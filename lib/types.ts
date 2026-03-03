@@ -19,7 +19,8 @@ export type RoleTeam =
   | 'outsider'
   | 'minion'
   | 'demon'
-  | 'traveler';
+  | 'traveler'
+  | 'loric';
 
 export interface ParsedScript {
   meta: {

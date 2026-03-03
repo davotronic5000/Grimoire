@@ -59,12 +59,17 @@ export const useStore = create<AppState>()(
 
       loadRolesDb: async () => {
         if (get().rolesDb) return; // already loaded
-        const res = await fetch('/data/roles.json');
-        if (!res.ok) throw new Error('Failed to load roles database');
-        const raw: RoleDefinition[] = await res.json();
-        const db = buildRolesIndex(raw);
+        const [rolesRes, loricRes] = await Promise.all([
+          fetch('/data/roles.json'),
+          fetch('/data/loric.json'),
+        ]);
+        if (!rolesRes.ok) throw new Error('Failed to load roles database');
+        const raw: RoleDefinition[] = await rolesRes.json();
+        const loricRaw: RoleDefinition[] = loricRes.ok ? await loricRes.json() : [];
+        const allRaw = [...raw, ...loricRaw];
+        const db = buildRolesIndex(allRaw);
         buildAliasMap(db);
-        set({ rolesDb: db, allRoles: raw });
+        set({ rolesDb: db, allRoles: allRaw });
       },
 
       createGame: (params) => {

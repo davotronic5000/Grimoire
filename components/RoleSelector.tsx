@@ -5,7 +5,7 @@ import type { RoleDefinition, RoleTeam } from '@/lib/types';
 import { getIconPath, getRoleTeamColor, TEAM_LABELS } from '@/lib/roles';
 import { useIsWide } from '@/lib/hooks';
 
-const ALL_TEAM_FILTERS = ['all', 'townsfolk', 'outsider', 'minion', 'demon', 'traveler'] as const;
+const ALL_TEAM_FILTERS = ['all', 'townsfolk', 'outsider', 'minion', 'demon', 'traveler', 'loric'] as const;
 type TeamFilter = (typeof ALL_TEAM_FILTERS)[number];
 
 interface Props {
