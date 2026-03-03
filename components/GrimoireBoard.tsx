@@ -12,6 +12,7 @@ import CustomMessageScreen from './CustomMessageScreen';
 import BluffDrawer from './BluffDrawer';
 import StorytoolsDrawer from './StorytoolsDrawer';
 import RoleAssignmentScreen from './RoleAssignmentScreen';
+import SoundboardPanel from './SoundboardPanel';
 
 interface Props {
   game: Game;
@@ -49,6 +50,7 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
   const [showAddPlayer, setShowAddPlayer] = useState(false);
   const [showRoleReveal, setShowRoleReveal] = useState(false);
   const [showRoleAssignment, setShowRoleAssignment] = useState(false);
+  const [showSoundboard, setShowSoundboard] = useState(false);
   const [showCustomMessage, setShowCustomMessage] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
   const boardRef = useRef<HTMLDivElement>(null);
@@ -204,6 +206,22 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
           >
             <span>👁</span>
             <span>Show</span>
+          </button>
+
+          <button
+            onClick={() => setShowSoundboard(true)}
+            className="flex items-center gap-2 rounded-xl transition-all active:opacity-60"
+            style={{
+              padding: '10px 16px',
+              minHeight: 44,
+              background: 'rgba(30,20,50,0.6)',
+              border: '1px solid var(--color-border)',
+              color: 'var(--color-text)',
+              fontSize: 15,
+            }}
+          >
+            <span>🔊</span>
+            <span>Sounds</span>
           </button>
 
           <button
@@ -462,6 +480,11 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
       {/* Custom Message Screen */}
       {showCustomMessage && (
         <CustomMessageScreen onClose={() => setShowCustomMessage(false)} />
+      )}
+
+      {/* Soundboard */}
+      {showSoundboard && (
+        <SoundboardPanel onClose={() => setShowSoundboard(false)} />
       )}
 
       {/* Role Assignment Screen */}
