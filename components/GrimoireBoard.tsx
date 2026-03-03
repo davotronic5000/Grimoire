@@ -14,6 +14,7 @@ import BluffDrawer from './BluffDrawer';
 import StorytoolsDrawer from './StorytoolsDrawer';
 import RoleAssignmentScreen from './RoleAssignmentScreen';
 import SoundboardPanel from './SoundboardPanel';
+import NightInfoScreen from './NightInfoScreen';
 
 interface Props {
   game: Game;
@@ -55,6 +56,7 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
   const [showCustomMessage, setShowCustomMessage] = useState(false);
   const [showWhiteboard, setShowWhiteboard] = useState(false);
   const [showMore, setShowMore] = useState(false);
+  const [showNightInfo, setShowNightInfo] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
   const boardRef = useRef<HTMLDivElement>(null);
   const [boardWidth, setBoardWidth] = useState(0);
@@ -442,6 +444,15 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
         <WhiteboardScreen onClose={() => setShowWhiteboard(false)} />
       )}
 
+      {/* Night Info Card */}
+      {showNightInfo && (
+        <NightInfoScreen
+          scriptRoleIds={game.scriptRoleIds}
+          rolesDb={rolesDb}
+          onClose={() => setShowNightInfo(false)}
+        />
+      )}
+
       {/* Soundboard */}
       {showSoundboard && (
         <SoundboardPanel onClose={() => setShowSoundboard(false)} />
@@ -470,11 +481,12 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
             }}
           >
             {([
-              { emoji: '👁',  label: 'Show Roles', action: () => { setShowMore(false); setShowRoleReveal(true); } },
-              { emoji: '🎴',  label: 'Deal Roles', action: () => { setShowMore(false); setShowRoleAssignment(true); } },
-              { emoji: '💬',  label: 'Message',    action: () => { setShowMore(false); setShowCustomMessage(true); } },
-              { emoji: '✏️', label: 'Whiteboard', action: () => { setShowMore(false); setShowWhiteboard(true); } },
-              { emoji: '🔊',  label: 'Sounds',     action: () => { setShowMore(false); setShowSoundboard(true); } },
+              { emoji: '👁',  label: 'Show Roles',  action: () => { setShowMore(false); setShowRoleReveal(true); } },
+              { emoji: '🌙',  label: 'Night Card',  action: () => { setShowMore(false); setShowNightInfo(true); } },
+              { emoji: '🎴',  label: 'Deal Roles',  action: () => { setShowMore(false); setShowRoleAssignment(true); } },
+              { emoji: '💬',  label: 'Message',     action: () => { setShowMore(false); setShowCustomMessage(true); } },
+              { emoji: '✏️', label: 'Whiteboard',  action: () => { setShowMore(false); setShowWhiteboard(true); } },
+              { emoji: '🔊',  label: 'Sounds',      action: () => { setShowMore(false); setShowSoundboard(true); } },
             ] as const).map(item => (
               <button
                 key={item.label}
