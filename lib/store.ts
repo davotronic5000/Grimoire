@@ -95,7 +95,7 @@ export const useStore = create<AppState>()(
           scriptRoleIds: params.scriptRoleIds,
           players,
           phase: 'night',
-          dayNumber: 1,
+          dayNumber: 0,
           nightNumber: 1,
           bluffRoleIds: [null, null, null],
         };
