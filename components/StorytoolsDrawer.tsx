@@ -239,10 +239,10 @@ export default function StorytoolsDrawer({ game, rolesDb }: Props) {
         <div className="fixed inset-0 z-30" onClick={() => setIsOpen(false)} />
       )}
 
-      {/* Drawer panel — opens downward from top-left */}
+      {/* Drawer panel — opens upward from above the Tools button */}
       {isOpen && (
         <div
-          className="fixed top-16 left-4 z-40 rounded-2xl flex flex-col gap-4 p-4"
+          className="fixed bottom-32 left-4 z-40 rounded-2xl flex flex-col gap-4 p-4"
           style={{
             background: 'var(--color-surface)',
             border: '1px solid var(--color-border)',
@@ -257,10 +257,10 @@ export default function StorytoolsDrawer({ game, rolesDb }: Props) {
         </div>
       )}
 
-      {/* Toggle button — fixed top-left */}
+      {/* Toggle button — fixed bottom-left above Bluffs button */}
       <button
         onClick={() => setIsOpen(v => !v)}
-        className="fixed top-4 left-4 z-40 flex items-center gap-2 rounded-xl transition-all active:scale-95"
+        className="fixed bottom-20 left-4 z-40 flex items-center gap-2 rounded-xl transition-all active:scale-95"
         style={{
           padding: '10px 14px',
           background: isOpen ? 'rgba(245,158,11,0.15)' : 'rgba(8,6,18,0.92)',
