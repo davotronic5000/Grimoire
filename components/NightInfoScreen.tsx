@@ -14,6 +14,7 @@ type CardType =
   | 'you_are'
   | 'this_player_is'
   | 'selected_you'
+  | 'cerenovus'
   | 'your_minions'
   | 'your_demon'
   | 'did_you_vote'
@@ -23,41 +24,83 @@ const CARD_LABELS: Record<CardType, string> = {
   you_are:          'You are',
   this_player_is:   'This player is',
   selected_you:     'This character selected you',
+  cerenovus:        'You were targeted by:',
   your_minions:     'These are your minions',
   your_demon:       'This is your demon',
   did_you_vote:     'Did you vote?',
   did_you_nominate: 'Did you nominate?',
 };
 
-// Cards that require a role to be selected
-const ROLE_CARDS: CardType[] = ['you_are', 'this_player_is', 'selected_you'];
-// Cards that show text only — no role needed
+const ROLE_CARDS: CardType[] = ['you_are', 'this_player_is', 'selected_you', 'cerenovus'];
 const SIMPLE_CARDS: CardType[] = ['your_minions', 'your_demon', 'did_you_vote', 'did_you_nominate'];
 
 function needsRole(type: CardType): boolean {
   return ROLE_CARDS.includes(type);
 }
 
-// ── Player-facing reveal ─────────────────────────────────────────────
+// ── Shared role icon block ────────────────────────────────────────────
+
+function RoleBlock({ role, size = 'lg' }: { role: RoleDefinition; size?: 'lg' | 'sm' }) {
+  const teamColor = getRoleTeamColor(role.team);
+  const iconSize = size === 'lg' ? 'clamp(120px, 38vmin, 260px)' : 'clamp(80px, 22vmin, 160px)';
+  const nameFontSize = size === 'lg' ? 'clamp(22px, 4.5vmin, 48px)' : 'clamp(16px, 3vmin, 32px)';
+
+  return (
+    <div className="flex flex-col items-center" style={{ gap: '2vmin' }}>
+      <div
+        className="rounded-full flex-shrink-0"
+        style={{
+          width: iconSize,
+          height: iconSize,
+          background: `radial-gradient(circle at 40% 30%, ${teamColor}44, #0a0614 70%)`,
+          boxShadow: `0 0 0 4px ${teamColor}, 0 0 ${size === 'lg' ? 50 : 30}px ${teamColor}66`,
+          padding: '9%',
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={getIconPath(role.id)}
+          alt={role.name}
+          style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+        />
+      </div>
+      <p
+        className="font-bold text-center"
+        style={{
+          fontSize: nameFontSize,
+          color: teamColor,
+          textShadow: `0 0 24px ${teamColor}99`,
+        }}
+      >
+        {role.name}
+      </p>
+    </div>
+  );
+}
+
+// ── Player-facing reveal ──────────────────────────────────────────────
 
 function NightInfoReveal({
   cardType,
   role,
+  rolesDb,
   onDone,
 }: {
   cardType: CardType;
   role: RoleDefinition | null;
+  rolesDb: Record<string, RoleDefinition>;
   onDone: () => void;
 }) {
   const label = CARD_LABELS[cardType];
-  const teamColor = role ? getRoleTeamColor(role.team) : null;
+  const isCerenovus = cardType === 'cerenovus';
+  const cerenovusRole = isCerenovus ? rolesDb['cerenovus'] : null;
 
   return (
     <div
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center"
-      style={{ background: '#06040f' }}
+      style={{ background: '#06040f', gap: isCerenovus ? '3vmin' : 0 }}
     >
-      {/* Label */}
+      {/* Top label */}
       <p
         className="gothic-heading text-center"
         style={{
@@ -65,7 +108,7 @@ function NightInfoReveal({
           color: 'var(--color-gold)',
           textShadow: '0 0 30px rgba(201,168,76,0.5)',
           letterSpacing: '0.06em',
-          marginBottom: role ? '5vmin' : 0,
+          marginBottom: (role && !isCerenovus) ? '5vmin' : 0,
           padding: '0 10%',
           lineHeight: 1.3,
         }}
@@ -73,43 +116,30 @@ function NightInfoReveal({
         {label}
       </p>
 
-      {/* Role content (role cards only) */}
-      {role && teamColor && (
+      {/* Cerenovus two-role layout */}
+      {isCerenovus && cerenovusRole && role && (
         <>
-          {/* Icon */}
-          <div
-            className="rounded-full flex-shrink-0"
-            style={{
-              width: 'clamp(120px, 38vmin, 260px)',
-              height: 'clamp(120px, 38vmin, 260px)',
-              background: `radial-gradient(circle at 40% 30%, ${teamColor}44, #0a0614 70%)`,
-              boxShadow: `0 0 0 4px ${teamColor}, 0 0 50px ${teamColor}66`,
-              padding: '9%',
-              marginBottom: '4vmin',
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={getIconPath(role.id)}
-              alt={role.name}
-              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-            />
-          </div>
-
-          {/* Name */}
+          <RoleBlock role={cerenovusRole} size="sm" />
           <p
-            className="font-bold text-center"
+            className="gothic-heading text-center"
             style={{
-              fontSize: 'clamp(22px, 4.5vmin, 48px)',
-              color: teamColor,
-              textShadow: `0 0 24px ${teamColor}99`,
-              marginBottom: cardType === 'you_are' ? '3vmin' : 0,
+              fontSize: 'clamp(14px, 3vmin, 28px)',
+              color: 'var(--color-gold)',
+              textShadow: '0 0 20px rgba(201,168,76,0.4)',
+              letterSpacing: '0.06em',
+              padding: '0 10%',
             }}
           >
-            {role.name}
+            to be mad as
           </p>
+          <RoleBlock role={role} size="sm" />
+        </>
+      )}
 
-          {/* Ability — only for "You are" */}
+      {/* Standard single-role layout */}
+      {!isCerenovus && role && (
+        <div className="flex flex-col items-center" style={{ gap: '4vmin' }}>
+          <RoleBlock role={role} size="lg" />
           {cardType === 'you_are' && (
             <p
               className="text-center leading-relaxed"
@@ -123,7 +153,7 @@ function NightInfoReveal({
               {role.ability}
             </p>
           )}
-        </>
+        </div>
       )}
 
       {/* Done */}
@@ -146,6 +176,35 @@ function NightInfoReveal({
   );
 }
 
+// ── Reusable card type button ─────────────────────────────────────────
+
+function CardTypeButton({
+  type,
+  active,
+  label,
+  onClick,
+}: {
+  type: CardType;
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full text-left rounded-xl px-4 py-3 font-semibold transition-all active:scale-[0.98]"
+      style={{
+        background: active ? 'rgba(201,168,76,0.15)' : 'rgba(20,12,40,0.6)',
+        border: `1.5px solid ${active ? 'var(--color-gold)' : 'var(--color-border)'}`,
+        color: active ? 'var(--color-gold)' : 'var(--color-text-dim)',
+        fontSize: 14,
+      }}
+    >
+      {label}
+    </button>
+  );
+}
+
 // ── Main screen ───────────────────────────────────────────────────────
 
 export default function NightInfoScreen({ scriptRoleIds, rolesDb, onClose }: Props) {
@@ -154,6 +213,7 @@ export default function NightInfoScreen({ scriptRoleIds, rolesDb, onClose }: Pro
   const [search, setSearch] = useState('');
   const [revealing, setRevealing] = useState(false);
 
+  const hasCerenovus = scriptRoleIds.includes('cerenovus');
   const isSimple = !needsRole(cardType);
   const canShow = isSimple || !!selectedRole;
 
@@ -161,13 +221,17 @@ export default function NightInfoScreen({ scriptRoleIds, rolesDb, onClose }: Pro
     .map(id => rolesDb[id])
     .filter((r): r is RoleDefinition => !!r && !!r.team);
 
-  const filteredRoles = search
-    ? scriptRoles.filter(r => r.name.toLowerCase().includes(search.toLowerCase()))
+  // For cerenovus "mad as" picker, exclude cerenovus itself
+  const rolePickerRoles = cardType === 'cerenovus'
+    ? scriptRoles.filter(r => r.id !== 'cerenovus')
     : scriptRoles;
+
+  const filteredRoles = search
+    ? rolePickerRoles.filter(r => r.name.toLowerCase().includes(search.toLowerCase()))
+    : rolePickerRoles;
 
   function selectCardType(type: CardType) {
     setCardType(type);
-    // Clear role selection when switching to a simple card
     if (!needsRole(type)) setSelectedRole(null);
   }
 
@@ -176,6 +240,7 @@ export default function NightInfoScreen({ scriptRoleIds, rolesDb, onClose }: Pro
       <NightInfoReveal
         cardType={cardType}
         role={isSimple ? null : selectedRole}
+        rolesDb={rolesDb}
         onDone={onClose}
       />
     );
@@ -219,48 +284,42 @@ export default function NightInfoScreen({ scriptRoleIds, rolesDb, onClose }: Pro
         {/* Card type selector */}
         <div className="px-4 pt-3 pb-1 flex flex-col gap-2">
 
-          {/* With-role group */}
           <p className="text-xs font-semibold px-1 pt-1" style={{ color: 'var(--color-text-dim)', letterSpacing: '0.08em' }}>
             WITH ROLE
           </p>
-          {ROLE_CARDS.map(type => (
-            <button
+          {ROLE_CARDS.filter(t => t !== 'cerenovus').map(type => (
+            <CardTypeButton
               key={type}
+              type={type}
+              active={cardType === type}
+              label={CARD_LABELS[type]}
               onClick={() => selectCardType(type)}
-              className="w-full text-left rounded-xl px-4 py-3 font-semibold transition-all active:scale-[0.98]"
-              style={{
-                background: cardType === type ? 'rgba(201,168,76,0.15)' : 'rgba(20,12,40,0.6)',
-                border: `1.5px solid ${cardType === type ? 'var(--color-gold)' : 'var(--color-border)'}`,
-                color: cardType === type ? 'var(--color-gold)' : 'var(--color-text-dim)',
-                fontSize: 14,
-              }}
-            >
-              {CARD_LABELS[type]}
-            </button>
+            />
           ))}
+          {hasCerenovus && (
+            <CardTypeButton
+              type="cerenovus"
+              active={cardType === 'cerenovus'}
+              label={CARD_LABELS.cerenovus}
+              onClick={() => selectCardType('cerenovus')}
+            />
+          )}
 
-          {/* Text-only group */}
           <p className="text-xs font-semibold px-1 pt-2" style={{ color: 'var(--color-text-dim)', letterSpacing: '0.08em' }}>
             TEXT ONLY
           </p>
           {SIMPLE_CARDS.map(type => (
-            <button
+            <CardTypeButton
               key={type}
+              type={type}
+              active={cardType === type}
+              label={CARD_LABELS[type]}
               onClick={() => selectCardType(type)}
-              className="w-full text-left rounded-xl px-4 py-3 font-semibold transition-all active:scale-[0.98]"
-              style={{
-                background: cardType === type ? 'rgba(201,168,76,0.15)' : 'rgba(20,12,40,0.6)',
-                border: `1.5px solid ${cardType === type ? 'var(--color-gold)' : 'var(--color-border)'}`,
-                color: cardType === type ? 'var(--color-gold)' : 'var(--color-text-dim)',
-                fontSize: 14,
-              }}
-            >
-              {CARD_LABELS[type]}
-            </button>
+            />
           ))}
         </div>
 
-        {/* Role picker — only shown for role cards */}
+        {/* Role picker — only for role cards */}
         {!isSimple && (
           <>
             <div className="px-4 pt-3 pb-2">
@@ -268,7 +327,7 @@ export default function NightInfoScreen({ scriptRoleIds, rolesDb, onClose }: Pro
                 type="text"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                placeholder="Search roles…"
+                placeholder={cardType === 'cerenovus' ? 'Select role to be mad as…' : 'Search roles…'}
                 className="w-full rounded-xl outline-none"
                 style={{
                   padding: '10px 14px',
