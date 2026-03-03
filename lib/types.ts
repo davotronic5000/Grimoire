@@ -20,7 +20,8 @@ export type RoleTeam =
   | 'minion'
   | 'demon'
   | 'traveler'
-  | 'loric';
+  | 'loric'
+  | 'fabled';
 
 export interface ParsedScript {
   meta: {
@@ -60,6 +61,10 @@ export interface Game {
   nightNumber: number;
   /** Three demon bluff role IDs (null = slot empty). May be absent on old persisted games. */
   bluffRoleIds?: [string | null, string | null, string | null];
+  /** Active Loric character IDs for this game. */
+  loricIds?: string[];
+  /** Active Fabled character IDs for this game. */
+  fabledIds?: string[];
 }
 
 export interface CreateGameParams {

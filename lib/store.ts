@@ -45,6 +45,7 @@ interface AppState {
   addPlayer: (gameId: string, name: string) => void;
   removePlayer: (gameId: string, playerId: string) => void;
   setBluff: (gameId: string, index: 0 | 1 | 2, roleId: string | null) => void;
+  toggleStoryTool: (gameId: string, field: 'loricIds' | 'fabledIds', roleId: string) => void;
   togglePhase: (gameId: string) => void;
   togglePhaseBack: (gameId: string) => void;
 }
@@ -59,14 +60,16 @@ export const useStore = create<AppState>()(
 
       loadRolesDb: async () => {
         if (get().rolesDb) return; // already loaded
-        const [rolesRes, loricRes] = await Promise.all([
+        const [rolesRes, loricRes, fabledRes] = await Promise.all([
           fetch('/data/roles.json'),
           fetch('/data/loric.json'),
+          fetch('/data/fabled.json'),
         ]);
         if (!rolesRes.ok) throw new Error('Failed to load roles database');
         const raw: RoleDefinition[] = await rolesRes.json();
         const loricRaw: RoleDefinition[] = loricRes.ok ? await loricRes.json() : [];
-        const allRaw = [...raw, ...loricRaw];
+        const fabledRaw: RoleDefinition[] = fabledRes.ok ? await fabledRes.json() : [];
+        const allRaw = [...raw, ...loricRaw, ...fabledRaw];
         const db = buildRolesIndex(allRaw);
         buildAliasMap(db);
         set({ rolesDb: db, allRoles: allRaw });
@@ -238,6 +241,20 @@ export const useStore = create<AppState>()(
               ...state.games,
               [gameId]: { ...game, bluffRoleIds },
             },
+          };
+        });
+      },
+
+      toggleStoryTool: (gameId, field, roleId) => {
+        set(state => {
+          const game = state.games[gameId];
+          if (!game) return state;
+          const current = game[field] ?? [];
+          const next = current.includes(roleId)
+            ? current.filter(id => id !== roleId)
+            : [...current, roleId];
+          return {
+            games: { ...state.games, [gameId]: { ...game, [field]: next } },
           };
         });
       },

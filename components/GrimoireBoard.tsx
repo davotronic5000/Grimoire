@@ -9,6 +9,7 @@ import NightOrderPanel from './NightOrderPanel';
 import RoleRevealScreen from './RoleRevealScreen';
 import CustomMessageScreen from './CustomMessageScreen';
 import BluffDrawer from './BluffDrawer';
+import StorytoolsDrawer from './StorytoolsDrawer';
 
 interface Props {
   game: Game;
@@ -465,6 +466,9 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
 
       {/* Bluff drawer — fixed bottom-left, always mounted */}
       <BluffDrawer game={game} rolesDb={rolesDb} />
+
+      {/* Storytools drawer — fixed top-left, always mounted */}
+      <StorytoolsDrawer game={game} rolesDb={rolesDb} />
     </div>
   );
 }

@@ -8,6 +8,7 @@ export const TEAM_COLORS: Record<RoleTeam, string> = {
   demon: '#ef4444',
   traveler: '#a855f7', // NOTE: American spelling to match Roles.json data
   loric: '#2dd4bf',
+  fabled: '#f59e0b',
 };
 
 export const TEAM_LABELS: Record<RoleTeam, string> = {
@@ -17,6 +18,7 @@ export const TEAM_LABELS: Record<RoleTeam, string> = {
   demon: 'Demon',
   traveler: 'Traveler',
   loric: 'Loric',
+  fabled: 'Fabled',
 };
 
 // IDs of the 4 special night-order entries (no team, no icon)
