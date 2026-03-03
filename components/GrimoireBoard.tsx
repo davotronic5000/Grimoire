@@ -54,6 +54,7 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
   const [showSoundboard, setShowSoundboard] = useState(false);
   const [showCustomMessage, setShowCustomMessage] = useState(false);
   const [showWhiteboard, setShowWhiteboard] = useState(false);
+  const [showMore, setShowMore] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
   const boardRef = useRef<HTMLDivElement>(null);
   const [boardWidth, setBoardWidth] = useState(0);
@@ -160,7 +161,7 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
           backdropFilter: 'blur(8px)',
         }}
       >
-        {/* Left group: Night Order + Show Roles */}
+        {/* Left group */}
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowNightOrder(true)}
@@ -195,83 +196,19 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
           </button>
 
           <button
-            onClick={() => setShowRoleReveal(true)}
+            onClick={() => setShowMore(v => !v)}
             className="flex items-center gap-2 rounded-xl transition-all active:opacity-60"
             style={{
               padding: '10px 16px',
               minHeight: 44,
-              background: 'rgba(30,20,50,0.6)',
-              border: '1px solid var(--color-border)',
-              color: 'var(--color-text)',
+              background: showMore ? 'rgba(99,102,241,0.2)' : 'rgba(30,20,50,0.6)',
+              border: `1px solid ${showMore ? '#6366f1' : 'var(--color-border)'}`,
+              color: showMore ? '#a5b4fc' : 'var(--color-text)',
               fontSize: 15,
             }}
           >
-            <span>👁</span>
-            <span>Show</span>
-          </button>
-
-          <button
-            onClick={() => setShowSoundboard(true)}
-            className="flex items-center gap-2 rounded-xl transition-all active:opacity-60"
-            style={{
-              padding: '10px 16px',
-              minHeight: 44,
-              background: 'rgba(30,20,50,0.6)',
-              border: '1px solid var(--color-border)',
-              color: 'var(--color-text)',
-              fontSize: 15,
-            }}
-          >
-            <span>🔊</span>
-            <span>Sounds</span>
-          </button>
-
-          <button
-            onClick={() => setShowRoleAssignment(true)}
-            className="flex items-center gap-2 rounded-xl transition-all active:opacity-60"
-            style={{
-              padding: '10px 16px',
-              minHeight: 44,
-              background: 'rgba(30,20,50,0.6)',
-              border: '1px solid var(--color-border)',
-              color: 'var(--color-text)',
-              fontSize: 15,
-            }}
-          >
-            <span>🎴</span>
-            <span>Deal</span>
-          </button>
-
-          <button
-            onClick={() => setShowCustomMessage(true)}
-            className="flex items-center gap-2 rounded-xl transition-all active:opacity-60"
-            style={{
-              padding: '10px 16px',
-              minHeight: 44,
-              background: 'rgba(30,20,50,0.6)',
-              border: '1px solid var(--color-border)',
-              color: 'var(--color-text)',
-              fontSize: 15,
-            }}
-          >
-            <span>💬</span>
-            <span>Msg</span>
-          </button>
-
-          <button
-            onClick={() => setShowWhiteboard(true)}
-            className="flex items-center gap-2 rounded-xl transition-all active:opacity-60"
-            style={{
-              padding: '10px 16px',
-              minHeight: 44,
-              background: 'rgba(30,20,50,0.6)',
-              border: '1px solid var(--color-border)',
-              color: 'var(--color-text)',
-              fontSize: 15,
-            }}
-          >
-            <span>✏️</span>
-            <span>Draw</span>
+            <span>⋯</span>
+            <span>More</span>
           </button>
         </div>
 
@@ -508,6 +445,55 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
       {/* Soundboard */}
       {showSoundboard && (
         <SoundboardPanel onClose={() => setShowSoundboard(false)} />
+      )}
+
+      {/* More dropdown */}
+      {showMore && (
+        <>
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setShowMore(false)}
+          />
+          <div
+            className="fixed z-50 rounded-2xl"
+            style={{
+              top: 64,
+              left: 8,
+              background: 'var(--color-surface)',
+              border: '1px solid var(--color-border)',
+              boxShadow: '0 8px 40px rgba(0,0,0,0.65)',
+              padding: 12,
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 8,
+              minWidth: 240,
+            }}
+          >
+            {([
+              { emoji: '👁',  label: 'Show Roles', action: () => { setShowMore(false); setShowRoleReveal(true); } },
+              { emoji: '🎴',  label: 'Deal Roles', action: () => { setShowMore(false); setShowRoleAssignment(true); } },
+              { emoji: '💬',  label: 'Message',    action: () => { setShowMore(false); setShowCustomMessage(true); } },
+              { emoji: '✏️', label: 'Whiteboard', action: () => { setShowMore(false); setShowWhiteboard(true); } },
+              { emoji: '🔊',  label: 'Sounds',     action: () => { setShowMore(false); setShowSoundboard(true); } },
+            ] as const).map(item => (
+              <button
+                key={item.label}
+                onClick={item.action}
+                className="flex flex-col items-center justify-center rounded-xl transition-all active:scale-95"
+                style={{
+                  padding: '14px 8px',
+                  gap: 6,
+                  background: 'rgba(30,20,50,0.6)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text)',
+                }}
+              >
+                <span style={{ fontSize: 26 }}>{item.emoji}</span>
+                <span style={{ fontSize: 12, fontWeight: 600 }}>{item.label}</span>
+              </button>
+            ))}
+          </div>
+        </>
       )}
 
       {/* Role Assignment Screen */}
