@@ -48,6 +48,8 @@ interface AppState {
   toggleStoryTool: (gameId: string, field: 'loricIds' | 'fabledIds', roleId: string) => void;
   togglePhase: (gameId: string) => void;
   togglePhaseBack: (gameId: string) => void;
+  resetGame: (gameId: string) => void;
+  changeScript: (gameId: string, scriptId: string, scriptName: string, scriptRoleIds: string[]) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -277,6 +279,48 @@ export const useStore = create<AppState>()(
                   ? game.dayNumber + 1
                   : game.dayNumber,
               },
+            },
+          };
+        });
+      },
+
+      resetGame: (gameId) => {
+        set(state => {
+          const game = state.games[gameId];
+          if (!game) return state;
+          return {
+            games: {
+              ...state.games,
+              [gameId]: {
+                ...game,
+                phase: 'night',
+                dayNumber: 0,
+                nightNumber: 1,
+                bluffRoleIds: [null, null, null],
+                loricIds: [],
+                fabledIds: [],
+                players: game.players.map(p => ({
+                  ...p,
+                  roleId: null,
+                  reminderTokens: [],
+                  alignment: null,
+                  isAlive: true,
+                  hasGhostVote: false,
+                })),
+              },
+            },
+          };
+        });
+      },
+
+      changeScript: (gameId, scriptId, scriptName, scriptRoleIds) => {
+        set(state => {
+          const game = state.games[gameId];
+          if (!game) return state;
+          return {
+            games: {
+              ...state.games,
+              [gameId]: { ...game, scriptId, scriptName, scriptRoleIds },
             },
           };
         });

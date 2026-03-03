@@ -15,6 +15,7 @@ import StorytoolsDrawer from './StorytoolsDrawer';
 import RoleAssignmentScreen from './RoleAssignmentScreen';
 import SoundboardPanel from './SoundboardPanel';
 import NightInfoScreen from './NightInfoScreen';
+import GameSettingsScreen from './GameSettingsScreen';
 
 interface Props {
   game: Game;
@@ -57,6 +58,7 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
   const [showWhiteboard, setShowWhiteboard] = useState(false);
   const [showMore, setShowMore] = useState(false);
   const [showNightInfo, setShowNightInfo] = useState(false);
+  const [showGameSettings, setShowGameSettings] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
   const boardRef = useRef<HTMLDivElement>(null);
   const [boardWidth, setBoardWidth] = useState(0);
@@ -458,6 +460,15 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
         <SoundboardPanel onClose={() => setShowSoundboard(false)} />
       )}
 
+      {/* Game Settings */}
+      {showGameSettings && (
+        <GameSettingsScreen
+          game={game}
+          rolesDb={rolesDb}
+          onClose={() => setShowGameSettings(false)}
+        />
+      )}
+
       {/* More dropdown */}
       {showMore && (
         <>
@@ -487,6 +498,7 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
               { emoji: '💬',  label: 'Message',     action: () => { setShowMore(false); setShowCustomMessage(true); } },
               { emoji: '✏️', label: 'Whiteboard',  action: () => { setShowMore(false); setShowWhiteboard(true); } },
               { emoji: '🔊',  label: 'Sounds',      action: () => { setShowMore(false); setShowSoundboard(true); } },
+              { emoji: '⚙️', label: 'Game',        action: () => { setShowMore(false); setShowGameSettings(true); } },
             ] as const).map(item => (
               <button
                 key={item.label}
