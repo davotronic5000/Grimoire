@@ -9,6 +9,7 @@ import NightOrderPanel from './NightOrderPanel';
 import JinxPanel from './JinxPanel';
 import RoleRevealScreen from './RoleRevealScreen';
 import CustomMessageScreen from './CustomMessageScreen';
+import WhiteboardScreen from './WhiteboardScreen';
 import BluffDrawer from './BluffDrawer';
 import StorytoolsDrawer from './StorytoolsDrawer';
 import RoleAssignmentScreen from './RoleAssignmentScreen';
@@ -52,6 +53,7 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
   const [showRoleAssignment, setShowRoleAssignment] = useState(false);
   const [showSoundboard, setShowSoundboard] = useState(false);
   const [showCustomMessage, setShowCustomMessage] = useState(false);
+  const [showWhiteboard, setShowWhiteboard] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
   const boardRef = useRef<HTMLDivElement>(null);
   const [boardWidth, setBoardWidth] = useState(0);
@@ -254,6 +256,22 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
           >
             <span>💬</span>
             <span>Msg</span>
+          </button>
+
+          <button
+            onClick={() => setShowWhiteboard(true)}
+            className="flex items-center gap-2 rounded-xl transition-all active:opacity-60"
+            style={{
+              padding: '10px 16px',
+              minHeight: 44,
+              background: 'rgba(30,20,50,0.6)',
+              border: '1px solid var(--color-border)',
+              color: 'var(--color-text)',
+              fontSize: 15,
+            }}
+          >
+            <span>✏️</span>
+            <span>Draw</span>
           </button>
         </div>
 
@@ -480,6 +498,11 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
       {/* Custom Message Screen */}
       {showCustomMessage && (
         <CustomMessageScreen onClose={() => setShowCustomMessage(false)} />
+      )}
+
+      {/* Whiteboard */}
+      {showWhiteboard && (
+        <WhiteboardScreen onClose={() => setShowWhiteboard(false)} />
       )}
 
       {/* Soundboard */}
