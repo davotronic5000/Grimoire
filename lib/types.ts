@@ -46,6 +46,8 @@ export interface Player {
   hasGhostVote: boolean; // dead players' ghost vote token
   reminderTokens: ReminderToken[];
   seat: number; // position index 0..n-1 for circle layout
+  /** Explicit alignment override — null/undefined means use role default */
+  alignment?: 'good' | 'evil' | null;
 }
 
 export interface Game {

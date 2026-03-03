@@ -8,7 +8,7 @@
     "firstNightReminder": "",
     "otherNight": 0,
     "otherNightReminder": "",
-    "reminders": [],
+    "reminders": ["Protected", "Something Bad"],
     "setup": false,
     "ability": "Something bad might happen to whoever is most responsible for the death of a new player."
   },
@@ -34,7 +34,7 @@
     "firstNightReminder": "",
     "otherNight": 0,
     "otherNightReminder": "",
-    "reminders": [],
+    "reminders": ["Whoopsie"],
     "setup": false,
     "ability": "At least once per game, the Storyteller will make a mistake, correct it, and publicly admit to it."
   },
@@ -73,7 +73,7 @@
     "firstNightReminder": "",
     "otherNight": 0,
     "otherNightReminder": "",
-    "reminders": [],
+    "reminders": ["Visitor", "False Info"],
     "setup": false,
     "ability": "Each day, 3 players may choose to visit you. At night*, each visitor learns how many visitors are evil, but 1 gets false info."
   },
@@ -99,7 +99,7 @@
     "firstNightReminder": "",
     "otherNight": 0,
     "otherNightReminder": "",
-    "reminders": [],
+    "reminders": ["No Ability"],
     "setup": false,
     "ability": "Once per game, 1 good player might get incorrect information."
   },
@@ -125,7 +125,7 @@
     "firstNightReminder": "",
     "otherNight": 0,
     "otherNightReminder": "",
-    "reminders": [],
+    "reminders": ["Something Bad"],
     "setup": false,
     "ability": "Something bad might happen to whoever talks when the Storyteller has asked for silence."
   },
@@ -138,7 +138,7 @@
     "firstNightReminder": "",
     "otherNight": 0,
     "otherNightReminder": "",
-    "reminders": [],
+    "reminders": ["Register Falsely?"],
     "setup": false,
     "ability": "2 neighboring players are known to be the same alignment. Once per game, 1 of them registers falsely."
   },
@@ -164,7 +164,7 @@
     "firstNightReminder": "",
     "otherNight": 0,
     "otherNightReminder": "",
-    "reminders": [],
+    "reminders": ["No More Evil"],
     "setup": false,
     "ability": "There can't be more than 1 extra evil player."
   },
@@ -177,7 +177,7 @@
     "firstNightReminder": "",
     "otherNight": 0,
     "otherNightReminder": "",
-    "reminders": [],
+    "reminders": ["No Attack"],
     "setup": false,
     "ability": "The Demon may choose not to attack & must do this at least once per game. Evil players get normal starting info."
   }

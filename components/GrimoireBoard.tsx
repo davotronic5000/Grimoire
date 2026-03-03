@@ -1,15 +1,17 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import type { Game, Player, RoleDefinition } from '@/lib/types';
 import { useStore } from '@/lib/store';
 import PlayerToken from './PlayerToken';
 import PlayerModal from './PlayerModal';
 import NightOrderPanel from './NightOrderPanel';
+import JinxPanel from './JinxPanel';
 import RoleRevealScreen from './RoleRevealScreen';
 import CustomMessageScreen from './CustomMessageScreen';
 import BluffDrawer from './BluffDrawer';
 import StorytoolsDrawer from './StorytoolsDrawer';
+import RoleAssignmentScreen from './RoleAssignmentScreen';
 
 interface Props {
   game: Game;
@@ -43,8 +45,10 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
   const { togglePhase, togglePhaseBack, removeReminderToken, addPlayer } = useStore();
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [showNightOrder, setShowNightOrder] = useState(false);
+  const [showJinxes, setShowJinxes] = useState(false);
   const [showAddPlayer, setShowAddPlayer] = useState(false);
   const [showRoleReveal, setShowRoleReveal] = useState(false);
+  const [showRoleAssignment, setShowRoleAssignment] = useState(false);
   const [showCustomMessage, setShowCustomMessage] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
   const boardRef = useRef<HTMLDivElement>(null);
@@ -107,6 +111,30 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
   const phaseLabel = isNight ? `Night ${game.nightNumber}` : `Day ${game.dayNumber}`;
   const aliveCount = players.filter(p => p.isAlive).length;
 
+  // Relative night order ranks — only counting roles actually assigned to players
+  const firstNightRanks = useMemo(() => {
+    const ranks = new Map<string, number>();
+    const entries = players
+      .filter(p => p.roleId && (rolesDb[p.roleId]?.firstNight ?? 0) > 0)
+      .map(p => ({ roleId: p.roleId!, order: rolesDb[p.roleId!].firstNight }));
+    // deduplicate by roleId (same role assigned to multiple players gets same rank)
+    const seen = new Set<string>();
+    const unique = entries.filter(e => { if (seen.has(e.roleId)) return false; seen.add(e.roleId); return true; });
+    unique.sort((a, b) => a.order - b.order).forEach((e, i) => ranks.set(e.roleId, i + 1));
+    return ranks;
+  }, [players, rolesDb]);
+
+  const otherNightRanks = useMemo(() => {
+    const ranks = new Map<string, number>();
+    const entries = players
+      .filter(p => p.roleId && (rolesDb[p.roleId]?.otherNight ?? 0) > 0)
+      .map(p => ({ roleId: p.roleId!, order: rolesDb[p.roleId!].otherNight }));
+    const seen = new Set<string>();
+    const unique = entries.filter(e => { if (seen.has(e.roleId)) return false; seen.add(e.roleId); return true; });
+    unique.sort((a, b) => a.order - b.order).forEach((e, i) => ranks.set(e.roleId, i + 1));
+    return ranks;
+  }, [players, rolesDb]);
+
   function handleAddPlayer() {
     addPlayer(game.id, newPlayerName);
     setNewPlayerName('');
@@ -147,6 +175,22 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
           </button>
 
           <button
+            onClick={() => setShowJinxes(true)}
+            className="flex items-center gap-2 rounded-xl transition-all active:opacity-60"
+            style={{
+              padding: '10px 16px',
+              minHeight: 44,
+              background: 'rgba(30,20,50,0.6)',
+              border: '1px solid var(--color-border)',
+              color: 'var(--color-text)',
+              fontSize: 15,
+            }}
+          >
+            <span>⚡</span>
+            <span>Jinxes</span>
+          </button>
+
+          <button
             onClick={() => setShowRoleReveal(true)}
             className="flex items-center gap-2 rounded-xl transition-all active:opacity-60"
             style={{
@@ -160,6 +204,22 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
           >
             <span>👁</span>
             <span>Show</span>
+          </button>
+
+          <button
+            onClick={() => setShowRoleAssignment(true)}
+            className="flex items-center gap-2 rounded-xl transition-all active:opacity-60"
+            style={{
+              padding: '10px 16px',
+              minHeight: 44,
+              background: 'rgba(30,20,50,0.6)',
+              border: '1px solid var(--color-border)',
+              color: 'var(--color-text)',
+              fontSize: 15,
+            }}
+          >
+            <span>🎴</span>
+            <span>Deal</span>
           </button>
 
           <button
@@ -354,6 +414,8 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
                   onRemoveReminder={tokenId =>
                     removeReminderToken(game.id, player.id, tokenId)
                   }
+                  firstNightOrder={player.roleId ? (firstNightRanks.get(player.roleId) ?? null) : null}
+                  otherNightOrder={player.roleId ? (otherNightRanks.get(player.roleId) ?? null) : null}
                 />
               </div>
             );
@@ -380,6 +442,14 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
         onClose={() => setShowNightOrder(false)}
       />
 
+      {/* Jinx Panel */}
+      <JinxPanel
+        game={game}
+        rolesDb={rolesDb}
+        isOpen={showJinxes}
+        onClose={() => setShowJinxes(false)}
+      />
+
       {/* Role Reveal Screen */}
       {showRoleReveal && (
         <RoleRevealScreen
@@ -392,6 +462,15 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
       {/* Custom Message Screen */}
       {showCustomMessage && (
         <CustomMessageScreen onClose={() => setShowCustomMessage(false)} />
+      )}
+
+      {/* Role Assignment Screen */}
+      {showRoleAssignment && (
+        <RoleAssignmentScreen
+          game={game}
+          rolesDb={rolesDb}
+          onClose={() => setShowRoleAssignment(false)}
+        />
       )}
 
       {/* Add Player Modal */}
@@ -467,7 +546,7 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
       {/* Bluff drawer — fixed bottom-left, always mounted */}
       <BluffDrawer game={game} rolesDb={rolesDb} />
 
-      {/* Storytools drawer — fixed top-left, always mounted */}
+      {/* Storytools drawer — fixed bottom-left, always mounted */}
       <StorytoolsDrawer game={game} rolesDb={rolesDb} />
     </div>
   );

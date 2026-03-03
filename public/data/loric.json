@@ -73,7 +73,7 @@
     "firstNightReminder": "",
     "otherNight": 0,
     "otherNightReminder": "",
-    "reminders": [],
+    "reminders": ["Safe", "This Player Is", "Not In Play"],
     "setup": false,
     "ability": "Name a good character. If in play, they can only die by execution, but evil players learn which player it is."
   },
@@ -99,7 +99,7 @@
     "firstNightReminder": "",
     "otherNight": 0,
     "otherNightReminder": "",
-    "reminders": [],
+    "reminders": ["Mad"],
     "setup": false,
     "ability": "If a player is mad as a fresh character during their nomination, they might not die if executed today."
   },
@@ -112,7 +112,7 @@
     "firstNightReminder": "",
     "otherNight": 0,
     "otherNightReminder": "",
-    "reminders": [],
+    "reminders": ["Goal"],
     "setup": false,
     "ability": "One or more players each have a goal. When achieved, that player learns a piece of true info."
   }

@@ -16,7 +16,7 @@ const BUILTIN_SCRIPTS: BuiltinScript[] = [
   {
     id: 'tb',
     name: 'Trouble Brewing',
-    subtitle: 'Beginner — 13 Townsfolk, 4 Outsiders, 4 Minions, 4 Demons',
+    subtitle: 'Beginner — 13 Townsfolk, 4 Outsiders, 4 Minions, 1 Demon',
     color: 'rgba(30, 58, 138, 0.4)',
     borderColor: '#3b82f6',
   },
