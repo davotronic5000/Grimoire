@@ -31,6 +31,13 @@ const ICON_NAME_OVERRIDES = {
   'mezephele': 'Mezepheles',
 };
 
+// Skip if the source BotC folder isn't present (e.g. on CI / Vercel)
+// — assets are already committed to the repo in that case.
+if (!fs.existsSync(ROLES_SRC)) {
+  console.log('copy-assets: source files not found, skipping (assets already in repo).');
+  process.exit(0);
+}
+
 // Ensure destination directories exist
 fs.mkdirSync(DATA_DEST, { recursive: true });
 fs.mkdirSync(ICONS_DEST, { recursive: true });
