@@ -300,7 +300,7 @@ export default function NightInfoScreen({ scriptRoleIds, rolesDb, onClose }: Pro
             <CardTypeButton
               type="cerenovus"
               active={cardType === 'cerenovus'}
-              label={CARD_LABELS.cerenovus}
+              label="You were targeted by: Cerenovus"
               onClick={() => selectCardType('cerenovus')}
             />
           )}
