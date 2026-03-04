@@ -55,7 +55,12 @@ function GameContent() {
     );
   }
 
-  return <GrimoireBoard game={game} rolesDb={rolesDb} allRoles={allRoles} />;
+  // Merge any homebrew role definitions from the script into the rolesDb
+  const mergedRolesDb = game.homebrewRoles && Object.keys(game.homebrewRoles).length > 0
+    ? { ...rolesDb, ...game.homebrewRoles }
+    : rolesDb;
+
+  return <GrimoireBoard game={game} rolesDb={mergedRolesDb} allRoles={allRoles} />;
 }
 
 export default function GamePage() {

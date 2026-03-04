@@ -55,6 +55,7 @@ export default function SetupPage() {
       scriptName: selectedScript.meta.name,
       scriptRoleIds: selectedScript.roleIds,
       playerNames: playerNames.map(n => n.trim() || 'Player'),
+      homebrewRoles: selectedScript.homebrewRoles,
     });
     router.push(`/game?id=${id}`);
   }

@@ -10,6 +10,7 @@ import type {
   RoleDefinition,
   CreateGameParams,
 } from './types';
+
 import { buildRolesIndex, buildAliasMap } from './roles';
 
 interface AppState {
@@ -49,7 +50,7 @@ interface AppState {
   togglePhase: (gameId: string) => void;
   togglePhaseBack: (gameId: string) => void;
   resetGame: (gameId: string) => void;
-  changeScript: (gameId: string, scriptId: string, scriptName: string, scriptRoleIds: string[]) => void;
+  changeScript: (gameId: string, scriptId: string, scriptName: string, scriptRoleIds: string[], homebrewRoles?: Record<string, RoleDefinition>) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -95,6 +96,7 @@ export const useStore = create<AppState>()(
           scriptId: params.scriptId,
           scriptName: params.scriptName,
           scriptRoleIds: params.scriptRoleIds,
+          homebrewRoles: params.homebrewRoles,
           players,
           phase: 'night',
           dayNumber: 0,
@@ -313,14 +315,35 @@ export const useStore = create<AppState>()(
         });
       },
 
-      changeScript: (gameId, scriptId, scriptName, scriptRoleIds) => {
+      changeScript: (gameId, scriptId, scriptName, scriptRoleIds, homebrewRoles) => {
         set(state => {
           const game = state.games[gameId];
           if (!game) return state;
           return {
             games: {
               ...state.games,
-              [gameId]: { ...game, scriptId, scriptName, scriptRoleIds },
+              [gameId]: {
+                ...game,
+                scriptId,
+                scriptName,
+                scriptRoleIds,
+                homebrewRoles: homebrewRoles ?? {},
+                // Reset game state when script changes
+                phase: 'night',
+                dayNumber: 0,
+                nightNumber: 1,
+                bluffRoleIds: [null, null, null],
+                loricIds: [],
+                fabledIds: [],
+                players: game.players.map(p => ({
+                  ...p,
+                  roleId: null,
+                  reminderTokens: [],
+                  alignment: null,
+                  isAlive: true,
+                  hasGhostVote: false,
+                })),
+              },
             },
           };
         });

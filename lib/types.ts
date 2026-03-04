@@ -30,6 +30,8 @@ export interface ParsedScript {
     colour?: string;
   };
   roleIds: string[]; // normalized role IDs in this script
+  /** Full definitions for homebrew roles not in the official roles DB */
+  homebrewRoles?: Record<string, RoleDefinition>;
 }
 
 export interface ReminderToken {
@@ -67,6 +69,8 @@ export interface Game {
   loricIds?: string[];
   /** Active Fabled character IDs for this game. */
   fabledIds?: string[];
+  /** Homebrew role definitions from a custom script upload, persisted with the game. */
+  homebrewRoles?: Record<string, RoleDefinition>;
 }
 
 export interface CreateGameParams {
@@ -75,6 +79,7 @@ export interface CreateGameParams {
   scriptName: string;
   scriptRoleIds: string[];
   playerNames: string[];
+  homebrewRoles?: Record<string, RoleDefinition>;
 }
 
 // Night order entry (used by NightOrderPanel)

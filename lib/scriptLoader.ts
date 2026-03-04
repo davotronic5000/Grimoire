@@ -1,26 +1,31 @@
 import type { RoleDefinition, ParsedScript } from './types';
 import { normalizeRoleId } from './roles';
 
-interface RawScriptEntry {
-  id: string;
-  name?: string;
-  team?: string;
-  [key: string]: unknown;
-}
+// Per the official schema, entries can be strings (official IDs) or objects
+type RawEntry = string | Record<string, unknown>;
 
 /**
  * Parse a raw script JSON array into a normalized ParsedScript.
- * Handles 3 formats:
- * 1. Standard: [{ id: '_meta', name: '...' }, { id: 'roleId' }, ...]
- * 2. Full-object: entries have full role data (name, team, ability, etc.)
- * 3. No-meta: [{ id: 'roleId' }, ...] — no _meta entry
+ *
+ * Handles the official BotC script JSON schema:
+ *   - String entry            → official role ID (e.g. "washerwoman")
+ *   - { id }                  → official role reference
+ *   - { id, name, team, ability, … } → homebrew role definition
+ *   - { id: "_meta", name }   → script metadata
  */
 export function parseScript(
-  raw: RawScriptEntry[],
+  raw: RawEntry[],
   scriptId: string,
   rolesDb: Record<string, RoleDefinition>
 ): ParsedScript {
-  const metaEntry = raw.find(e => e.id === '_meta');
+  const homebrewRoles: Record<string, RoleDefinition> = {};
+  const roleIds: string[] = [];
+  const seen = new Set<string>();
+
+  // Find _meta entry (always an object)
+  const metaEntry = raw.find(
+    e => typeof e === 'object' && e !== null && (e as Record<string, unknown>).id === '_meta'
+  ) as Record<string, unknown> | undefined;
 
   const meta = {
     id: scriptId,
@@ -28,26 +33,68 @@ export function parseScript(
     colour: metaEntry?.colour as string | undefined,
   };
 
-  const roleEntries = raw.filter(e => e.id !== '_meta' && e.id !== '');
+  for (const entry of raw) {
+    // ── String entry: plain official role ID ──────────────────────────
+    if (typeof entry === 'string') {
+      const id = normalizeRoleId(entry, rolesDb);
+      if (id && !seen.has(id)) {
+        seen.add(id);
+        roleIds.push(id);
+      }
+      continue;
+    }
 
-  const roleIds = roleEntries
-    .map(e => normalizeRoleId(e.id, rolesDb))
-    .filter(id => id && id !== '_meta');
+    const e = entry as Record<string, unknown>;
+    const rawId = typeof e.id === 'string' ? e.id : undefined;
+    if (!rawId || rawId === '_meta' || rawId === '') continue;
 
-  // De-duplicate while preserving order
-  const seen = new Set<string>();
-  const uniqueRoleIds = roleIds.filter(id => {
-    if (seen.has(id)) return false;
-    seen.add(id);
-    return true;
-  });
+    // ── Homebrew role: has name, team, and ability ────────────────────
+    if (
+      typeof e.name === 'string' &&
+      typeof e.team === 'string' &&
+      typeof e.ability === 'string'
+    ) {
+      // Schema uses British 'traveller'; internal code uses American 'traveler'
+      const rawTeam = e.team === 'traveller' ? 'traveler' : e.team;
 
-  return { meta, roleIds: uniqueRoleIds };
+      homebrewRoles[rawId] = {
+        id: rawId,
+        name: e.name,
+        team: rawTeam as RoleDefinition['team'],
+        ability: e.ability,
+        edition: 'custom',
+        firstNight: typeof e.firstNight === 'number' ? e.firstNight : 0,
+        firstNightReminder: typeof e.firstNightReminder === 'string' ? e.firstNightReminder : '',
+        otherNight: typeof e.otherNight === 'number' ? e.otherNight : 0,
+        otherNightReminder: typeof e.otherNightReminder === 'string' ? e.otherNightReminder : '',
+        reminders: Array.isArray(e.reminders) ? (e.reminders as string[]) : [],
+        setup: typeof e.setup === 'boolean' ? e.setup : false,
+      };
+
+      if (!seen.has(rawId)) {
+        seen.add(rawId);
+        roleIds.push(rawId);
+      }
+      continue;
+    }
+
+    // ── Official role reference object ────────────────────────────────
+    const id = normalizeRoleId(rawId, rolesDb);
+    if (id && !seen.has(id)) {
+      seen.add(id);
+      roleIds.push(id);
+    }
+  }
+
+  return {
+    meta,
+    roleIds,
+    homebrewRoles: Object.keys(homebrewRoles).length > 0 ? homebrewRoles : undefined,
+  };
 }
 
 /**
  * Load a built-in script by ID ('tb' | 'bmr' | 'snv').
- * Fetches from /public/data/{id}.json.
  */
 export async function loadBuiltinScript(
   scriptId: 'tb' | 'bmr' | 'snv',
@@ -55,13 +102,13 @@ export async function loadBuiltinScript(
 ): Promise<ParsedScript> {
   const res = await fetch(`/data/${scriptId}.json`);
   if (!res.ok) throw new Error(`Failed to load script: ${scriptId}`);
-  const raw: RawScriptEntry[] = await res.json();
+  const raw: RawEntry[] = await res.json();
   return parseScript(raw, scriptId, rolesDb);
 }
 
 /**
  * Parse an uploaded custom script JSON file.
- * Returns a ParsedScript or an error message.
+ * Returns a ParsedScript or an error message string.
  */
 export function parseUploadedScript(
   fileContent: string,
@@ -82,11 +129,18 @@ export function parseUploadedScript(
     return { error: 'Script file is empty.' };
   }
 
-  const entries = raw as RawScriptEntry[];
-  if (!entries.every(e => typeof e === 'object' && e !== null && 'id' in e)) {
-    return { error: 'Each entry in the script must have an "id" field.' };
+  // Each entry must be a string or an object with an "id" field
+  const valid = (raw as unknown[]).every(
+    e =>
+      typeof e === 'string' ||
+      (typeof e === 'object' && e !== null && 'id' in (e as object))
+  );
+  if (!valid) {
+    return {
+      error: 'Invalid script format. Each entry must be a role ID string or an object with an "id" field.',
+    };
   }
 
   const customId = `custom-${Date.now()}`;
-  return parseScript(entries, customId, rolesDb);
+  return parseScript(raw as RawEntry[], customId, rolesDb);
 }
