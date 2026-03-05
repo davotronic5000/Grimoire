@@ -13,8 +13,10 @@
   },
   "dependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
+    "mongodb": "^7.1.0",
     "nanoid": "^5.1.6",
     "next": "14.2.35",
+    "qrcode.react": "^4.2.0",
     "react": "^18",
     "react-dom": "^18",
     "zustand": "^5.0.11"

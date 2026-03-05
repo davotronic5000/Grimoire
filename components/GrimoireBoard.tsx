@@ -17,6 +17,7 @@ import RoleAssignmentScreen from './RoleAssignmentScreen';
 import SoundboardPanel from './SoundboardPanel';
 import NightInfoScreen from './NightInfoScreen';
 import GameSettingsScreen from './GameSettingsScreen';
+import ScriptShareDrawer from './ScriptShareDrawer';
 
 interface Props {
   game: Game;
@@ -66,6 +67,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
   const [showMore, setShowMore] = useState(false);
   const [showNightInfo, setShowNightInfo] = useState(false);
   const [showGameSettings, setShowGameSettings] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState('');
   const boardRef = useRef<HTMLDivElement>(null);
   const [boardWidth, setBoardWidth] = useState(0);
@@ -472,6 +474,13 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
         onClose={() => setShowJinxes(false)}
       />
 
+      {/* Script Share Drawer */}
+      <ScriptShareDrawer
+        game={game}
+        isOpen={showShare}
+        onClose={() => setShowShare(false)}
+      />
+
       {/* Role Reveal Screen */}
       {showRoleReveal && (
         <RoleRevealScreen
@@ -544,6 +553,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
               { emoji: '✏️', label: 'Whiteboard',  action: () => { setShowMore(false); setShowWhiteboard(true); } },
               { emoji: '🔊',  label: 'Sounds',      action: () => { setShowMore(false); setShowSoundboard(true); } },
               { emoji: '⚙️', label: 'Game',        action: () => { setShowMore(false); setShowGameSettings(true); } },
+              { emoji: '🔗',  label: 'Share',       action: () => { setShowMore(false); setShowShare(true); } },
             ] as const).map(item => (
               <button
                 key={item.label}
