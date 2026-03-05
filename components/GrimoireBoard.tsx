@@ -131,7 +131,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
   const firstNightRanks = useMemo(() => {
     const ranks = new Map<string, number>();
     const entries = players
-      .filter(p => p.roleId && (rolesDb[p.roleId]?.firstNight ?? 0) > 0)
+      .filter(p => p.isAlive && p.roleId && (rolesDb[p.roleId]?.firstNight ?? 0) > 0)
       .map(p => ({ roleId: p.roleId!, order: rolesDb[p.roleId!].firstNight }));
     // deduplicate by roleId (same role assigned to multiple players gets same rank)
     const seen = new Set<string>();
@@ -143,7 +143,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
   const otherNightRanks = useMemo(() => {
     const ranks = new Map<string, number>();
     const entries = players
-      .filter(p => p.roleId && (rolesDb[p.roleId]?.otherNight ?? 0) > 0)
+      .filter(p => p.isAlive && p.roleId && (rolesDb[p.roleId]?.otherNight ?? 0) > 0)
       .map(p => ({ roleId: p.roleId!, order: rolesDb[p.roleId!].otherNight }));
     const seen = new Set<string>();
     const unique = entries.filter(e => { if (seen.has(e.roleId)) return false; seen.add(e.roleId); return true; });
@@ -436,8 +436,8 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
                   onRemoveReminder={tokenId =>
                     removeReminderToken(game.id, player.id, tokenId)
                   }
-                  firstNightOrder={player.roleId ? (firstNightRanks.get(player.roleId) ?? null) : null}
-                  otherNightOrder={player.roleId ? (otherNightRanks.get(player.roleId) ?? null) : null}
+                  firstNightOrder={player.isAlive && player.roleId ? (firstNightRanks.get(player.roleId) ?? null) : null}
+                  otherNightOrder={player.isAlive && player.roleId ? (otherNightRanks.get(player.roleId) ?? null) : null}
                 />
               </div>
             );

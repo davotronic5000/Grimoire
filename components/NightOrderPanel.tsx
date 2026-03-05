@@ -13,6 +13,8 @@ interface Props {
   onClose: () => void;
 }
 
+type Tab = 'in-play' | 'script';
+
 export default function NightOrderPanel({
   game,
   rolesDb,
@@ -21,28 +23,47 @@ export default function NightOrderPanel({
   onClose,
 }: Props) {
   const [currentStep, setCurrentStep] = useState(0);
+  const [tab, setTab] = useState<Tab>('in-play');
   const isWide = useIsWide();
 
   const phase = game.nightNumber === 1 ? 'first' : 'other';
 
-  // Set of role IDs that have at least one assigned player
+  // Too many roles makes a full-script tab impractical (e.g. Whale Buffet)
+  const isWhaleBuffet =
+    game.scriptName.toLowerCase().includes('whale') ||
+    game.scriptRoleIds.length > 40;
+
+  // Set of role IDs that have at least one alive assigned player
   const assignedRoleIds = useMemo(() => {
     const ids = new Set<string>();
     for (const p of game.players) {
-      if (p.roleId) ids.add(p.roleId);
+      if (p.roleId && p.isAlive) ids.add(p.roleId);
     }
     return ids;
   }, [game.players]);
 
-  const entries = useMemo(() => {
-    return getNightOrder(
-      game.scriptRoleIds,
-      rolesDb,
-      allRoles,
-      phase,
-      assignedRoleIds
-    );
-  }, [game.scriptRoleIds, rolesDb, allRoles, phase, assignedRoleIds]);
+  // All script roles treated as "assigned" for the full-script tab
+  const allScriptRoleSet = useMemo(
+    () => new Set(game.scriptRoleIds),
+    [game.scriptRoleIds]
+  );
+
+  const inPlayEntries = useMemo(() =>
+    getNightOrder(game.scriptRoleIds, rolesDb, allRoles, phase, assignedRoleIds),
+    [game.scriptRoleIds, rolesDb, allRoles, phase, assignedRoleIds]
+  );
+
+  const scriptEntries = useMemo(() =>
+    getNightOrder(game.scriptRoleIds, rolesDb, allRoles, phase, allScriptRoleSet),
+    [game.scriptRoleIds, rolesDb, allRoles, phase, allScriptRoleSet]
+  );
+
+  const entries = tab === 'in-play' ? inPlayEntries : scriptEntries;
+
+  function switchTab(next: Tab) {
+    setTab(next);
+    setCurrentStep(0);
+  }
 
   if (!isOpen) return null;
 
@@ -85,6 +106,29 @@ export default function NightOrderPanel({
             ×
           </button>
         </div>
+
+        {/* Tab switcher */}
+        {!isWhaleBuffet && (
+          <div
+            className="flex gap-2 px-4 py-2 flex-shrink-0"
+            style={{ borderBottom: '1px solid var(--color-border)' }}
+          >
+            {(['in-play', 'script'] as Tab[]).map(t => (
+              <button
+                key={t}
+                onClick={() => switchTab(t)}
+                className="flex-1 rounded-lg py-1.5 text-sm font-medium transition-colors"
+                style={{
+                  background: tab === t ? 'rgba(201,168,76,0.15)' : 'transparent',
+                  border: `1px solid ${tab === t ? 'var(--color-gold-dim)' : 'var(--color-border)'}`,
+                  color: tab === t ? 'var(--color-gold)' : 'var(--color-text-dim)',
+                }}
+              >
+                {t === 'in-play' ? 'In Play' : 'Full Script'}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Order list */}
         <div className="flex-1 overflow-y-auto py-2">
