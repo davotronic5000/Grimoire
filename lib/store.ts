@@ -50,7 +50,7 @@ interface AppState {
   togglePhase: (gameId: string) => void;
   togglePhaseBack: (gameId: string) => void;
   resetGame: (gameId: string) => void;
-  changeScript: (gameId: string, scriptId: string, scriptName: string, scriptRoleIds: string[], homebrewRoles?: Record<string, RoleDefinition>) => void;
+  changeScript: (gameId: string, scriptId: string, scriptName: string, scriptRoleIds: string[], homebrewRoles?: Record<string, RoleDefinition>, scriptAuthor?: string) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -95,6 +95,7 @@ export const useStore = create<AppState>()(
           createdAt: Date.now(),
           scriptId: params.scriptId,
           scriptName: params.scriptName,
+          scriptAuthor: params.scriptAuthor,
           scriptRoleIds: params.scriptRoleIds,
           homebrewRoles: params.homebrewRoles,
           players,
@@ -315,7 +316,7 @@ export const useStore = create<AppState>()(
         });
       },
 
-      changeScript: (gameId, scriptId, scriptName, scriptRoleIds, homebrewRoles) => {
+      changeScript: (gameId, scriptId, scriptName, scriptRoleIds, homebrewRoles, scriptAuthor) => {
         set(state => {
           const game = state.games[gameId];
           if (!game) return state;
@@ -326,6 +327,7 @@ export const useStore = create<AppState>()(
                 ...game,
                 scriptId,
                 scriptName,
+                scriptAuthor,
                 scriptRoleIds,
                 homebrewRoles: homebrewRoles ?? {},
                 // Reset game state when script changes

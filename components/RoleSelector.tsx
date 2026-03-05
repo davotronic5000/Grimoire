@@ -2,11 +2,15 @@
 
 import { useState, useMemo } from 'react';
 import type { RoleDefinition, RoleTeam } from '@/lib/types';
-import { getIconPath, getRoleTeamColor, TEAM_LABELS } from '@/lib/roles';
+import { getRoleIconPath, getRoleTeamColor, TEAM_LABELS } from '@/lib/roles';
 import { useIsWide } from '@/lib/hooks';
 
 const ALL_TEAM_FILTERS = ['all', 'townsfolk', 'outsider', 'minion', 'demon', 'traveler', 'loric'] as const;
 type TeamFilter = (typeof ALL_TEAM_FILTERS)[number];
+
+const TEAM_SORT_ORDER: Record<string, number> = {
+  townsfolk: 0, outsider: 1, minion: 2, demon: 3, traveler: 4, loric: 5, fabled: 6,
+};
 
 interface Props {
   scriptRoleIds: string[];
@@ -47,11 +51,14 @@ export default function RoleSelector({
       const matchesSearch = !search || role.name.toLowerCase().includes(search.toLowerCase());
       return matchesTeam && matchesSearch;
     });
-    if (!priorityIds) return matching;
+    const sorted = teamFilter === 'all'
+      ? [...matching].sort((a, b) => (TEAM_SORT_ORDER[a.team] ?? 99) - (TEAM_SORT_ORDER[b.team] ?? 99))
+      : matching;
+    if (!priorityIds) return sorted;
     // Sort: priority (unassigned) first, then the rest
     return [
-      ...matching.filter(r => priorityIds.has(r.id)),
-      ...matching.filter(r => !priorityIds.has(r.id)),
+      ...sorted.filter(r => priorityIds.has(r.id)),
+      ...sorted.filter(r => !priorityIds.has(r.id)),
     ];
   }, [scriptRoles, teamFilter, search, priorityIds]);
 
@@ -163,7 +170,7 @@ export default function RoleSelector({
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={getIconPath(role.id)}
+                    src={getRoleIconPath(role)}
                     alt={role.name}
                     style={{ width: isWide ? 64 : 48, height: isWide ? 64 : 48, objectFit: 'contain' }}
                     onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}

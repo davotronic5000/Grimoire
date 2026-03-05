@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import type { Game, Player, RoleDefinition } from '@/lib/types';
 import { useStore } from '@/lib/store';
+import { getRoleDistribution } from '@/lib/roles';
 import PlayerToken from './PlayerToken';
 import PlayerModal from './PlayerModal';
 import NightOrderPanel from './NightOrderPanel';
@@ -45,7 +46,13 @@ function computeTokenPx(boardPx: number, count: number): number {
   return Math.max(64, Math.round(boardPx * fraction));
 }
 
-export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
+export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: Props) {
+  // Safety net: always merge homebrew roles so they're available even if the
+  // upstream merge in game/page.tsx didn't fire (e.g. stale build, hydration timing).
+  const rolesDb = (game.homebrewRoles && Object.keys(game.homebrewRoles).length > 0)
+    ? { ...rolesDbProp, ...game.homebrewRoles }
+    : rolesDbProp;
+
   const { togglePhase, togglePhaseBack, removeReminderToken, addPlayer } = useStore();
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [showNightOrder, setShowNightOrder] = useState(false);
@@ -336,35 +343,73 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
           />
 
           {/* Center display */}
-          <div
-            className="absolute pointer-events-none flex flex-col items-center justify-center text-center"
-            style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}
-          >
-            <span
-              style={{ fontSize: Math.max(36, boardMinDim * 0.06), lineHeight: 1 }}
-            >
-              {isNight ? '🌙' : '☀️'}
-            </span>
-            <span
-              className="font-semibold mt-1"
-              style={{
-                fontSize: Math.max(13, boardMinDim * 0.025),
-                color: isNight ? '#818cf8' : '#fbbf24',
-                textShadow: `0 0 12px ${isNight ? 'rgba(129,140,248,0.5)' : 'rgba(251,191,36,0.5)'}`,
-              }}
-            >
-              {phaseLabel}
-            </span>
-            <span
-              className="mt-1"
-              style={{
-                fontSize: Math.max(11, boardMinDim * 0.018),
-                color: 'var(--color-text-dim)',
-              }}
-            >
-              {aliveCount}/{players.length} alive
-            </span>
-          </div>
+          {(() => {
+            const dist = getRoleDistribution(players.length);
+            const scriptLabel = game.scriptAuthor ? `by ${game.scriptAuthor}` : null;
+            const distItems = [
+              { label: 'TF', count: dist.townsfolk, color: '#60a5fa' },
+              { label: 'OUT', count: dist.outsider, color: '#22d3ee' },
+              { label: 'MIN', count: dist.minion, color: '#fb923c' },
+              { label: 'DEM', count: dist.demon, color: '#f87171' },
+            ];
+            return (
+              <div
+                className="absolute pointer-events-none flex flex-col items-center justify-center text-center"
+                style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)', width: `${RADIUS_PCT * 1.1}%` }}
+              >
+                <span style={{ fontSize: Math.max(28, boardMinDim * 0.05), lineHeight: 1 }}>
+                  {isNight ? '🌙' : '☀️'}
+                </span>
+                <span
+                  className="font-semibold mt-1"
+                  style={{
+                    fontSize: Math.max(12, boardMinDim * 0.022),
+                    color: isNight ? '#818cf8' : '#fbbf24',
+                    textShadow: `0 0 12px ${isNight ? 'rgba(129,140,248,0.5)' : 'rgba(251,191,36,0.5)'}`,
+                  }}
+                >
+                  {phaseLabel}
+                </span>
+                <span style={{ fontSize: Math.max(10, boardMinDim * 0.016), color: 'var(--color-text-dim)', marginTop: 2 }}>
+                  {aliveCount}/{players.length} alive
+                </span>
+                {/* Script name */}
+                <span
+                  className="font-semibold"
+                  style={{
+                    fontSize: Math.max(10, boardMinDim * 0.018),
+                    color: 'var(--color-gold)',
+                    marginTop: Math.max(6, boardMinDim * 0.012),
+                    maxWidth: '100%',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    display: 'block',
+                  }}
+                >
+                  {game.scriptName}
+                </span>
+                {scriptLabel && (
+                  <span style={{ fontSize: Math.max(9, boardMinDim * 0.014), color: 'var(--color-text-dim)', marginTop: 1 }}>
+                    {scriptLabel}
+                  </span>
+                )}
+                {/* Role distribution */}
+                <div style={{ display: 'flex', gap: Math.max(6, boardMinDim * 0.012), marginTop: Math.max(5, boardMinDim * 0.01) }}>
+                  {distItems.map(({ label, count, color }) => (
+                    <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
+                      <span style={{ fontSize: Math.max(11, boardMinDim * 0.02), fontWeight: 700, color, lineHeight: 1 }}>
+                        {count}
+                      </span>
+                      <span style={{ fontSize: Math.max(7, boardMinDim * 0.012), color: 'var(--color-text-dim)', lineHeight: 1 }}>
+                        {label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Player tokens */}
           {players.map((player, index) => {

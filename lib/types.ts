@@ -11,6 +11,8 @@ export interface RoleDefinition {
   reminders: string[]; // reminder token labels this role uses
   setup: boolean;
   ability: string;
+  /** Custom image URL for homebrew roles (from script JSON "image" field) */
+  image?: string;
 }
 
 // NOTE: Roles.json uses 'traveler' (American single-L) — do NOT use 'traveller'
@@ -27,6 +29,7 @@ export interface ParsedScript {
   meta: {
     id: string; // 'tb' | 'bmr' | 'snv' | 'custom'
     name: string;
+    author?: string;
     colour?: string;
   };
   roleIds: string[]; // normalized role IDs in this script
@@ -58,6 +61,7 @@ export interface Game {
   createdAt: number; // Date.now()
   scriptId: string; // 'tb' | 'bmr' | 'snv' | 'custom-{timestamp}'
   scriptName: string;
+  scriptAuthor?: string;
   scriptRoleIds: string[]; // normalized IDs of roles in this game's script
   players: Player[];
   phase: 'day' | 'night';
@@ -77,6 +81,7 @@ export interface CreateGameParams {
   name: string;
   scriptId: string;
   scriptName: string;
+  scriptAuthor?: string;
   scriptRoleIds: string[];
   playerNames: string[];
   homebrewRoles?: Record<string, RoleDefinition>;

@@ -53,6 +53,7 @@ export default function SetupPage() {
       name: gameName || `Game — ${new Date().toLocaleDateString()}`,
       scriptId: selectedScript.meta.id,
       scriptName: selectedScript.meta.name,
+      scriptAuthor: selectedScript.meta.author,
       scriptRoleIds: selectedScript.roleIds,
       playerNames: playerNames.map(n => n.trim() || 'Player'),
       homebrewRoles: selectedScript.homebrewRoles,

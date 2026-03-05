@@ -88,6 +88,14 @@ export function getIconPath(roleId: string): string {
 }
 
 /**
+ * Get the icon URL for a role, preferring a custom image URL (homebrew roles)
+ * over the default local icon path.
+ */
+export function getRoleIconPath(role: RoleDefinition): string {
+  return role.image ?? `/icons/${role.id}.png`;
+}
+
+/**
  * Get team color for a role team value.
  */
 export function getRoleTeamColor(team: RoleTeam | '' | undefined): string {

@@ -30,6 +30,7 @@ export function parseScript(
   const meta = {
     id: scriptId,
     name: (metaEntry?.name as string) ?? 'Custom Script',
+    author: metaEntry?.author as string | undefined,
     colour: metaEntry?.colour as string | undefined,
   };
 
@@ -69,6 +70,7 @@ export function parseScript(
         otherNightReminder: typeof e.otherNightReminder === 'string' ? e.otherNightReminder : '',
         reminders: Array.isArray(e.reminders) ? (e.reminders as string[]) : [],
         setup: typeof e.setup === 'boolean' ? e.setup : false,
+        image: typeof e.image === 'string' ? e.image : undefined,
       };
 
       if (!seen.has(rawId)) {
@@ -86,11 +88,12 @@ export function parseScript(
     }
   }
 
-  return {
+  const result: ParsedScript = {
     meta,
     roleIds,
     homebrewRoles: Object.keys(homebrewRoles).length > 0 ? homebrewRoles : undefined,
   };
+  return result;
 }
 
 /**
@@ -103,7 +106,11 @@ export async function loadBuiltinScript(
   const res = await fetch(`/data/${scriptId}.json`);
   if (!res.ok) throw new Error(`Failed to load script: ${scriptId}`);
   const raw: RawEntry[] = await res.json();
-  return parseScript(raw, scriptId, rolesDb);
+  const parsed = parseScript(raw, scriptId, rolesDb);
+  return {
+    ...parsed,
+    meta: { ...parsed.meta, author: parsed.meta.author ?? 'The Pandemonium Institute' },
+  };
 }
 
 /**

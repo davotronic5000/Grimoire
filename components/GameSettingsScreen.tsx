@@ -23,7 +23,7 @@ export default function GameSettingsScreen({ game, rolesDb, onClose }: Props) {
   }
 
   function handleScriptSelected(script: ParsedScript) {
-    changeScript(game.id, script.meta.id, script.meta.name, script.roleIds, script.homebrewRoles);
+    changeScript(game.id, script.meta.id, script.meta.name, script.roleIds, script.homebrewRoles, script.meta.author);
     onClose();
   }
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { Player, RoleDefinition } from '@/lib/types';
-import { getIconPath, getRoleTeamColor } from '@/lib/roles';
+import { getIconPath, getRoleIconPath, getRoleTeamColor } from '@/lib/roles';
 
 interface Props {
   player: Player;
@@ -111,7 +111,7 @@ export default function PlayerToken({ player, role, sizePx: px, inwardAngle, onC
         {role ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={getIconPath(role.id)}
+            src={getRoleIconPath(role)}
             alt={role.name}
             className="absolute inset-0 w-full h-full object-contain"
             style={{
@@ -191,16 +191,21 @@ export default function PlayerToken({ player, role, sizePx: px, inwardAngle, onC
         {/* Ghost vote badge */}
         {isDead && player.hasGhostVote && (
           <div
-            className="absolute top-1 right-1 rounded-full flex items-center justify-center font-bold"
+            className="absolute rounded-full flex items-center justify-center font-bold"
             style={{
-              width: Math.max(16, px * 0.22),
-              height: Math.max(16, px * 0.22),
-              fontSize: Math.max(9, px * 0.13),
-              background: 'rgba(168,85,247,0.75)',
+              width: Math.max(20, px * 0.29),
+              height: Math.max(20, px * 0.29),
+              top: Math.max(2, px * 0.03),
+              left: '50%',
+              transform: 'translateX(-50%)',
+              fontSize: Math.max(11, px * 0.17),
+              background: 'rgba(168,85,247,0.92)',
               color: '#fff',
+              border: '2px solid rgba(216,180,254,0.8)',
+              boxShadow: '0 0 8px rgba(168,85,247,0.7)',
             }}
           >
-            V
+            👻
           </div>
         )}
       </button>

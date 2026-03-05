@@ -66,8 +66,12 @@ for (const role of rawRoles) {
   const src = path.join(ICONS_SRC, `BW ${iconBaseName}.png`);
   const dest = path.join(ICONS_DEST, `${role.id}.png`);
 
-  if (fs.existsSync(src)) {
-    fs.copyFileSync(src, dest);
+  // Prefer colored 'C {Name}.png' over BW when available
+  const coloredSrc = path.join(ICONS_SRC, `C ${iconBaseName}.png`);
+  const actualSrc = fs.existsSync(coloredSrc) ? coloredSrc : src;
+
+  if (fs.existsSync(actualSrc)) {
+    fs.copyFileSync(actualSrc, dest);
     iconsCopied++;
   } else {
     console.warn(`  WARN: No icon for "${role.id}" (looked for "BW ${iconBaseName}.png")`);

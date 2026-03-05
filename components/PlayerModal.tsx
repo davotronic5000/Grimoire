@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { Player, RoleDefinition, Game } from '@/lib/types';
-import { getIconPath, getRoleTeamColor } from '@/lib/roles';
+import { getRoleIconPath, getRoleTeamColor } from '@/lib/roles';
 import { useIsWide } from '@/lib/hooks';
 import { useStore } from '@/lib/store';
 import RoleSelector from './RoleSelector';
@@ -36,7 +36,8 @@ export default function PlayerModal({ player, game, rolesDb, onClose }: Props) {
   }
 
   function handleToggleAlive() {
-    updatePlayer(game.id, player.id, { isAlive: !player.isAlive, hasGhostVote: false });
+    const dying = player.isAlive;
+    updatePlayer(game.id, player.id, { isAlive: !player.isAlive, hasGhostVote: dying });
   }
 
   function handleNameSave() {
@@ -144,7 +145,7 @@ export default function PlayerModal({ player, game, rolesDb, onClose }: Props) {
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={getIconPath(role.id)}
+                src={getRoleIconPath(role)}
                 alt={role.name}
                 className="rounded-full object-contain flex-shrink-0"
                 style={{ width: 56, height: 56, background: 'rgba(0,0,0,0.3)', padding: 3 }}
@@ -461,7 +462,7 @@ export default function PlayerModal({ player, game, rolesDb, onClose }: Props) {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={getIconPath(r.id)}
+                      src={getRoleIconPath(r)}
                       alt={r.name}
                       className="rounded-full object-contain flex-shrink-0"
                       style={{ width: 28, height: 28, background: 'rgba(0,0,0,0.3)' }}

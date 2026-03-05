@@ -35,7 +35,22 @@ export default function RootLayout({
           content="black-translucent"
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <div style={{
+          position: 'fixed',
+          bottom: 8,
+          right: 10,
+          fontSize: 10,
+          opacity: 0.35,
+          color: '#fff',
+          pointerEvents: 'none',
+          zIndex: 9999,
+          fontFamily: 'monospace',
+        }}>
+          v3
+        </div>
+      </body>
     </html>
   );
 }
