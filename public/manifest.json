@@ -4,21 +4,21 @@
   "description": "Digital Grimoire for the Blood on the Clocktower Storyteller",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0a0a0f",
+  "background_color": "#2d0e5a",
   "theme_color": "#1a0a2e",
   "orientation": "any",
   "icons": [
     {
-      "src": "/icons/imp.png",
+      "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icons/imp.png",
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any maskable"
     }
   ]
 }
