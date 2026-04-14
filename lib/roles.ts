@@ -96,6 +96,23 @@ export function getRoleIconPath(role: RoleDefinition): string {
 }
 
 /**
+ * Get the generic fallback icon path for a team, shown when a specific role
+ * icon fails to load.
+ */
+export function getGenericIconPath(team: RoleTeam | '' | undefined): string {
+  switch (team) {
+    case 'townsfolk': return '/icons/generic_townsfolk.png';
+    case 'outsider':  return '/icons/generic_outsider.png';
+    case 'minion':    return '/icons/generic_minion.png';
+    case 'demon':     return '/icons/generic_demon.png';
+    case 'traveler':  return '/icons/generic_traveler.png';
+    case 'fabled':    return '/icons/generic_fabled.png';
+    case 'loric':     return '/icons/generic_loric.png';
+    default:          return '/icons/generic_townsfolk.png';
+  }
+}
+
+/**
  * Get team color for a role team value.
  */
 export function getRoleTeamColor(team: RoleTeam | '' | undefined): string {

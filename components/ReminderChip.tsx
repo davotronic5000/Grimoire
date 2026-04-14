@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReminderToken, RoleDefinition } from '@/lib/types';
-import { getIconPath } from '@/lib/roles';
+import { getGenericIconPath, getRoleIconPath } from '@/lib/roles';
 
 interface Props {
   token: ReminderToken;
@@ -33,7 +33,11 @@ export default function ReminderChip({
         {sourceRole && (
           // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={getIconPath(token.sourceRoleId)}
+            src={getRoleIconPath(sourceRole!)}
+            onError={e => {
+              const img = e.target as HTMLImageElement;
+              if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = getGenericIconPath(sourceRole!.team); }
+            }}
             alt=""
             className="w-3 h-3 rounded-full flex-shrink-0"
             style={{ opacity: 0.8 }}
@@ -61,7 +65,7 @@ export default function ReminderChip({
       {sourceRole && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={getIconPath(token.sourceRoleId)}
+          src={getRoleIconPath(sourceRole!)}
           alt={sourceRole.name}
           className="w-6 h-6 rounded-full flex-shrink-0"
         />

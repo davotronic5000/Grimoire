@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import type { Game, RoleDefinition } from '@/lib/types';
-import { getNightOrder, getIconPath } from '@/lib/roles';
+import { getNightOrder, getIconPath, getGenericIconPath } from '@/lib/roles';
 import { useIsWide } from '@/lib/hooks';
 
 interface Props {
@@ -175,11 +175,12 @@ export default function NightOrderPanel({
                     ) : (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={getIconPath(entry.roleId)}
+                        src={rolesDb[entry.roleId]?.image ?? getIconPath(entry.roleId)}
                         alt={entry.name}
                         className="w-full h-full object-contain p-0.5"
                         onError={e => {
-                          (e.target as HTMLImageElement).style.display = 'none';
+                          const img = e.target as HTMLImageElement;
+                          if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = getGenericIconPath(rolesDb[entry.roleId]?.team); }
                         }}
                       />
                     )}

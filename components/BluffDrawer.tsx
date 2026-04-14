@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { Game, RoleDefinition } from '@/lib/types';
-import { getIconPath, getRoleTeamColor } from '@/lib/roles';
+import { getGenericIconPath, getRoleIconPath, getRoleTeamColor } from '@/lib/roles';
 import { useStore } from '@/lib/store';
 import RoleSelector from './RoleSelector';
 
@@ -105,9 +105,13 @@ export default function BluffDrawer({ game, rolesDb }: Props) {
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={getIconPath(role.id)}
+                    src={getRoleIconPath(role)}
                     alt={role.name}
                     style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    onError={e => {
+                      const img = e.target as HTMLImageElement;
+                      if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = getGenericIconPath(role.team); }
+                    }}
                   />
                 </div>
 
@@ -230,9 +234,13 @@ export default function BluffDrawer({ game, rolesDb }: Props) {
                     {role ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={getIconPath(role.id)}
+                        src={getRoleIconPath(role)}
                         alt={role.name}
                         style={{ width: '75%', height: '75%', objectFit: 'contain' }}
+                        onError={e => {
+                          const img = e.target as HTMLImageElement;
+                          if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = getGenericIconPath(role.team); }
+                        }}
                       />
                     ) : (
                       <span style={{ fontSize: 24, color: 'rgba(201,168,76,0.4)' }}>+</span>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { RoleDefinition } from '@/lib/types';
-import { getIconPath, getRoleTeamColor } from '@/lib/roles';
+import { getGenericIconPath, getRoleIconPath, getRoleTeamColor } from '@/lib/roles';
 
 interface Props {
   scriptRoleIds: string[];
@@ -59,9 +59,13 @@ function RoleBlock({ role, size = 'lg' }: { role: RoleDefinition; size?: 'lg' | 
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={getIconPath(role.id)}
+          src={getRoleIconPath(role)}
           alt={role.name}
           style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+          onError={e => {
+            const img = e.target as HTMLImageElement;
+            if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = getGenericIconPath(role.team); }
+          }}
         />
       </div>
       <p
@@ -372,10 +376,14 @@ export default function NightInfoScreen({ scriptRoleIds, rolesDb, onClose }: Pro
                     </div>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={getIconPath(role.id)}
+                      src={getRoleIconPath(role)}
                       alt={role.name}
                       className="rounded-full object-contain flex-shrink-0"
                       style={{ width: 36, height: 36, background: 'rgba(0,0,0,0.4)', padding: 3 }}
+                      onError={e => {
+                        const img = e.target as HTMLImageElement;
+                        if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = getGenericIconPath(role.team); }
+                      }}
                     />
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm" style={{ color: isSelected ? teamColor : 'var(--color-text)' }}>

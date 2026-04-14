@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import type { Player, RoleDefinition } from '@/lib/types';
-import { getIconPath, getRoleIconPath, getRoleTeamColor } from '@/lib/roles';
+import { getIconPath, getGenericIconPath, getRoleIconPath, getRoleTeamColor } from '@/lib/roles';
 
 interface Props {
   player: Player;
   role: RoleDefinition | null;
+  rolesDb: Record<string, RoleDefinition>;
   /** Token diameter in pixels — calculated dynamically by GrimoireBoard */
   sizePx: number;
   /** Angle (radians) pointing from this token toward the board center */
@@ -19,7 +20,7 @@ interface Props {
   otherNightOrder: number | null;
 }
 
-export default function PlayerToken({ player, role, sizePx: px, inwardAngle, onClick, onRemoveReminder, firstNightOrder, otherNightOrder }: Props) {
+export default function PlayerToken({ player, role, rolesDb, sizePx: px, inwardAngle, onClick, onRemoveReminder, firstNightOrder, otherNightOrder }: Props) {
   const isDead = !player.isAlive;
   const teamColor = getRoleTeamColor(role?.team);
   const [popupTokenId, setPopupTokenId] = useState<string | null>(null);
@@ -118,7 +119,10 @@ export default function PlayerToken({ player, role, sizePx: px, inwardAngle, onC
               padding: `${Math.max(4, px * 0.07)}px ${Math.max(4, px * 0.07)}px ${Math.max(10, px * 0.17)}px`,
               opacity: isDead ? 0.4 : 1,
             }}
-            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+            onError={e => {
+              const img = e.target as HTMLImageElement;
+              if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = getGenericIconPath(role.team); }
+            }}
           />
         ) : (
           <span
@@ -326,10 +330,13 @@ export default function PlayerToken({ player, role, sizePx: px, inwardAngle, onC
               <div style={{ width: iconSize, height: iconSize, borderRadius: '50%', overflow: 'hidden', flexShrink: 0 }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={getIconPath(t.sourceRoleId)}
+                  src={rolesDb[t.sourceRoleId]?.image ?? getIconPath(t.sourceRoleId)}
                   alt={t.label}
                   style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                  onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  onError={e => {
+                    const img = e.target as HTMLImageElement;
+                    if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = getGenericIconPath(rolesDb[t.sourceRoleId]?.team); }
+                  }}
                 />
               </div>
             )}

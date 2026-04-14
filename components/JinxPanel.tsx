@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import type { Game, RoleDefinition } from '@/lib/types';
-import { getIconPath } from '@/lib/roles';
+import { getIconPath, getGenericIconPath, getRoleIconPath } from '@/lib/roles';
 import { useIsWide } from '@/lib/hooks';
 
 interface Jinx {
@@ -148,10 +148,13 @@ export default function JinxPanel({ game, rolesDb, isOpen, onClose }: Props) {
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={getIconPath(jinx.id1)}
+                        src={role1 ? getRoleIconPath(role1) : getIconPath(jinx.id1)}
                         alt={role1?.name ?? jinx.id1}
                         className="w-full h-full object-contain p-0.5"
-                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        onError={e => {
+                          const img = e.target as HTMLImageElement;
+                          if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = getGenericIconPath(role1?.team); }
+                        }}
                       />
                     </div>
                     <span
@@ -177,10 +180,13 @@ export default function JinxPanel({ game, rolesDb, isOpen, onClose }: Props) {
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={getIconPath(jinx.id2)}
+                        src={role2 ? getRoleIconPath(role2) : getIconPath(jinx.id2)}
                         alt={role2?.name ?? jinx.id2}
                         className="w-full h-full object-contain p-0.5"
-                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        onError={e => {
+                          const img = e.target as HTMLImageElement;
+                          if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = getGenericIconPath(role2?.team); }
+                        }}
                       />
                     </div>
                     <span

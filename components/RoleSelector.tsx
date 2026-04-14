@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import type { RoleDefinition, RoleTeam } from '@/lib/types';
-import { getRoleIconPath, getRoleTeamColor, TEAM_LABELS } from '@/lib/roles';
+import { getGenericIconPath, getRoleIconPath, getRoleTeamColor, TEAM_LABELS } from '@/lib/roles';
 import { useIsWide } from '@/lib/hooks';
 
 const ALL_TEAM_FILTERS = ['all', 'townsfolk', 'outsider', 'minion', 'demon', 'traveler', 'loric'] as const;
@@ -173,7 +173,10 @@ export default function RoleSelector({
                     src={getRoleIconPath(role)}
                     alt={role.name}
                     style={{ width: isWide ? 64 : 48, height: isWide ? 64 : 48, objectFit: 'contain' }}
-                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    onError={e => {
+                      const img = e.target as HTMLImageElement;
+                      if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = getGenericIconPath(role.team); }
+                    }}
                   />
                   <p
                     className="text-center mt-1.5 leading-tight"

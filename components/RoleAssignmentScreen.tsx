@@ -4,7 +4,8 @@ import { useState, useMemo } from 'react';
 import type { Game, RoleDefinition } from '@/lib/types';
 import { useStore } from '@/lib/store';
 import {
-  getIconPath,
+  getGenericIconPath,
+  getRoleIconPath,
   getRoleTeamColor,
   TEAM_COLORS,
   TEAM_LABELS,
@@ -251,10 +252,13 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose }: Props) 
                         >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
-                            src={getIconPath(role.id)}
+                            src={getRoleIconPath(role)}
                             alt={role.name}
                             style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 3 }}
-                            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                            onError={e => {
+                              const img = e.target as HTMLImageElement;
+                              if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = getGenericIconPath(role.team); }
+                            }}
                           />
                         </div>
                         <div className="flex-1 min-w-0">
@@ -477,10 +481,13 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose }: Props) 
               <div style={{ width: 56, height: 56, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: `2px solid ${getRoleTeamColor(activeRole.team)}66` }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={getIconPath(activeRole.id)}
+                  src={getRoleIconPath(activeRole)}
                   alt={activeRole.name}
                   style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 4 }}
-                  onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  onError={e => {
+                    const img = e.target as HTMLImageElement;
+                    if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = getGenericIconPath(activeRole.team); }
+                  }}
                 />
               </div>
               <div className="flex-1 min-w-0">

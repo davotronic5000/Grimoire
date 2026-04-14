@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import type { Game, RoleDefinition } from '@/lib/types';
-import { getIconPath, getRoleTeamColor } from '@/lib/roles';
+import { getGenericIconPath, getRoleIconPath, getRoleTeamColor } from '@/lib/roles';
 import { useStore } from '@/lib/store';
 
 interface Props {
@@ -103,10 +103,14 @@ function RolePicker({ team, rolesDb, activeIds, onToggle, onClose }: PickerProps
 
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={getIconPath(role.id)}
+                src={getRoleIconPath(role)}
                 alt={role.name}
                 className="rounded-full object-contain flex-shrink-0"
                 style={{ width: 36, height: 36, background: 'rgba(0,0,0,0.4)', padding: 3 }}
+                onError={e => {
+                  const img = e.target as HTMLImageElement;
+                  if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = getGenericIconPath(role.team); }
+                }}
               />
 
               <div className="flex-1 min-w-0">
@@ -205,9 +209,13 @@ export default function StorytoolsDrawer({ game, rolesDb }: Props) {
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={getIconPath(id)}
+                      src={getRoleIconPath(role)}
                       alt={role.name}
                       style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                      onError={e => {
+                        const img = e.target as HTMLImageElement;
+                        if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = getGenericIconPath(role.team); }
+                      }}
                     />
                   </div>
                   <span
