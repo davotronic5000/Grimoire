@@ -432,6 +432,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
                 <PlayerToken
                   player={player}
                   role={role}
+                  rolesDb={rolesDb}
                   sizePx={tokenPx}
                   inwardAngle={angle + Math.PI}
                   onClick={() => setSelectedPlayer(player)}
