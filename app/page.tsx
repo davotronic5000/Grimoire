@@ -36,146 +36,141 @@ export default function HomePage() {
   }
 
   return (
-    /* Full-screen with centred content column */
     <div
       className="min-h-screen flex flex-col items-center"
-      style={{ padding: '48px 24px 40px' }}
+      style={{ padding: '48px 20px 48px' }}
     >
       {/* Constrained column — comfortable on iPad */}
       <div style={{ width: '100%', maxWidth: 560 }}>
 
-        {/* Header */}
-        <div className="text-center mb-10">
+        {/* ── Header ─────────────────────────────────────────── */}
+        <div className="text-center" style={{ marginBottom: 40 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/icons/imp.png"
             alt="Imp"
             style={{
-              width: 80,
-              height: 80,
-              margin: '0 auto 16px',
-              filter: 'drop-shadow(0 0 12px rgba(239,68,68,0.55))',
+              width: 88,
+              height: 88,
+              margin: '0 auto 18px',
+              filter: 'drop-shadow(0 0 16px rgba(239,68,68,0.5))',
             }}
           />
           <h1
             className="gothic-heading"
-            style={{ fontSize: 40, marginBottom: 6 }}
+            style={{ fontSize: 42, marginBottom: 8, display: 'block' }}
           >
             Grimoire
           </h1>
-          <p style={{ fontSize: 15, color: 'var(--color-text-dim)' }}>
+          <p style={{ fontSize: 14, color: 'var(--botc-muted)' }}>
             Blood on the Clocktower — Storyteller Tool
           </p>
         </div>
 
-        {/* New Game button */}
+        {/* ── New Game button ─────────────────────────────────── */}
         <button
           onClick={() => router.push('/setup')}
-          className="w-full transition-all active:scale-95"
-          style={{
-            padding: '18px 24px',
-            marginBottom: 28,
-            borderRadius: 16,
-            fontSize: 18,
-            fontWeight: 600,
-            background: 'linear-gradient(135deg, #4a1942 0%, #7b1a1a 100%)',
-            border: '1px solid var(--color-gold-dim)',
-            color: 'var(--color-gold)',
-            boxShadow: '0 4px 24px rgba(123,26,26,0.35)',
-          }}
+          className="botc-btn-primary w-full transition-all active:scale-[0.98]"
+          style={{ marginBottom: 28, fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}
         >
-          + New Game
+          <span style={{ fontSize: 20 }}>+</span>
+          New Game
         </button>
 
-        {/* Games list */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {/* ── Game list ───────────────────────────────────────── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {sortedGames.length === 0 ? (
             <div
               className="text-center"
               style={{
-                padding: '48px 24px',
-                borderRadius: 16,
-                border: '1px dashed var(--color-border)',
-                color: 'var(--color-text-dim)',
+                padding: '52px 24px',
+                borderRadius: 18,
+                border: '1px dashed var(--botc-border)',
+                color: 'var(--botc-muted)',
               }}
             >
-              <p style={{ fontSize: 17, marginBottom: 6 }}>No games yet</p>
-              <p style={{ fontSize: 14 }}>Start a new game above</p>
+              <p style={{ fontSize: 32, marginBottom: 12, opacity: 0.4 }}>📖</p>
+              <p style={{ fontSize: 16, marginBottom: 5 }}>No games yet</p>
+              <p style={{ fontSize: 13, opacity: 0.7 }}>Start a new game above to begin</p>
             </div>
           ) : (
-            sortedGames.map(game => (
-              <div
-                key={game.id}
-                style={{
-                  borderRadius: 16,
-                  overflow: 'hidden',
-                  background: 'var(--color-surface)',
-                  border: '1px solid var(--color-border)',
-                }}
-              >
-                <button
-                  className="w-full text-left active:opacity-70 transition-opacity"
-                  style={{ padding: '16px 20px' }}
-                  onClick={() => router.push(`/game?id=${game.id}`)}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p style={{ fontSize: 17, fontWeight: 600 }}>{game.name}</p>
-                      <p style={{ fontSize: 14, color: 'var(--color-text-dim)', marginTop: 3 }}>
-                        {game.scriptName} · {game.players.length} players
-                      </p>
-                      <p style={{ fontSize: 12, color: 'var(--color-text-dim)', marginTop: 3 }}>
-                        {formatDate(game.createdAt)} ·{' '}
-                        {game.phase === 'night'
-                          ? `Night ${game.nightNumber}`
-                          : `Day ${game.dayNumber}`}
-                      </p>
+            sortedGames.map(game => {
+              const isNight  = game.phase === 'night';
+              const phaseColor = isNight ? 'var(--botc-night)' : 'var(--botc-day)';
+              const phaseBg    = isNight ? 'rgba(99,102,241,0.15)' : 'rgba(251,191,36,0.15)';
+              const phaseBorder = isNight ? '#6366f1' : '#d97706';
+
+              return (
+                <div key={game.id} className="botc-game-card">
+                  {/* Main tap area */}
+                  <button
+                    className="w-full text-left transition-opacity active:opacity-70"
+                    style={{ padding: '16px 18px' }}
+                    onClick={() => router.push(`/game?id=${game.id}`)}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0 flex-1">
+                        <p
+                          className="font-semibold truncate"
+                          style={{ fontSize: 17, color: 'var(--botc-text)', marginBottom: 3 }}
+                        >
+                          {game.name}
+                        </p>
+                        <p style={{ fontSize: 13, color: 'var(--botc-muted)', marginBottom: 3 }}>
+                          {game.scriptName} · {game.players.length} players
+                        </p>
+                        <p style={{ fontSize: 11, color: 'var(--botc-subtle)' }}>
+                          {formatDate(game.createdAt)}
+                        </p>
+                      </div>
+
+                      {/* Phase badge */}
+                      <div
+                        style={{
+                          flexShrink: 0,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 5,
+                          padding: '5px 12px',
+                          borderRadius: 20,
+                          background: phaseBg,
+                          border: `1px solid ${phaseBorder}`,
+                          color: phaseColor,
+                          fontSize: 12,
+                          fontWeight: 600,
+                        }}
+                      >
+                        <span>{isNight ? '🌙' : '☀️'}</span>
+                        <span style={{ textTransform: 'capitalize' }}>
+                          {isNight ? `Night ${game.nightNumber}` : `Day ${game.dayNumber}`}
+                        </span>
+                      </div>
                     </div>
-                    <span
+                  </button>
+
+                  {/* Delete row */}
+                  <div
+                    className="flex justify-end"
+                    style={{ padding: '7px 14px', borderTop: '1px solid var(--botc-border)' }}
+                  >
+                    <button
+                      onClick={() => handleDelete(game.id)}
                       style={{
-                        flexShrink: 0,
+                        padding: '5px 12px',
+                        borderRadius: 8,
                         fontSize: 12,
-                        padding: '4px 10px',
-                        borderRadius: 20,
-                        background:
-                          game.phase === 'night'
-                            ? 'rgba(99,102,241,0.2)'
-                            : 'rgba(245,158,11,0.2)',
-                        color: game.phase === 'night' ? '#818cf8' : '#fbbf24',
+                        fontWeight: 500,
+                        color: confirmDelete === game.id ? 'var(--botc-demon)' : 'var(--botc-subtle)',
+                        background: confirmDelete === game.id ? 'rgba(239,68,68,0.1)' : 'transparent',
+                        transition: 'color 0.15s, background 0.15s',
                       }}
                     >
-                      {game.phase === 'night' ? '🌙' : '☀️'} {game.phase}
-                    </span>
+                      {confirmDelete === game.id ? 'Tap again to confirm delete' : 'Delete'}
+                    </button>
                   </div>
-                </button>
-                <div
-                  className="flex justify-end"
-                  style={{
-                    padding: '8px 16px',
-                    borderTop: '1px solid var(--color-border)',
-                  }}
-                >
-                  <button
-                    onClick={() => handleDelete(game.id)}
-                    style={{
-                      padding: '6px 14px',
-                      borderRadius: 8,
-                      fontSize: 13,
-                      color:
-                        confirmDelete === game.id
-                          ? '#ef4444'
-                          : 'var(--color-text-dim)',
-                      background:
-                        confirmDelete === game.id
-                          ? 'rgba(239,68,68,0.1)'
-                          : 'transparent',
-                    }}
-                  >
-                    {confirmDelete === game.id ? 'Tap again to delete' : 'Delete'}
-                  </button>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

@@ -25,8 +25,8 @@ export default function PlayerToken({ player, role, rolesDb, sizePx: px, inwardA
   const teamColor = getRoleTeamColor(role?.team);
   const [popupTokenId, setPopupTokenId] = useState<string | null>(null);
 
-  // Reminder chips: 50% bigger, arranged in two columns along the inward ray
-  const chipSize = Math.max(63, Math.round(px * 0.81));
+  // Reminder chips — small but legible, arranged in two columns along the inward ray
+  const chipSize = Math.max(34, Math.round(px * 0.44));
   const maxVisible = 6;
   const visibleReminders = player.reminderTokens.slice(0, maxVisible);
   const extraCount = player.reminderTokens.length - maxVisible;
@@ -294,7 +294,7 @@ export default function PlayerToken({ player, role, rolesDb, sizePx: px, inwardA
         const chipTop  = chipCenterY - chipSize / 2;
         const isCustom = t.sourceRoleId === '';
         const iconSize = Math.round(chipSize * 0.45);
-        const labelFontSize = Math.max(7, Math.round(chipSize * (isCustom ? 0.16 : 0.13)));
+        const labelFontSize = Math.max(8, Math.round(chipSize * (isCustom ? 0.20 : 0.17)));
         const pad = Math.round(chipSize * 0.08);
 
         return (
