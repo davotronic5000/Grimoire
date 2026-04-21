@@ -77,6 +77,7 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose }: Props) 
 
   const [tiles, setTiles] = useState<Tile[]>([]);
   const [activeTileIdx, setActiveTileIdx] = useState<number | null>(null);
+  const lastActiveTileRef = useRef<{ tile: Tile; idx: number } | null>(null);
 
   const playerCount = game.players.length;
   const dist = getRoleDistribution(playerCount);
@@ -625,8 +626,6 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose }: Props) 
   // ASSIGN PHASE
   // ══════════════════════════════════════════════════════════════
   const activeTile = activeTileIdx !== null ? tiles[activeTileIdx] : null;
-  // Keep the last active role in a ref so it stays visible during the slide-out
-  const lastActiveTileRef = useRef<{ tile: typeof activeTile; idx: number } | null>(null);
   if (activeTile && activeTileIdx !== null) {
     lastActiveTileRef.current = { tile: activeTile, idx: activeTileIdx };
   }
