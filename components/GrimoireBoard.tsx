@@ -44,7 +44,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
     ? { ...rolesDbProp, ...game.homebrewRoles }
     : rolesDbProp;
 
-  const { togglePhase, togglePhaseBack, removeReminderToken, addPlayer } = useStore();
+  const { togglePhase, togglePhaseBack, removeReminderToken, addPlayer, reorderPlayer } = useStore();
 
   // ── UI visibility state ──────────────────────────────────────────
   const [selectedPlayer, setSelectedPlayer]       = useState<Player | null>(null);
@@ -68,6 +68,14 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
   const boardRef = useRef<HTMLDivElement>(null);
   const [boardWidth, setBoardWidth]   = useState(0);
   const [boardHeight, setBoardHeight] = useState(0);
+
+  // ── Drag state ───────────────────────────────────────────────────
+  const [dragPlayerId, setDragPlayerId]   = useState<string | null>(null);
+  const [dragPos, setDragPos]             = useState<{ x: number; y: number } | null>(null);
+  const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
+  const dragOriginRef = useRef<{ x: number; y: number; index: number } | null>(null);
+  const dragActiveRef = useRef(false);
+  const dragJustEndedRef = useRef(false);
 
   const { players } = game;
   const boardMinDim = Math.min(boardWidth, boardHeight);
@@ -106,6 +114,53 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
       left: Math.max(contW / 2, Math.min(boardWidth  - contW / 2, rawX)),
       top:  Math.max(contH / 2, Math.min(boardHeight - contH / 2, rawY)),
     };
+  }
+
+  // ── Drag handlers ────────────────────────────────────────────────
+  function getNearestSlotIndex(clientX: number, clientY: number): number {
+    const board = boardRef.current;
+    if (!board) return 0;
+    const rect = board.getBoundingClientRect();
+    const cx = rect.left + rect.width  / 2;
+    const cy = rect.top  + rect.height / 2;
+    const angle = Math.atan2(clientY - cy, clientX - cx) + Math.PI / 2;
+    const norm = ((angle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+    const raw = norm / (2 * Math.PI) * players.length;
+    return Math.round(raw) % players.length;
+  }
+
+  function handleDragPointerDown(e: React.PointerEvent, playerId: string, index: number) {
+    if (e.button !== undefined && e.button > 0) return; // ignore right-click
+    dragOriginRef.current = { x: e.clientX, y: e.clientY, index };
+    dragActiveRef.current = false;
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  }
+
+  function handleDragPointerMove(e: React.PointerEvent, playerId: string) {
+    if (!dragOriginRef.current) return;
+    const dx = e.clientX - dragOriginRef.current.x;
+    const dy = e.clientY - dragOriginRef.current.y;
+    if (!dragActiveRef.current && Math.sqrt(dx * dx + dy * dy) < 8) return;
+    if (!dragActiveRef.current) {
+      dragActiveRef.current = true;
+      setDragPlayerId(playerId);
+    }
+    setDragPos({ x: e.clientX, y: e.clientY });
+    setDropTargetIndex(getNearestSlotIndex(e.clientX, e.clientY));
+  }
+
+  function handleDragPointerUp(e: React.PointerEvent, fromIndex: number) {
+    const wasDragging = dragActiveRef.current;
+    dragOriginRef.current = null;
+    dragActiveRef.current = false;
+    if (!wasDragging) { setDragPlayerId(null); setDragPos(null); setDropTargetIndex(null); return; }
+    dragJustEndedRef.current = true;
+    setTimeout(() => { dragJustEndedRef.current = false; }, 50);
+    const target = getNearestSlotIndex(e.clientX, e.clientY);
+    setDragPlayerId(null);
+    setDragPos(null);
+    setDropTargetIndex(null);
+    reorderPlayer(game.id, fromIndex, target);
   }
 
   const isNight    = game.phase === 'night';
@@ -300,21 +355,55 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
             );
           })()}
 
+          {/* Drop target indicator */}
+          {dragPlayerId && dropTargetIndex !== null && (() => {
+            const tPos = getTokenPos(dropTargetIndex, players[dropTargetIndex]);
+            return (
+              <div
+                className="absolute pointer-events-none"
+                style={{
+                  left: tPos.left,
+                  top: tPos.top,
+                  transform: 'translate(-50%, -50%)',
+                  width: tokenPx + 12,
+                  height: tokenPx + 12,
+                  borderRadius: '50%',
+                  border: '3px dashed rgba(201,168,76,0.8)',
+                  boxShadow: '0 0 16px rgba(201,168,76,0.4)',
+                  zIndex: 25,
+                }}
+              />
+            );
+          })()}
+
           {/* Player tokens */}
           {players.map((player, index) => {
-            const angle = (2 * Math.PI * index) / players.length - Math.PI / 2;
-            const pos   = getTokenPos(index, player);
-            const role  = player.roleId ? rolesDb[player.roleId] : null;
+            const angle   = (2 * Math.PI * index) / players.length - Math.PI / 2;
+            const pos     = getTokenPos(index, player);
+            const role    = player.roleId ? rolesDb[player.roleId] : null;
+            const isDragging = dragPlayerId === player.id;
             return (
               <div
                 key={player.id}
                 className="absolute"
-                style={{
+                style={isDragging && dragPos ? {
+                  left: dragPos.x,
+                  top:  dragPos.y,
+                  transform: 'translate(-50%, -50%)',
+                  zIndex: 30,
+                  opacity: 0.85,
+                  pointerEvents: 'none',
+                } : {
                   left: pos.left,
                   top:  pos.top,
                   transform: 'translate(-50%, -50%)',
                   zIndex: selectedPlayer?.id === player.id ? 20 : 1,
+                  opacity: dragPlayerId && !isDragging ? 0.6 : 1,
+                  transition: dragPlayerId ? 'none' : 'opacity 0.15s',
                 }}
+                onPointerDown={e => handleDragPointerDown(e, player.id, index)}
+                onPointerMove={e => handleDragPointerMove(e, player.id)}
+                onPointerUp={e => handleDragPointerUp(e, index)}
               >
                 <PlayerToken
                   player={player}
@@ -322,7 +411,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
                   rolesDb={rolesDb}
                   sizePx={tokenPx}
                   inwardAngle={angle + Math.PI}
-                  onClick={() => setSelectedPlayer(player)}
+                  onClick={() => { if (!dragActiveRef.current && !dragJustEndedRef.current) setSelectedPlayer(player); }}
                   onRemoveReminder={tokenId => removeReminderToken(game.id, player.id, tokenId)}
                   firstNightOrder={player.isAlive && player.roleId ? (firstNightRanks.get(player.roleId) ?? null) : null}
                   otherNightOrder={player.isAlive && player.roleId ? (otherNightRanks.get(player.roleId) ?? null) : null}

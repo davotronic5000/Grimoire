@@ -49,6 +49,7 @@ interface AppState {
   toggleStoryTool: (gameId: string, field: 'loricIds' | 'fabledIds', roleId: string) => void;
   togglePhase: (gameId: string) => void;
   togglePhaseBack: (gameId: string) => void;
+  reorderPlayer: (gameId: string, fromIndex: number, toIndex: number) => void;
   resetGame: (gameId: string) => void;
   changeScript: (gameId: string, scriptId: string, scriptName: string, scriptRoleIds: string[], homebrewRoles?: Record<string, RoleDefinition>, scriptAuthor?: string) => void;
 }
@@ -282,6 +283,23 @@ export const useStore = create<AppState>()(
                   ? game.dayNumber + 1
                   : game.dayNumber,
               },
+            },
+          };
+        });
+      },
+
+      reorderPlayer: (gameId, fromIndex, toIndex) => {
+        if (fromIndex === toIndex) return;
+        set(state => {
+          const game = state.games[gameId];
+          if (!game) return state;
+          const players = [...game.players];
+          const [moved] = players.splice(fromIndex, 1);
+          players.splice(toIndex, 0, moved);
+          return {
+            games: {
+              ...state.games,
+              [gameId]: { ...game, players: players.map((p, i) => ({ ...p, seat: i })) },
             },
           };
         });
