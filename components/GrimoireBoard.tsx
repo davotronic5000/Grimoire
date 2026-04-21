@@ -129,38 +129,49 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
     return Math.round(raw) % players.length;
   }
 
-  function handleDragPointerDown(e: React.PointerEvent, playerId: string, index: number) {
-    if (e.button !== undefined && e.button > 0) return; // ignore right-click
+  function handleTokenPointerDown(e: React.PointerEvent, playerId: string, index: number) {
+    if (e.button !== undefined && e.button > 0) return;
     dragOriginRef.current = { x: e.clientX, y: e.clientY, index };
     dragActiveRef.current = false;
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    // Store playerId on the ref so board-level handlers can access it
+    (dragOriginRef.current as typeof dragOriginRef.current & { playerId: string }).playerId = playerId;
   }
 
-  function handleDragPointerMove(e: React.PointerEvent, playerId: string) {
-    if (!dragOriginRef.current) return;
-    const dx = e.clientX - dragOriginRef.current.x;
-    const dy = e.clientY - dragOriginRef.current.y;
+  function handleBoardPointerMove(e: React.PointerEvent) {
+    const origin = dragOriginRef.current as (typeof dragOriginRef.current & { playerId?: string }) | null;
+    if (!origin) return;
+    const dx = e.clientX - origin.x;
+    const dy = e.clientY - origin.y;
     if (!dragActiveRef.current && Math.sqrt(dx * dx + dy * dy) < 8) return;
     if (!dragActiveRef.current) {
       dragActiveRef.current = true;
-      setDragPlayerId(playerId);
+      setDragPlayerId(origin.playerId ?? null);
     }
     setDragPos({ x: e.clientX, y: e.clientY });
     setDropTargetIndex(getNearestSlotIndex(e.clientX, e.clientY));
   }
 
-  function handleDragPointerUp(e: React.PointerEvent, fromIndex: number) {
+  function handleBoardPointerUp(e: React.PointerEvent) {
+    const origin = dragOriginRef.current;
+    if (!origin) return;
     const wasDragging = dragActiveRef.current;
     dragOriginRef.current = null;
     dragActiveRef.current = false;
-    if (!wasDragging) { setDragPlayerId(null); setDragPos(null); setDropTargetIndex(null); return; }
-    dragJustEndedRef.current = true;
-    setTimeout(() => { dragJustEndedRef.current = false; }, 50);
-    const target = getNearestSlotIndex(e.clientX, e.clientY);
     setDragPlayerId(null);
     setDragPos(null);
     setDropTargetIndex(null);
-    reorderPlayer(game.id, fromIndex, target);
+    if (!wasDragging) return;
+    dragJustEndedRef.current = true;
+    setTimeout(() => { dragJustEndedRef.current = false; }, 50);
+    reorderPlayer(game.id, origin.index, getNearestSlotIndex(e.clientX, e.clientY));
+  }
+
+  function handleBoardPointerCancel() {
+    dragOriginRef.current = null;
+    dragActiveRef.current = false;
+    setDragPlayerId(null);
+    setDragPos(null);
+    setDropTargetIndex(null);
   }
 
   const isNight    = game.phase === 'night';
@@ -274,7 +285,13 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
           BOARD AREA
           ══════════════════════════════════════════════════════════ */}
       <div className="flex-1 relative overflow-hidden">
-        <div ref={boardRef} className="absolute inset-0">
+        <div
+          ref={boardRef}
+          className="absolute inset-0"
+          onPointerMove={handleBoardPointerMove}
+          onPointerUp={handleBoardPointerUp}
+          onPointerCancel={handleBoardPointerCancel}
+        >
           {/* Dashed ellipse guide */}
           <div
             className="absolute pointer-events-none"
@@ -401,9 +418,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
                   opacity: dragPlayerId && !isDragging ? 0.6 : 1,
                   transition: dragPlayerId ? 'none' : 'opacity 0.15s',
                 }}
-                onPointerDown={e => handleDragPointerDown(e, player.id, index)}
-                onPointerMove={e => handleDragPointerMove(e, player.id)}
-                onPointerUp={e => handleDragPointerUp(e, index)}
+                onPointerDown={e => handleTokenPointerDown(e, player.id, index)}
               >
                 <PlayerToken
                   player={player}
