@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import type { Game, RoleDefinition } from '@/lib/types';
 import { useStore } from '@/lib/store';
 import {
@@ -625,13 +625,22 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose }: Props) 
   // ASSIGN PHASE
   // ══════════════════════════════════════════════════════════════
   const activeTile = activeTileIdx !== null ? tiles[activeTileIdx] : null;
-  const activeRole = activeTile ? rolesDb[activeTile.roleId] : null;
+  // Keep the last active role in a ref so it stays visible during the slide-out
+  const lastActiveTileRef = useRef<{ tile: typeof activeTile; idx: number } | null>(null);
+  if (activeTile && activeTileIdx !== null) {
+    lastActiveTileRef.current = { tile: activeTile, idx: activeTileIdx };
+  }
+  const displayTile = activeTile ?? lastActiveTileRef.current?.tile ?? null;
+  const displayTileIdx = activeTile ? activeTileIdx! : (lastActiveTileRef.current?.idx ?? 0);
+  const displayRole = displayTile ? rolesDb[displayTile.roleId] : null;
+  const roleColor = displayRole ? getRoleTeamColor(displayRole.team) : 'var(--botc-gold)';
 
   return (
     <div
       className="fixed inset-0 flex flex-col overflow-hidden"
       style={{ zIndex: 80, background: 'var(--botc-bg)' }}
     >
+      {/* ── Tile grid view ── */}
       {/* Header */}
       <div
         className="flex items-center justify-between px-4 flex-shrink-0"
@@ -665,11 +674,7 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose }: Props) 
       </div>
 
       {/* Tile grid */}
-      <div
-        className="flex-1 overflow-y-auto"
-        style={{ padding: '16px' }}
-        onClick={() => setActiveTileIdx(null)}
-      >
+      <div className="flex-1 overflow-y-auto" style={{ padding: '16px' }}>
         <div
           style={{
             display: 'grid',
@@ -682,19 +687,16 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose }: Props) 
               ? game.players.find(p => p.id === tile.assignedPlayerId)
               : null;
             const isClaimed = !!assignedPlayer;
-            const isActive  = activeTileIdx === idx;
 
             return (
               <button
                 key={idx}
-                onClick={e => { e.stopPropagation(); setActiveTileIdx(isActive ? null : idx); }}
+                onClick={() => setActiveTileIdx(idx)}
                 className="flex flex-col items-center justify-center rounded-2xl active:scale-95"
                 style={{
                   padding: '12px 8px 10px',
-                  background: isActive
-                    ? 'rgba(99,102,241,0.18)'
-                    : isClaimed ? 'rgba(30,20,50,0.7)' : 'rgba(20,12,38,0.8)',
-                  border: `2px solid ${isActive ? '#6366f1' : isClaimed ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.08)'}`,
+                  background: isClaimed ? 'rgba(30,20,50,0.7)' : 'rgba(20,12,38,0.8)',
+                  border: `2px solid ${isClaimed ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.08)'}`,
                   aspectRatio: '3/4',
                   position: 'relative',
                   transition: 'background 0.15s, border-color 0.15s',
@@ -739,145 +741,160 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose }: Props) 
         </div>
       </div>
 
-      {/* Active tile bottom sheet */}
-      {activeTile && activeRole && (
-        <>
-          <div
-            className="fixed inset-0"
-            style={{ zIndex: 81, background: 'rgba(0,0,0,0.5)' }}
+      {/* ── Role + player picker — slides up over the tile grid ── */}
+      <div
+        className="fixed inset-0 flex flex-col overflow-hidden"
+        style={{
+          zIndex: 84,
+          background: 'var(--botc-bg)',
+          transform: activeTileIdx !== null ? 'translateY(0)' : 'translateY(100%)',
+          transition: 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)',
+        }}
+      >
+        {/* Sub-header */}
+        <div
+          className="flex items-center justify-between px-4 flex-shrink-0"
+          style={{
+            height: 56,
+            background: 'rgba(8,6,18,0.95)',
+            borderBottom: `1px solid ${roleColor}44`,
+          }}
+        >
+          <button
             onClick={() => setActiveTileIdx(null)}
-          />
-          <div
-            className="fixed flex flex-col overflow-hidden"
-            style={{
-              zIndex: 82,
-              bottom: 0,
-              left: 0,
-              right: 0,
-              maxHeight: '75vh',
-              background: 'var(--botc-surface)',
-              border: `1px solid ${getRoleTeamColor(activeRole.team)}66`,
-              borderBottom: 'none',
-              borderRadius: '20px 20px 0 0',
-              boxShadow: '0 -16px 60px rgba(0,0,0,0.7)',
-            }}
-            onClick={e => e.stopPropagation()}
+            className="botc-btn-secondary"
+            style={{ padding: '8px 14px', fontSize: 15 }}
           >
-            {/* Role header */}
-            <div
-              className="flex items-center gap-4 flex-shrink-0"
+            ← Back
+          </button>
+          <p className="font-semibold" style={{ color: 'var(--botc-muted)', fontSize: 14 }}>
+            Tile {displayTileIdx + 1}
+          </p>
+          {displayTile?.assignedPlayerId ? (
+            <button
+              onClick={() => { handleUnassign(displayTileIdx); setActiveTileIdx(null); }}
               style={{
-                padding: '20px 20px 16px',
-                borderBottom: '1px solid var(--botc-border)',
-                background: `linear-gradient(to bottom, rgba(${hexToRgb(getRoleTeamColor(activeRole.team))}, 0.12), transparent)`,
+                padding: '6px 12px',
+                borderRadius: 10,
+                background: 'rgba(239,68,68,0.12)',
+                border: '1px solid #ef4444',
+                color: '#ef4444',
+                fontSize: 13,
               }}
             >
-              <div style={{ width: 56, height: 56, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, border: `2px solid ${getRoleTeamColor(activeRole.team)}66` }}>
+              Unassign
+            </button>
+          ) : (
+            <div style={{ width: 80 }} />
+          )}
+        </div>
+
+        {/* Top half — role display */}
+        <div
+          className="flex flex-col items-center justify-center flex-shrink-0"
+          style={{
+            height: '45%',
+            padding: '16px 24px 8px',
+            background: `radial-gradient(ellipse at 50% 0%, ${roleColor}18 0%, transparent 70%)`,
+            borderBottom: `1px solid ${roleColor}22`,
+          }}
+        >
+          {displayRole && (
+            <>
+              <div
+                style={{
+                  width: 'min(28vmin, 140px)',
+                  height: 'min(28vmin, 140px)',
+                  borderRadius: '50%',
+                  overflow: 'hidden',
+                  background: `radial-gradient(circle at 40% 30%, ${roleColor}44, #0a0614 70%)`,
+                  border: `3px solid ${roleColor}88`,
+                  boxShadow: `0 0 32px ${roleColor}44`,
+                  marginBottom: 12,
+                  flexShrink: 0,
+                }}
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={getRoleIconPath(activeRole)}
-                  alt={activeRole.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 4 }}
+                  src={getRoleIconPath(displayRole)}
+                  alt={displayRole.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '8%' }}
                   onError={e => {
                     const img = e.target as HTMLImageElement;
-                    if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = getGenericIconPath(activeRole.team); }
+                    if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = getGenericIconPath(displayRole.team); }
                   }}
                 />
               </div>
-              <div className="flex-1 min-w-0">
-                <p style={{ fontSize: 18, fontWeight: 700, color: getRoleTeamColor(activeRole.team) }}>
-                  {activeRole.name}
-                </p>
-                <p style={{ fontSize: 12, color: 'var(--botc-muted)', marginTop: 2 }}>
-                  Tile {activeTileIdx! + 1}
-                  {activeTile.assignedPlayerId && (
-                    <> · {game.players.find(p => p.id === activeTile.assignedPlayerId)?.name}</>
+              <p style={{ fontSize: 'clamp(20px, 4vmin, 28px)', fontWeight: 700, color: roleColor, textAlign: 'center', lineHeight: 1.2, marginBottom: 6 }}>
+                {displayRole.name}
+              </p>
+              <p style={{ fontSize: 'clamp(12px, 2.2vmin, 15px)', color: 'var(--botc-muted)', textAlign: 'center', lineHeight: 1.5, fontStyle: 'italic', maxWidth: 360 }}>
+                "{displayRole.ability}"
+              </p>
+            </>
+          )}
+        </div>
+
+        {/* Bottom half — player list */}
+        <div className="flex-1 overflow-y-auto" style={{ padding: '12px 16px 32px' }}>
+          <p style={{ fontSize: 11, color: 'var(--botc-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10, padding: '0 4px' }}>
+            Choose a player
+          </p>
+          <div className="flex flex-col gap-2">
+            {displayTile && [...game.players].sort((a, b) => {
+              const aTaken = a.id !== displayTile.assignedPlayerId && tiles.some((t, i) => i !== displayTileIdx && t.assignedPlayerId === a.id);
+              const bTaken = b.id !== displayTile.assignedPlayerId && tiles.some((t, i) => i !== displayTileIdx && t.assignedPlayerId === b.id);
+              return Number(aTaken) - Number(bTaken);
+            }).map(player => {
+              const isCurrent    = displayTile.assignedPlayerId === player.id;
+              const takenTileIdx = isCurrent ? -1 : tiles.findIndex((t, i) => i !== displayTileIdx && t.assignedPlayerId === player.id);
+              const isTaken      = takenTileIdx !== -1;
+
+              return (
+                <div key={player.id} className="flex items-center gap-2">
+                  <button
+                    onClick={() => { handleAssign(player.id); setActiveTileIdx(null); }}
+                    className="flex items-center gap-3 rounded-xl text-left flex-1 active:scale-[0.98]"
+                    style={{
+                      padding: '14px 18px',
+                      background: isCurrent
+                        ? `rgba(${hexToRgb(roleColor)}, 0.15)`
+                        : 'rgba(30,20,50,0.5)',
+                      border: `1px solid ${isCurrent ? roleColor + '88' : 'var(--botc-border)'}`,
+                      opacity: isTaken ? 0.38 : 1,
+                      transition: 'background 0.1s, opacity 0.1s',
+                    }}
+                    disabled={isTaken}
+                  >
+                    <span style={{ fontSize: 17, color: isCurrent ? roleColor : 'var(--botc-text)', fontWeight: isCurrent ? 700 : 500, flex: 1 }}>
+                      {player.name}
+                    </span>
+                    {isCurrent && <span style={{ fontSize: 12, color: roleColor, fontWeight: 600 }}>✓</span>}
+                    {isTaken   && <span style={{ fontSize: 12, color: 'var(--botc-muted)' }}>taken</span>}
+                  </button>
+                  {isCurrent && (
+                    <button
+                      onClick={() => { handleUnassign(displayTileIdx); setActiveTileIdx(null); }}
+                      className="flex items-center justify-center rounded-xl active:scale-90 flex-shrink-0"
+                      style={{
+                        width: 44,
+                        height: 44,
+                        background: 'rgba(239,68,68,0.1)',
+                        border: '1px solid rgba(239,68,68,0.4)',
+                        color: '#ef4444',
+                        fontSize: 18,
+                      }}
+                      aria-label="Remove assignment"
+                    >
+                      ×
+                    </button>
                   )}
-                </p>
-              </div>
-              {activeTile.assignedPlayerId && (
-                <button
-                  onClick={() => handleUnassign(activeTileIdx!)}
-                  style={{
-                    padding: '6px 12px',
-                    borderRadius: 10,
-                    background: 'rgba(239,68,68,0.12)',
-                    border: '1px solid #ef4444',
-                    color: '#ef4444',
-                    fontSize: 13,
-                    flexShrink: 0,
-                  }}
-                >
-                  Unassign
-                </button>
-              )}
-            </div>
-
-            {/* Ability */}
-            <div style={{ padding: '12px 20px', flexShrink: 0 }}>
-              <p style={{ fontSize: 14, color: 'var(--botc-text)', lineHeight: 1.6, fontStyle: 'italic' }}>
-                "{activeRole.ability}"
-              </p>
-            </div>
-
-            {/* Player list */}
-            <div className="overflow-y-auto flex-1" style={{ padding: '0 16px 24px' }}>
-              <p style={{ fontSize: 11, color: 'var(--botc-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8, padding: '0 4px' }}>
-                Assign to player
-              </p>
-              <div className="flex flex-col gap-2">
-                {[...game.players].sort((a, b) => {
-                  const aTaken = a.id !== activeTile.assignedPlayerId && tiles.some((t, i) => i !== activeTileIdx && t.assignedPlayerId === a.id);
-                  const bTaken = b.id !== activeTile.assignedPlayerId && tiles.some((t, i) => i !== activeTileIdx && t.assignedPlayerId === b.id);
-                  return Number(aTaken) - Number(bTaken);
-                }).map(player => {
-                  const isCurrent    = activeTile.assignedPlayerId === player.id;
-                  const takenTileIdx = isCurrent ? -1 : tiles.findIndex((t, i) => i !== activeTileIdx && t.assignedPlayerId === player.id);
-                  const isTaken      = takenTileIdx !== -1;
-
-                  return (
-                    <div key={player.id} className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleAssign(player.id)}
-                        className="flex items-center gap-3 rounded-xl text-left flex-1"
-                        style={{
-                          padding: '10px 14px',
-                          background: isCurrent ? 'rgba(99,102,241,0.18)' : 'rgba(30,20,50,0.5)',
-                          border: `1px solid ${isCurrent ? '#6366f1' : 'var(--botc-border)'}`,
-                          opacity: isTaken ? 0.4 : 1,
-                        }}
-                      >
-                        <span style={{ fontSize: 16, color: isCurrent ? '#a5b4fc' : 'var(--botc-text)', fontWeight: isCurrent ? 700 : 400, flex: 1 }}>
-                          {player.name}
-                        </span>
-                        {isCurrent && <span style={{ fontSize: 12, color: '#a5b4fc', fontWeight: 600 }}>✓ assigned</span>}
-                        {isTaken   && <span style={{ fontSize: 12, color: 'var(--botc-muted)' }}>taken</span>}
-                      </button>
-                      {(isCurrent || isTaken) && (
-                        <button
-                          onClick={() => handleUnassign(isCurrent ? activeTileIdx! : takenTileIdx)}
-                          className="flex items-center justify-center rounded-xl active:scale-90 flex-shrink-0"
-                          style={{
-                            width: 36,
-                            height: 36,
-                            background: 'rgba(239,68,68,0.1)',
-                            border: '1px solid rgba(239,68,68,0.4)',
-                            color: '#ef4444',
-                            fontSize: 16,
-                          }}
-                          aria-label="Remove assignment"
-                        >
-                          ×
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+                </div>
+              );
+            })}
           </div>
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 }
