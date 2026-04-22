@@ -1,12 +1,14 @@
 import type { RoleDefinition } from './types';
 
-// Common OCR substitutions to normalise before matching
+// Common OCR substitutions to normalise before matching.
+// Applied to BOTH the OCR text and the role name needle so confusion is symmetric.
 const OCR_FIXES: [RegExp, string][] = [
-  [/0/g, 'o'],
-  [/1/g, 'l'],
-  [/\|/g, 'l'],
-  [/vv/g, 'w'],
-  [/rn/g, 'm'],
+  [/0/g,  'o'],   // digit zero → o
+  [/[1|]/g, 'l'], // digit one / pipe → l
+  [/i/g,  'l'],   // unify i and l (visually identical in many fonts)
+  [/vv/g, 'w'],   // vv → w
+  [/rn/g, 'm'],   // rn → m
+  [/cb/g, 'ch'],  // ch → cb OCR error (helps Psychopath)
   [/[^a-z ']/g, ' '],
 ];
 
@@ -33,7 +35,8 @@ export function matchRolesFromText(
     const needle = normalise(role.name);
     if (needle.length < 3) continue;
     // Word-boundary regex: prevents "Imp" matching inside "Important" etc.
-    const pattern = new RegExp(`(?<![a-z])${needle.replace(/ +/g, ' +')}(?![a-z])`);
+    // Spaces are optional ( *) so hyphenated/merged OCR output still matches.
+    const pattern = new RegExp(`(?<![a-z])${needle.replace(/ +/g, ' *')}(?![a-z])`);
     const m = pattern.exec(haystack);
     if (m) {
       matches.push({ id: role.id, pos: m.index });
