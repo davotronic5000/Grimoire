@@ -91,10 +91,11 @@ export default function PlayerModal({ player, game, rolesDb, onClose }: Props) {
         style={{ borderColor: 'var(--color-border)' }}
       >
         {editingName ? (
-          <input
+          <ClearableInput
             type="text"
             value={nameValue}
             onChange={e => setNameValue(e.target.value)}
+            onClear={() => setNameValue('')}
             onBlur={handleNameSave}
             onKeyDown={e => { if (e.key === 'Enter') handleNameSave(); }}
             className="flex-1 font-semibold px-3 py-2 rounded-lg outline-none"
