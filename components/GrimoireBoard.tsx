@@ -31,7 +31,7 @@ interface Props {
 const RADIUS_PCT = 44;
 
 // Arch layout: 120° gap at the bottom, 240° of arc
-const ARCH_GAP   = (2 * Math.PI) / 6;
+const ARCH_GAP   = (2 * Math.PI) / 12;
 const ARCH_SPAN  = 2 * Math.PI - ARCH_GAP;
 const ARCH_START = Math.PI / 2 + ARCH_GAP / 2; // 150° — bottom-left start
 
