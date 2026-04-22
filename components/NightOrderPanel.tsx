@@ -42,6 +42,19 @@ export default function NightOrderPanel({
     return ids;
   }, [game.players]);
 
+  // Map roleId → alive player names for the in-play tab
+  const roleToPlayers = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const p of game.players) {
+      if (p.roleId && p.isAlive) {
+        const names = map.get(p.roleId) ?? [];
+        names.push(p.name);
+        map.set(p.roleId, names);
+      }
+    }
+    return map;
+  }, [game.players]);
+
   // All script roles treated as "assigned" for the full-script tab
   const allScriptRoleSet = useMemo(
     () => new Set(game.scriptRoleIds),
@@ -197,6 +210,14 @@ export default function NightOrderPanel({
                     >
                       {entry.name}
                     </p>
+                    {(() => {
+                      const players = roleToPlayers.get(entry.roleId);
+                      return players && players.length > 0 ? (
+                        <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-dim)' }}>
+                          {players.join(', ')}
+                        </p>
+                      ) : null;
+                    })()}
                     {isActive && entry.reminder && (
                       <p
                         className="text-xs mt-1 leading-relaxed"

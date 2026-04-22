@@ -20,6 +20,7 @@ import NightInfoScreen from './NightInfoScreen';
 import GameSettingsScreen from './GameSettingsScreen';
 import ScriptShareDrawer from './ScriptShareDrawer';
 import ReminderPickerModal from './ReminderPickerModal';
+import RolePickerModal from './RolePickerModal';
 import CustomReminderModal from './CustomReminderModal';
 
 interface Props {
@@ -57,12 +58,13 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
     ? { ...rolesDbProp, ...game.homebrewRoles }
     : rolesDbProp;
 
-  const { togglePhase, togglePhaseBack, removeReminderToken, addPlayer, reorderPlayer, swapPlayers } = useStore();
+  const { togglePhase, togglePhaseBack, removeReminderToken, addPlayer, reorderPlayer, swapPlayers, updatePlayer } = useStore();
 
   // ── UI visibility state ──────────────────────────────────────────
   const [selectedPlayer, setSelectedPlayer]       = useState<Player | null>(null);
   const [tokenMenuPlayer, setTokenMenuPlayer]     = useState<Player | null>(null);
   const [reminderPlayer, setReminderPlayer]       = useState<Player | null>(null);
+  const [rolePickerPlayer, setRolePickerPlayer]   = useState<Player | null>(null);
   const [customReminderPlayer, setCustomReminderPlayer] = useState<Player | null>(null);
   const [showNightOrder, setShowNightOrder]       = useState(false);
   const [showJinxes, setShowJinxes]               = useState(false);
@@ -100,6 +102,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
   const { players } = game;
   const boardMinDim = Math.min(boardWidth, boardHeight);
   const tokenPx = computeTokenPx(boardMinDim || boardWidth, players.length);
+  const tokenNameH = Math.max(11, Math.min(16, Math.round(tokenPx * 0.17))) + 10;
 
   useEffect(() => {
     const obs = new ResizeObserver(entries => {
@@ -125,6 +128,10 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
     ? game.players.find(p => p.id === reminderPlayer.id) ?? null
     : null;
 
+  const liveRolePickerPlayer = rolePickerPlayer
+    ? game.players.find(p => p.id === rolePickerPlayer.id) ?? null
+    : null;
+
   const liveCustomReminderPlayer = customReminderPlayer
     ? game.players.find(p => p.id === customReminderPlayer.id) ?? null
     : null;
@@ -137,7 +144,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
         top:  `${50 + RADIUS_PCT * Math.sin(angle)}%` as string | number,
       };
     }
-    const nameH = Math.max(11, Math.min(16, Math.round(tokenPx * 0.17))) + 10;
+    const nameH = tokenNameH;
     const contW = tokenPx + 8;
     const contH = tokenPx + nameH;
     const rawX = boardWidth  * (50 + RADIUS_PCT * Math.cos(angle)) / 100;
@@ -193,12 +200,12 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
     if (e.button !== undefined && e.button > 0) return;
     dragOriginRef.current = { x: e.clientX, y: e.clientY, index };
     dragActiveRef.current = false;
-    // Store playerId on the ref so board-level handlers can access it
-    (dragOriginRef.current as typeof dragOriginRef.current & { playerId: string }).playerId = playerId;
+    (dragOriginRef.current as typeof dragOriginRef.current & { playerId: string; pointerId: number }).playerId = playerId;
+    (dragOriginRef.current as typeof dragOriginRef.current & { playerId: string; pointerId: number }).pointerId = e.pointerId;
   }
 
   function handleBoardPointerMove(e: React.PointerEvent) {
-    const origin = dragOriginRef.current as (typeof dragOriginRef.current & { playerId?: string }) | null;
+    const origin = dragOriginRef.current as (typeof dragOriginRef.current & { playerId?: string; pointerId?: number }) | null;
     if (!origin) return;
     const dx = e.clientX - origin.x;
     const dy = e.clientY - origin.y;
@@ -206,6 +213,8 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
     if (!dragActiveRef.current) {
       dragActiveRef.current = true;
       setDragPlayerId(origin.playerId ?? null);
+      // Capture pointer to board so moves/ups always reach us, even over child elements
+      if (origin.pointerId != null) boardRef.current?.setPointerCapture(origin.pointerId);
     }
     setDragPos({ x: e.clientX, y: e.clientY });
     setDropTarget(getDropTarget(e.clientX, e.clientY));
@@ -371,6 +380,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
         <div
           ref={boardRef}
           className="absolute inset-0"
+          style={{ touchAction: 'none' }}
           onPointerMove={handleBoardPointerMove}
           onPointerUp={handleBoardPointerUp}
           onPointerCancel={handleBoardPointerCancel}
@@ -474,18 +484,19 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
           {dragPlayerId && dropTarget && (() => {
             if (dropTarget.mode === 'swap') {
               const tPos = getTokenPos(dropTarget.slotIndex, players[dropTarget.slotIndex]);
+              const topVal = typeof tPos.top === 'number' ? tPos.top - tokenNameH / 2 : tPos.top;
               return (
                 <div
                   className="absolute pointer-events-none"
                   style={{
                     left: tPos.left,
-                    top: tPos.top,
+                    top: topVal,
                     transform: 'translate(-50%, -50%)',
                     width: tokenPx + 12,
                     height: tokenPx + 12,
                     borderRadius: '50%',
-                    border: '3px dashed rgba(201,168,76,0.8)',
-                    boxShadow: '0 0 16px rgba(201,168,76,0.4)',
+                    border: '3px dashed rgba(99,102,241,0.9)',
+                    boxShadow: '0 0 16px rgba(99,102,241,0.5)',
                     zIndex: 25,
                   }}
                 />
@@ -531,6 +542,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
                   zIndex: 30,
                   opacity: 0.85,
                   pointerEvents: 'none',
+                  touchAction: 'none',
                 } : {
                   left: pos.left,
                   top:  pos.top,
@@ -538,6 +550,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
                   zIndex: selectedPlayer?.id === player.id ? 20 : 1,
                   opacity: dragPlayerId && !isDragging ? 0.6 : 1,
                   transition: dragPlayerId ? 'none' : 'opacity 0.15s',
+                  touchAction: 'none',
                 }}
                 onPointerDown={e => handleTokenPointerDown(e, player.id, index)}
               >
@@ -736,6 +749,32 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
               <span style={{ fontSize: 22 }}>⚙️</span> Settings
             </button>
             <button
+              onClick={() => { setRolePickerPlayer(liveTokenMenuPlayer); setTokenMenuPlayer(null); }}
+              className="w-full rounded-2xl py-4 font-semibold text-left flex items-center gap-3 px-5 transition-all active:scale-[0.98]"
+              style={{
+                background: 'rgba(20,12,40,0.8)',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text)',
+                fontSize: 16,
+              }}
+            >
+              <span style={{ fontSize: 22 }}>🎭</span> Assign Role
+            </button>
+            {liveTokenMenuPlayer?.roleId && (
+              <button
+                onClick={() => { updatePlayer(game.id, liveTokenMenuPlayer.id, { roleId: null }); setTokenMenuPlayer(null); }}
+                className="w-full rounded-2xl py-4 font-semibold text-left flex items-center gap-3 px-5 transition-all active:scale-[0.98]"
+                style={{
+                  background: 'rgba(239,68,68,0.08)',
+                  border: '1px solid rgba(239,68,68,0.35)',
+                  color: '#ef4444',
+                  fontSize: 16,
+                }}
+              >
+                <span style={{ fontSize: 22 }}>✕</span> Clear Role
+              </button>
+            )}
+            <button
               onClick={() => { setReminderPlayer(liveTokenMenuPlayer); setTokenMenuPlayer(null); }}
               className="w-full rounded-2xl py-4 font-semibold text-left flex items-center gap-3 px-5 transition-all active:scale-[0.98]"
               style={{
@@ -790,6 +829,15 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
           player={liveCustomReminderPlayer}
           game={game}
           onClose={() => setCustomReminderPlayer(null)}
+        />
+      )}
+
+      {liveRolePickerPlayer && (
+        <RolePickerModal
+          player={liveRolePickerPlayer}
+          game={game}
+          rolesDb={rolesDb}
+          onClose={() => setRolePickerPlayer(null)}
         />
       )}
 

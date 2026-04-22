@@ -2,11 +2,9 @@
 
 import { useState } from 'react';
 import type { Player, RoleDefinition, Game } from '@/lib/types';
-import { getRoleIconPath, getRoleTeamColor } from '@/lib/roles';
 import ClearableInput from './ClearableInput';
 import { useIsWide } from '@/lib/hooks';
 import { useStore } from '@/lib/store';
-import RoleSelector from './RoleSelector';
 import ReminderChip from './ReminderChip';
 
 interface Props {
@@ -18,18 +16,10 @@ interface Props {
 
 export default function PlayerModal({ player, game, rolesDb, onClose }: Props) {
   const { updatePlayer, removeReminderToken, removePlayer } = useStore();
-  const [showRoleSelector, setShowRoleSelector] = useState(false);
   const [editingName, setEditingName] = useState(false);
   const [nameValue, setNameValue] = useState(player.name);
   const [confirmRemove, setConfirmRemove] = useState(false);
   const isWide = useIsWide(); // true on iPad Pro in all orientations
-
-  const role = player.roleId ? rolesDb[player.roleId] : null;
-  const teamColor = getRoleTeamColor(role?.team);
-
-  function handleRoleSelect(roleId: string) {
-    updatePlayer(game.id, player.id, { roleId });
-  }
 
   function handleToggleAlive() {
     const dying = player.isAlive;
@@ -43,18 +33,6 @@ export default function PlayerModal({ player, game, rolesDb, onClose }: Props) {
       setNameValue(player.name);
     }
     setEditingName(false);
-  }
-
-  if (showRoleSelector) {
-    return (
-      <RoleSelector
-        scriptRoleIds={game.scriptRoleIds}
-        rolesDb={rolesDb}
-        currentRoleId={player.roleId}
-        onSelect={handleRoleSelect}
-        onClose={() => setShowRoleSelector(false)}
-      />
-    );
   }
 
   // ── Modal content (shared between both layout modes) ─────────────
@@ -101,64 +79,6 @@ export default function PlayerModal({ player, game, rolesDb, onClose }: Props) {
             ×
           </button>
         )}
-      </div>
-
-      {/* Role */}
-      <div className="mb-5">
-        <p className="text-xs uppercase tracking-widest mb-2" style={{ color: 'var(--color-text-dim)' }}>
-          Role
-        </p>
-        <div className="flex items-stretch gap-2">
-        <button
-          onClick={() => setShowRoleSelector(true)}
-          className="flex-1 flex items-center gap-4 rounded-xl active:opacity-70 transition-opacity"
-          style={{
-            padding: '14px 16px',
-            background: role ? `${teamColor}22` : 'var(--color-bg)',
-            border: `1px solid ${role ? teamColor : 'var(--color-border)'}`,
-          }}
-        >
-          {role ? (
-            <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={getRoleIconPath(role)}
-                alt={role.name}
-                className="rounded-full object-contain flex-shrink-0"
-                style={{ width: 56, height: 56, background: 'rgba(0,0,0,0.3)', padding: 3 }}
-              />
-              <div className="flex-1 text-left min-w-0">
-                <p className="font-semibold text-base" style={{ color: teamColor }}>
-                  {role.name}
-                </p>
-                <p className="text-sm mt-0.5 leading-relaxed" style={{ color: 'var(--color-text-dim)' }}>
-                  {role.ability}
-                </p>
-              </div>
-            </>
-          ) : (
-            <p className="text-base" style={{ color: 'var(--color-text-dim)' }}>
-              Tap to assign role →
-            </p>
-          )}
-        </button>
-        {role && (
-          <button
-            onClick={() => updatePlayer(game.id, player.id, { roleId: null })}
-            className="flex items-center justify-center rounded-xl active:scale-90 flex-shrink-0"
-            style={{
-              width: 44,
-              background: 'rgba(239,68,68,0.1)',
-              border: '1px solid rgba(239,68,68,0.4)',
-              color: '#ef4444',
-              fontSize: 20,
-            }}
-            aria-label="Remove role"
-          >
-            ×
-          </button>
-        )}
-        </div>
       </div>
 
       {/* Status */}
