@@ -101,6 +101,7 @@ export const useStore = create<AppState>()(
           scriptName: params.scriptName,
           scriptAuthor: params.scriptAuthor,
           scriptRoleIds: params.scriptRoleIds,
+          baseScriptRoleIds: params.scriptRoleIds,
           homebrewRoles: params.homebrewRoles,
           players,
           phase: 'night',
@@ -333,6 +334,7 @@ export const useStore = create<AppState>()(
               ...state.games,
               [gameId]: {
                 ...game,
+                scriptRoleIds: game.baseScriptRoleIds ?? game.scriptRoleIds,
                 phase: 'night',
                 dayNumber: 0,
                 nightNumber: 1,
@@ -366,6 +368,7 @@ export const useStore = create<AppState>()(
                 scriptName,
                 scriptAuthor,
                 scriptRoleIds,
+                baseScriptRoleIds: scriptRoleIds,
                 homebrewRoles: homebrewRoles ?? {},
                 // Reset game state when script changes
                 phase: 'night',

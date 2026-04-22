@@ -63,7 +63,8 @@ export interface Game {
   scriptId: string; // 'tb' | 'bmr' | 'snv' | 'custom-{timestamp}'
   scriptName: string;
   scriptAuthor?: string;
-  scriptRoleIds: string[]; // normalized IDs of roles in this game's script
+  scriptRoleIds: string[]; // normalized IDs of roles in this game's script (may include mid-game additions)
+  baseScriptRoleIds?: string[]; // original script roles at game creation — used by resetGame
   players: Player[];
   phase: 'day' | 'night';
   dayNumber: number;
