@@ -57,7 +57,7 @@ export default function GameSettingsScreen({ game, rolesDb, onClose }: Props) {
           </button>
         </div>
         <div className="flex-1 overflow-y-auto">
-          <ScriptSelector rolesDb={rolesDb} onSelect={handleScriptSelected} />
+          <ScriptSelector rolesDb={rolesDb} onSelect={handleScriptSelected} onBuild={() => {}} />
         </div>
       </div>
     );

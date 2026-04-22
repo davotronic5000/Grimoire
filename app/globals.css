@@ -306,7 +306,7 @@
     border-radius: 20px 20px 0 0;
     padding: 16px;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     animation: slideUp 0.22s ease-out;
     box-shadow: 0 -8px 48px rgba(0, 0, 0, 0.65);

@@ -39,9 +39,10 @@ const BUILTIN_SCRIPTS: BuiltinScript[] = [
 interface Props {
   rolesDb: Record<string, RoleDefinition>;
   onSelect: (script: ParsedScript) => void;
+  onBuild: () => void;
 }
 
-export default function ScriptSelector({ rolesDb, onSelect }: Props) {
+export default function ScriptSelector({ rolesDb, onSelect, onBuild }: Props) {
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -134,6 +135,24 @@ export default function ScriptSelector({ rolesDb, onSelect }: Props) {
         </p>
         <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-dim)' }}>
           All roles from every edition
+        </p>
+      </button>
+
+      {/* Build Script */}
+      <button
+        onClick={onBuild}
+        disabled={loading !== null}
+        className="w-full text-left p-4 rounded-xl transition-all active:scale-95 disabled:opacity-60"
+        style={{
+          background: 'rgba(99,102,241,0.15)',
+          border: '1px solid rgba(99,102,241,0.5)',
+        }}
+      >
+        <p className="font-semibold text-base" style={{ color: '#a5b4fc' }}>
+          🛠️ Build Script
+        </p>
+        <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-dim)' }}>
+          Pick roles manually or scan a printed script with your camera
         </p>
       </button>
 

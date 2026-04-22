@@ -19,6 +19,7 @@
     "qrcode.react": "^4.2.0",
     "react": "^18",
     "react-dom": "^18",
+    "tesseract.js": "^7.0.0",
     "zustand": "^5.0.11"
   },
   "devDependencies": {

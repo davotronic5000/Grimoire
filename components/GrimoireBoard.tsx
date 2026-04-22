@@ -283,6 +283,21 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
   const phaseBg    = isNight ? 'var(--botc-night-bg)' : 'var(--botc-day-bg)';
   const phaseBorder = isNight ? 'rgba(129,140,248,0.45)' : 'rgba(251,191,36,0.45)';
 
+  function handleDownloadScript() {
+    setShowMore(false);
+    const entries: object[] = [
+      { id: '_meta', name: game.scriptName, ...(game.scriptAuthor ? { author: game.scriptAuthor } : {}) },
+      ...game.scriptRoleIds.map(id => ({ id })),
+    ];
+    const blob = new Blob([JSON.stringify(entries, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${game.scriptName.replace(/[^a-z0-9]/gi, '_')}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   // ── "More" action items ──────────────────────────────────────────
   const moreItems = [
     { emoji: '👁',  label: 'Show Roles',  action: () => { setShowMore(false); setShowRoleReveal(true); } },
@@ -293,6 +308,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
     { emoji: '✏️', label: 'Whiteboard',  action: () => { setShowMore(false); setShowWhiteboard(true); } },
     { emoji: '🔊',  label: 'Sounds',      action: () => { setShowMore(false); setShowSoundboard(true); } },
     { emoji: '🔗',  label: 'Share',       action: () => { setShowMore(false); setShowShare(true); } },
+    { emoji: '⬇️', label: 'Download Script', action: handleDownloadScript },
   ] as const;
 
   return (

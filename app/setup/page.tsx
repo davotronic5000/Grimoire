@@ -7,6 +7,7 @@ import { getRoleDistribution } from '@/lib/roles';
 import { useIsWide } from '@/lib/hooks';
 import type { ParsedScript } from '@/lib/types';
 import ScriptSelector from '@/components/ScriptSelector';
+import ScriptBuilderScreen from '@/components/ScriptBuilderScreen';
 
 type Step = 'script' | 'count' | 'names' | 'confirm';
 
@@ -16,6 +17,7 @@ export default function SetupPage() {
   const isWide = useIsWide();
 
   const [step, setStep] = useState<Step>('script');
+  const [showBuilder, setShowBuilder] = useState(false);
   const [selectedScript, setSelectedScript] = useState<ParsedScript | null>(null);
   const [playerCount, setPlayerCount] = useState(7);
   const [playerNames, setPlayerNames] = useState<string[]>([]);
@@ -64,7 +66,8 @@ export default function SetupPage() {
   const dist = getRoleDistribution(playerCount);
 
   return (
-    /* Outer scroll container — inner column is capped for iPad */
+    <>
+    {/* Outer scroll container — inner column is capped for iPad */}
     <div className="min-h-screen flex flex-col items-center" style={{ padding: '0 24px' }}>
     <div className="flex flex-col w-full flex-1" style={{ maxWidth: 540, paddingTop: 32, paddingBottom: 40 }}>
       {/* Header */}
@@ -109,7 +112,11 @@ export default function SetupPage() {
 
       {/* STEP 1: Script Selection */}
       {step === 'script' && rolesDb && (
-        <ScriptSelector rolesDb={rolesDb} onSelect={handleScriptSelect} />
+        <ScriptSelector
+          rolesDb={rolesDb}
+          onSelect={handleScriptSelect}
+          onBuild={() => setShowBuilder(true)}
+        />
       )}
       {step === 'script' && !rolesDb && (
         <div className="text-center py-12" style={{ color: 'var(--color-text-dim)' }}>
@@ -314,5 +321,14 @@ export default function SetupPage() {
       )}
     </div>
     </div>
+
+    {showBuilder && rolesDb && (
+      <ScriptBuilderScreen
+        rolesDb={rolesDb}
+        onSelect={script => { setShowBuilder(false); handleScriptSelect(script); }}
+        onClose={() => setShowBuilder(false)}
+      />
+    )}
+    </>
   );
 }
