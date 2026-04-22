@@ -16,6 +16,7 @@ const DATA_DEST = path.join(__dirname, '..', 'public', 'data');
 
 const ROLES_URL      = 'https://release.botc.app/resources/data/roles.json';
 const NIGHTSHEET_URL = 'https://release.botc.app/resources/data/nightsheet.json';
+const JINXES_URL     = 'https://release.botc.app/resources/data/jinxes.json';
 
 // ── Special entries that don't exist in the upstream roles.json ────────────────
 // Kept verbatim from the official Grimoire wording.
@@ -109,9 +110,10 @@ function cleanReminder(text) {
   fs.mkdirSync(DATA_DEST, { recursive: true });
 
   // ── 1. Fetch upstream data ─────────────────────────────────────────
-  const [appRoles, nightsheet] = await Promise.all([
+  const [appRoles, nightsheet, upstreamJinxes] = await Promise.all([
     fetchJson(ROLES_URL),
     fetchJson(NIGHTSHEET_URL),
+    fetchJson(JINXES_URL),
   ]);
   console.log(`  Loaded ${appRoles.length} roles, ${nightsheet.firstNight.length} first-night / ${nightsheet.otherNight.length} other-night entries`);
 
@@ -204,7 +206,21 @@ function cleanReminder(text) {
     console.log(`  ✓ ${filename} — ${roleIds.length} roles`);
   }
 
-  // ── 9. Summary ─────────────────────────────────────────────────────
+  // ── 9. Write jinxes.json ──────────────────────────────────────────
+  // Flatten nested upstream format { id, jinx: [{ id, reason }] } → { id1, id2, rule }
+  const jinxesFlat = [];
+  for (const entry of upstreamJinxes) {
+    for (const j of entry.jinx) {
+      jinxesFlat.push({ id1: entry.id, id2: j.id, rule: j.reason });
+    }
+  }
+  fs.writeFileSync(
+    path.join(DATA_DEST, 'jinxes.json'),
+    JSON.stringify(jinxesFlat, null, 2),
+  );
+  console.log(`  ✓ jinxes.json — ${jinxesFlat.length} jinxes`);
+
+  // ── 10. Summary ────────────────────────────────────────────────────
   const byTeam = {};
   for (const r of mainRoles) byTeam[r.team] = (byTeam[r.team] ?? 0) + 1;
   console.log('\n  Team breakdown:', byTeam);

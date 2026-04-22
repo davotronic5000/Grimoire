@@ -1,133 +1,657 @@
 [
-  { "id1": "alchemist", "id2": "boffin", "rule": "If the Alchemist has the Boffin ability, the Alchemist does not learn what ability the Demon has." },
-  { "id1": "alchemist", "id2": "marionette", "rule": "An Alchemist-Marionette has no Marionette ability & the Marionette is in play." },
-  { "id1": "alchemist", "id2": "mastermind", "rule": "An Alchemist-Mastermind has no Mastermind ability & the Mastermind is not-in-play." },
-  { "id1": "alchemist", "id2": "organ_grinder", "rule": "If the Alchemist has the Organ Grinder ability, the Organ Grinder is in play. If both are sober, both are drunk." },
-  { "id1": "alchemist", "id2": "spy", "rule": "An Alchemist-Spy has no Spy ability & a Spy is in play. After each execution, a living Alchemist-Spy may publicly guess a living player as the Spy." },
-  { "id1": "alchemist", "id2": "summoner", "rule": "The Alchemist-Summoner does not get bluffs, and chooses which Demon but not which player. If they die before this happens, evil wins." },
-  { "id1": "alchemist", "id2": "widow", "rule": "An Alchemist-Widow has no Widow ability & a Widow is in play. After each execution, a living Alchemist-Widow may publicly guess a living player as the Widow." },
-  { "id1": "alchemist", "id2": "wraith", "rule": "An Alchemist-Wraith has no Wraith ability & a Wraith is in play. After each execution, a living Alchemist-Wraith may publicly guess a living player as the Wraith." },
-  { "id1": "bounty_hunter", "id2": "kazali", "rule": "If the Kazali turns the Bounty Hunter into a Minion, an evil Townsfolk is not created." },
-  { "id1": "bounty_hunter", "id2": "philosopher", "rule": "If the Philosopher gains the Bounty Hunter ability, a Townsfolk might turn evil." },
-  { "id1": "cannibal", "id2": "butler", "rule": "If the Cannibal gains the Butler ability, the Cannibal learns this." },
-  { "id1": "cannibal", "id2": "juggler", "rule": "If the Juggler guesses on their first day and dies by execution, tonight the living Cannibal learns how many guesses the Juggler got correct." },
-  { "id1": "cannibal", "id2": "princess", "rule": "If the Cannibal nominated, executed, & killed the Princess today, the Demon doesn't kill tonight." },
-  { "id1": "cannibal", "id2": "zealot", "rule": "If the Cannibal gains the Zealot ability, the Cannibal learns this." },
-  { "id1": "chambermaid", "id2": "mathematician", "rule": "The Chambermaid can detect if the Mathematician will wake tonight." },
-  { "id1": "drunk", "id2": "mathematician", "rule": "The Mathematician might learn if the Drunk's ability yielded false info or failed to work properly." },
-  { "id1": "lunatic", "id2": "mathematician", "rule": "The Mathematician might learn if the Lunatic attacks a different player than the real Demon attacked." },
-  { "id1": "marionette", "id2": "mathematician", "rule": "The Mathematician might learn if the Marionette's ability yielded false info or failed to work properly." },
-  { "id1": "legion", "id2": "magician", "rule": "The Magician wakes with Legion and might register as evil. Legion knows if a Magician is in play, but not which player it is." },
-  { "id1": "magician", "id2": "marionette", "rule": "If the Magician is alive, the Demon doesn't know which neighbor is the Marionette." },
-  { "id1": "magician", "id2": "spy", "rule": "When the Spy sees the Grimoire, the Demon and Magician's character tokens are removed." },
-  { "id1": "magician", "id2": "vizier", "rule": "If the Vizier is in play, the Magician has no ability but is immune to the Vizier's ability." },
-  { "id1": "magician", "id2": "widow", "rule": "When the Widow sees the Grimoire, the Demon and Magician's character tokens are removed." },
-  { "id1": "magician", "id2": "wraith", "rule": "After each execution, the living Magician may publicly guess a living player as the Wraith. If correct, the Demon must choose the Wraith tonight." },
-  { "id1": "butler", "id2": "organ_grinder", "rule": "If the Organ Grinder is causing eyes closed voting, the Butler may raise their hand to vote but their vote is only counted if their master voted too." },
-  { "id1": "baron", "id2": "heretic", "rule": "Only 1 jinxed character can be in play." },
-  { "id1": "godfather", "id2": "heretic", "rule": "Only 1 jinxed character can be in play." },
-  { "id1": "heretic", "id2": "lleech", "rule": "Only 1 jinxed character can be in play." },
-  { "id1": "heretic", "id2": "pit_hag", "rule": "Only 1 jinxed character can be in play." },
-  { "id1": "heretic", "id2": "spy", "rule": "Only 1 jinxed character can be in play." },
-  { "id1": "heretic", "id2": "widow", "rule": "Only 1 jinxed character can be in play." },
-  { "id1": "baron", "id2": "plague_doctor", "rule": "If the Storyteller would gain the Baron ability, up to two players become Outsiders." },
-  { "id1": "boomdandy", "id2": "plague_doctor", "rule": "If the Storyteller would gain the Boomdandy ability, a player becomes the Boomdandy." },
-  { "id1": "evil_twin", "id2": "plague_doctor", "rule": "If the Storyteller would gain the Evil Twin ability, a player becomes the Evil Twin." },
-  { "id1": "fearmonger", "id2": "plague_doctor", "rule": "If the Storyteller would gain the Fearmonger ability, a Minion gains it, and learns this." },
-  { "id1": "goblin", "id2": "plague_doctor", "rule": "If the Storyteller would gain the Goblin ability, a Minion gains it, and learns this." },
-  { "id1": "marionette", "id2": "plague_doctor", "rule": "If the Storyteller would gain the Marionette ability, one of the Demon's good neighbors becomes the Marionette." },
-  { "id1": "plague_doctor", "id2": "scarlet_woman", "rule": "If the Storyteller would gain the Scarlet Woman ability, a Minion gains it, and learns this." },
-  { "id1": "plague_doctor", "id2": "spy", "rule": "If the Storyteller would gain the Spy ability, a Minion gains it, and learns this." },
-  { "id1": "plague_doctor", "id2": "wraith", "rule": "If the Storyteller would gain the Wraith ability, a Minion gains it, and learns this." },
-  { "id1": "ogre", "id2": "recluse", "rule": "If the Recluse registers as evil to the Ogre, the Ogre learns that they are evil." },
-  { "id1": "recluse", "id2": "sage", "rule": "The Recluse might register as the Demon to the Sage." },
-  { "id1": "boffin", "id2": "cult_leader", "rule": "If the Demon has the Cult Leader ability, they can't turn good due to this ability." },
-  { "id1": "boffin", "id2": "drunk", "rule": "The Demon cannot have the Drunk ability." },
-  { "id1": "boffin", "id2": "goon", "rule": "If the Demon has the Goon ability, they can't turn good due to this ability." },
-  { "id1": "boffin", "id2": "heretic", "rule": "The Demon cannot have the Heretic ability." },
-  { "id1": "boffin", "id2": "ogre", "rule": "The Demon cannot have the Ogre ability." },
-  { "id1": "boffin", "id2": "politician", "rule": "The Demon cannot have the Politician ability." },
-  { "id1": "boffin", "id2": "village_idiot", "rule": "If there is a spare token, the Boffin can give the Demon the Village Idiot ability." },
-  { "id1": "cerenovus", "id2": "goblin", "rule": "The Cerenovus may choose to make a player mad that they are the Goblin." },
-  { "id1": "balloonist", "id2": "marionette", "rule": "If the Marionette thinks that they are the Balloonist, an Outsider might have been added during setup." },
-  { "id1": "huntsman", "id2": "marionette", "rule": "If the Marionette thinks that they are the Huntsman, the Damsel was added during setup." },
-  { "id1": "kazali", "id2": "marionette", "rule": "If there would be a Marionette in play, they enter play after the Demon & must start as their neighbor." },
-  { "id1": "lil_monsta", "id2": "marionette", "rule": "If there would be a Marionette in play, they enter play after the Demon & must start as their neighbor." },
-  { "id1": "marionette", "id2": "summoner", "rule": "If there would be a Marionette in play, they enter play after the Demon & must start as their neighbor." },
-  { "id1": "mastermind", "id2": "vigormortis", "rule": "A Mastermind that has their ability keeps it if the Vigormortis dies." },
-  { "id1": "cult_leader", "id2": "pit_hag", "rule": "If the Pit-Hag turns an evil player into the Cult Leader, they can't turn good due to their own ability." },
-  { "id1": "damsel", "id2": "pit_hag", "rule": "If a Pit-Hag creates a Damsel, the Storyteller chooses which player it is." },
-  { "id1": "goon", "id2": "pit_hag", "rule": "If the Pit-Hag turns an evil player into the Goon, they can't turn good due to their own ability." },
-  { "id1": "ogre", "id2": "pit_hag", "rule": "If the Pit-Hag turns an evil player into the Ogre, they can't turn good due to their own ability." },
-  { "id1": "pit_hag", "id2": "politician", "rule": "If the Pit-Hag turns an evil player into the Politician, they can't turn good due to their own ability." },
-  { "id1": "pit_hag", "id2": "village_idiot", "rule": "If there is a spare token, the Pit-Hag can create an extra Village Idiot. If so, the drunk Village Idiot might change." },
-  { "id1": "al_hadikhia", "id2": "scarlet_woman", "rule": "If there would be two Demons, one of which was the Scarlet Woman, the Scarlet Woman becomes the Scarlet Woman again." },
-  { "id1": "fang_gu", "id2": "scarlet_woman", "rule": "If there would be two Demons, one of which was the Scarlet Woman, the Scarlet Woman remains the Scarlet Woman." },
-  { "id1": "damsel", "id2": "spy", "rule": "If the Spy is (or has been) in play, the Damsel is poisoned." },
-  { "id1": "ogre", "id2": "spy", "rule": "The Spy registers as evil to the Ogre." },
-  { "id1": "poppy_grower", "id2": "spy", "rule": "If the Poppy Grower has their ability, the Spy does not see the Grimoire." },
-  { "id1": "clockmaker", "id2": "summoner", "rule": "The Summoner registers as the Demon to the Clockmaker." },
-  { "id1": "courtier", "id2": "summoner", "rule": "If the living Summoner has no ability, the Storyteller has the Summoner ability." },
-  { "id1": "engineer", "id2": "summoner", "rule": "If the living Summoner is removed from play, the Storyteller has the Summoner ability." },
-  { "id1": "hatter", "id2": "summoner", "rule": "If the Summoner creates a second living Demon, deaths tonight are arbitrary." },
-  { "id1": "kazali", "id2": "summoner", "rule": "If the Summoner creates a second living Demon, deaths tonight are arbitrary." },
-  { "id1": "lord_of_typhon", "id2": "summoner", "rule": "If a Lord of Typhon is summoned, they must neighbor a Minion & their other neighbor becomes an evil Minion." },
-  { "id1": "pit_hag", "id2": "summoner", "rule": "If the Summoner creates a second living Demon, deaths tonight are arbitrary." },
-  { "id1": "poppy_grower", "id2": "summoner", "rule": "If the Poppy Grower is alive on the 3rd night, the Summoner chooses which Demon but not which player." },
-  { "id1": "preacher", "id2": "summoner", "rule": "If the living Summoner has no ability, the Storyteller has the Summoner ability." },
-  { "id1": "pukka", "id2": "summoner", "rule": "The Summoner may summon a Pukka on the 2nd night instead of the 3rd." },
-  { "id1": "summoner", "id2": "zombuul", "rule": "If the Summoner summons a dead player into the Zombuul, the Zombuul has already 'died once'." },
-  { "id1": "alsaahir", "id2": "vizier", "rule": "The Storyteller doesn't declare the Vizier is in play." },
-  { "id1": "courtier", "id2": "vizier", "rule": "If the Vizier loses their ability, they learn this, and cannot die during the day." },
-  { "id1": "fearmonger", "id2": "vizier", "rule": "The Vizier wakes with the Fearmonger, learns who they choose and cannot choose to immediately execute that player." },
-  { "id1": "investigator", "id2": "vizier", "rule": "The Storyteller doesn't declare the Vizier is in play." },
-  { "id1": "politician", "id2": "vizier", "rule": "The Politician might register as evil to the Vizier." },
-  { "id1": "preacher", "id2": "vizier", "rule": "If the Vizier loses their ability, they learn this, and cannot die during the day." },
-  { "id1": "vizier", "id2": "zealot", "rule": "The Zealot might register as evil to the Vizier." },
-  { "id1": "damsel", "id2": "widow", "rule": "If the Widow is (or has been) in play, the Damsel is poisoned." },
-  { "id1": "poppy_grower", "id2": "widow", "rule": "If the Poppy Grower has their ability, the Widow does not see the Grimoire." },
-  { "id1": "al_hadikhia", "id2": "princess", "rule": "If the Princess nominated & executed a player on their 1st day, no one dies to the Al-Hadikhia tonight." },
-  { "id1": "al_hadikhia", "id2": "mastermind", "rule": "If the Al-Hadikhia dies by execution, and the Mastermind is alive, the Al-Hadikhia chooses 3 good players tonight: if all 3 choose to live, evil wins. Otherwise, good wins." },
-  { "id1": "engineer", "id2": "legion", "rule": "If Legion is created, all evil players become Legion. If Legion is in play, the Engineer starts knowing this but has no ability." },
-  { "id1": "hatter", "id2": "legion", "rule": "If Legion is created, all evil players become Legion. If Legion is in play, the Hatter has no ability." },
-  { "id1": "legion", "id2": "minstrel", "rule": "If Legion died by execution today, Legion keeps their ability, but the Minstrel might learn they are Legion." },
-  { "id1": "legion", "id2": "politician", "rule": "The Politician might register as evil to Legion." },
-  { "id1": "legion", "id2": "preacher", "rule": "If the Preacher chooses Legion, Legion keeps their ability, but the Preacher might learn they are Legion." },
-  { "id1": "legion", "id2": "summoner", "rule": "If Legion is summoned, all evil players become Legion." },
-  { "id1": "legion", "id2": "zealot", "rule": "The Zealot might register as evil to Legion." },
-  { "id1": "banshee", "id2": "leviathan", "rule": "Each night*, the Leviathan chooses an alive good player (different to previous nights): a chosen Banshee dies & gains their ability." },
-  { "id1": "exorcist", "id2": "leviathan", "rule": "If the Leviathan nominates and executes the Exorcist-chosen player, good wins." },
-  { "id1": "farmer", "id2": "leviathan", "rule": "Each night*, the Leviathan chooses an alive good player (different to previous nights): a chosen Farmer uses their ability but does not die." },
-  { "id1": "grandmother", "id2": "leviathan", "rule": "If the Leviathan is in play and the Grandchild dies by execution, evil wins." },
-  { "id1": "hatter", "id2": "leviathan", "rule": "The Leviathan cannot enter play after day 5." },
-  { "id1": "innkeeper", "id2": "leviathan", "rule": "If the Leviathan nominates and executes an Innkeeper-protected player, good wins." },
-  { "id1": "king", "id2": "leviathan", "rule": "If the Leviathan is in play, and at least 1 player is dead, the King learns an alive character each night." },
-  { "id1": "leviathan", "id2": "mayor", "rule": "If the Leviathan and the Mayor are alive on day 5 & no execution occurs, good wins." },
-  { "id1": "leviathan", "id2": "monk", "rule": "If the Leviathan nominates and executes the Monk-protected player, good wins." },
-  { "id1": "leviathan", "id2": "pit_hag", "rule": "The Leviathan cannot enter play after day 5." },
-  { "id1": "leviathan", "id2": "ravenkeeper", "rule": "Each night*, the Leviathan chooses an alive player (different to previous nights): a chosen Ravenkeeper uses their ability but does not die." },
-  { "id1": "leviathan", "id2": "sage", "rule": "Each night*, the Leviathan chooses an alive good player (different to previous nights): a chosen Sage uses their ability but does not die." },
-  { "id1": "leviathan", "id2": "soldier", "rule": "If the Leviathan nominates and executes the Soldier, good wins." },
-  { "id1": "hatter", "id2": "lil_monsta", "rule": "If the Hatter dies & the Demon chooses Lil' Monsta, they also choose a Minion to become." },
-  { "id1": "lil_monsta", "id2": "poppy_grower", "rule": "If Lil' Monsta & the Poppy Grower are alive, Minions wake one by one, until one of them chooses to take the Lil' Monsta token." },
-  { "id1": "lil_monsta", "id2": "psychopath", "rule": "If the Psychopath is babysitting Lil' Monsta, they die when executed." },
-  { "id1": "lil_monsta", "id2": "magician", "rule": "If the Magician is alive, the Storyteller chooses which Minion babysits Lil' Monsta." },
-  { "id1": "lil_monsta", "id2": "scarlet_woman", "rule": "If Lil' Monsta dies with 5 or more players alive, the Scarlet Woman babysits Lil' Monsta for the rest of the game." },
-  { "id1": "lil_monsta", "id2": "vizier", "rule": "If the Vizier is babysitting Lil' Monsta, they die when executed." },
-  { "id1": "lleech", "id2": "mastermind", "rule": "If the Mastermind is alive and the Lleech host dies by execution, the Lleech lives but loses their ability." },
-  { "id1": "lleech", "id2": "slayer", "rule": "If the Slayer slays the Lleech host, the host dies." },
-  { "id1": "atheist", "id2": "riot", "rule": "During a riot, if the Storyteller is nominated, players vote. If they are 'about to die', the game ends. If not, they nominate again." },
-  { "id1": "banshee", "id2": "riot", "rule": "Each night*, Riot chooses an alive good player (different to previous nights): a chosen Banshee dies & gains their ability." },
-  { "id1": "exorcist", "id2": "riot", "rule": "If Riot nominates and executes the Exorcist-chosen player, good wins." },
-  { "id1": "farmer", "id2": "riot", "rule": "Each night*, Riot chooses an alive good player (different to previous nights): a chosen Farmer uses their ability but does not die." },
-  { "id1": "grandmother", "id2": "riot", "rule": "If Riot is in play and the Grandchild dies by execution, evil wins." },
-  { "id1": "innkeeper", "id2": "riot", "rule": "If Riot nominates and executes an Innkeeper-protected player, good wins." },
-  { "id1": "king", "id2": "riot", "rule": "If Riot is in play, and at least 1 player is dead, the King learns an alive character each night." },
-  { "id1": "mayor", "id2": "riot", "rule": "The Mayor may choose to stop the riot. If they do so when only 1 Riot is alive, good wins. Otherwise, evil wins." },
-  { "id1": "monk", "id2": "riot", "rule": "If Riot nominates and executes the Monk-protected player, good wins." },
-  { "id1": "ravenkeeper", "id2": "riot", "rule": "Each night*, Riot chooses an alive good player (different to previous nights): a chosen Ravenkeeper uses their ability but does not die." },
-  { "id1": "riot", "id2": "sage", "rule": "Each night*, Riot chooses an alive good player (different to previous nights): a chosen Sage uses their ability but does not die." },
-  { "id1": "riot", "id2": "soldier", "rule": "If Riot nominates and executes the Soldier, good wins." },
-  { "id1": "banshee", "id2": "vortox", "rule": "If the Vortox kills the Banshee, all players learn that the Banshee has died." },
-  { "id1": "exorcist", "id2": "yaggababble", "rule": "If the Exorcist chooses the Yaggababble, the Yaggababble does not kill tonight." }
+  {
+    "id1": "alchemist",
+    "id2": "boffin",
+    "rule": "If the Alchemist has the Boffin ability, the Alchemist does not learn what ability the Demon has."
+  },
+  {
+    "id1": "alchemist",
+    "id2": "marionette",
+    "rule": "An Alchemist-Marionette has no Marionette ability & the Marionette is in play."
+  },
+  {
+    "id1": "alchemist",
+    "id2": "mastermind",
+    "rule": "An Alchemist-Mastermind has no Mastermind ability & the Mastermind is not-in-play."
+  },
+  {
+    "id1": "alchemist",
+    "id2": "organgrinder",
+    "rule": "If the Alchemist has the Organ Grinder ability, the Organ Grinder is in play. If both are sober, both are drunk."
+  },
+  {
+    "id1": "alchemist",
+    "id2": "spy",
+    "rule": "An Alchemist-Spy has no Spy ability & a Spy is in play. After each execution, a living Alchemist-Spy may publicly guess a living player as the Spy. If correct, the Demon must choose the Spy tonight."
+  },
+  {
+    "id1": "alchemist",
+    "id2": "summoner",
+    "rule": "The Alchemist-Summoner does not get bluffs, and chooses which Demon but not which player. If they die before this happens, evil wins. [No Demon]"
+  },
+  {
+    "id1": "alchemist",
+    "id2": "widow",
+    "rule": "An Alchemist-Widow has no Widow ability & a Widow is in play. After each execution, a living Alchemist-Widow may publicly guess a living player as the Widow. If correct, the Demon must choose the Widow tonight."
+  },
+  {
+    "id1": "alchemist",
+    "id2": "wraith",
+    "rule": "An Alchemist-Wraith has no Wraith ability & a Wraith is in play. After each execution, a living Alchemist-Wraith may publicly guess a living player as the Wraith. If correct, the Demon must choose the Wraith tonight."
+  },
+  {
+    "id1": "alhadikhia",
+    "id2": "mastermind",
+    "rule": "If the Al-Hadikhia dies by execution, and the Mastermind is alive, the Al-Hadikhia chooses 3 good players tonight: if all 3 choose to live, evil wins. Otherwise, good wins."
+  },
+  {
+    "id1": "alhadikhia",
+    "id2": "princess",
+    "rule": "If the Princess nominated & executed a player on their 1st day, no one dies to the Al-Hadikhia tonight."
+  },
+  {
+    "id1": "boffin",
+    "id2": "cultleader",
+    "rule": "If the Demon has the Cult Leader ability, they can\u2019t turn good due to this ability."
+  },
+  {
+    "id1": "boffin",
+    "id2": "drunk",
+    "rule": "The Demon cannot have the Drunk ability."
+  },
+  {
+    "id1": "boffin",
+    "id2": "goon",
+    "rule": "If the Demon has the Goon ability, they can\u2019t turn good due to this ability."
+  },
+  {
+    "id1": "boffin",
+    "id2": "heretic",
+    "rule": "The Demon cannot have the Heretic ability."
+  },
+  {
+    "id1": "boffin",
+    "id2": "ogre",
+    "rule": "The Demon cannot have the Ogre ability."
+  },
+  {
+    "id1": "boffin",
+    "id2": "politician",
+    "rule": "The Demon cannot have the Politician ability."
+  },
+  {
+    "id1": "boffin",
+    "id2": "villageidiot",
+    "rule": "If there is a spare token, the Boffin can give the Demon the Village Idiot ability."
+  },
+  {
+    "id1": "bountyhunter",
+    "id2": "kazali",
+    "rule": "If the Kazali turns the Bounty Hunter into a Minion, an evil Townsfolk is not created."
+  },
+  {
+    "id1": "bountyhunter",
+    "id2": "philosopher",
+    "rule": "If the Philosopher gains the Bounty Hunter ability, a Townsfolk might turn evil."
+  },
+  {
+    "id1": "butler",
+    "id2": "organgrinder",
+    "rule": "If the Organ Grinder is causing eyes closed voting, the Butler may raise their hand to vote but their vote is only counted if their master voted too."
+  },
+  {
+    "id1": "cannibal",
+    "id2": "butler",
+    "rule": "If the Cannibal gains the Butler ability, the Cannibal learns this."
+  },
+  {
+    "id1": "cannibal",
+    "id2": "juggler",
+    "rule": "If the Juggler guesses on their first day and dies by execution, tonight the living Cannibal learns how many guesses the Juggler got correct."
+  },
+  {
+    "id1": "cannibal",
+    "id2": "princess",
+    "rule": "If the Cannibal nominated, executed, & killed the Princess today, the Demon doesn\u2019t kill tonight."
+  },
+  {
+    "id1": "cannibal",
+    "id2": "zealot",
+    "rule": "If the Cannibal gains the Zealot ability, the Cannibal learns this."
+  },
+  {
+    "id1": "cerenovus",
+    "id2": "goblin",
+    "rule": "The Cerenovus may choose to make a player mad that they are the Goblin."
+  },
+  {
+    "id1": "heretic",
+    "id2": "baron",
+    "rule": "Only 1 jinxed character can be in play."
+  },
+  {
+    "id1": "heretic",
+    "id2": "godfather",
+    "rule": "Only 1 jinxed character can be in play."
+  },
+  {
+    "id1": "heretic",
+    "id2": "lleech",
+    "rule": "Only 1 jinxed character can be in play."
+  },
+  {
+    "id1": "heretic",
+    "id2": "pithag",
+    "rule": "Only 1 jinxed character can be in play."
+  },
+  {
+    "id1": "heretic",
+    "id2": "spy",
+    "rule": "Only 1 jinxed character can be in play."
+  },
+  {
+    "id1": "heretic",
+    "id2": "widow",
+    "rule": "Only 1 jinxed character can be in play."
+  },
+  {
+    "id1": "legion",
+    "id2": "engineer",
+    "rule": "If Legion is created, all evil players become Legion. If Legion is in play, the Engineer starts knowing this but has no ability."
+  },
+  {
+    "id1": "legion",
+    "id2": "hatter",
+    "rule": "If Legion is created, all evil players become Legion. If Legion is in play, the Hatter has no ability."
+  },
+  {
+    "id1": "legion",
+    "id2": "minstrel",
+    "rule": "If Legion died by execution today, Legion keeps their ability, but the Minstrel might learn they are Legion."
+  },
+  {
+    "id1": "legion",
+    "id2": "politician",
+    "rule": "The Politician might register as evil to Legion."
+  },
+  {
+    "id1": "legion",
+    "id2": "preacher",
+    "rule": "If the Preacher chooses Legion, Legion keeps their ability, but the Preacher might learn they are Legion."
+  },
+  {
+    "id1": "legion",
+    "id2": "summoner",
+    "rule": "If Legion is summoned, all evil players become Legion. "
+  },
+  {
+    "id1": "legion",
+    "id2": "zealot",
+    "rule": "The Zealot might register as evil to Legion."
+  },
+  {
+    "id1": "leviathan",
+    "id2": "banshee",
+    "rule": "Each night*, the Leviathan chooses an alive good player (different to previous nights): a chosen Banshee dies & gains their ability."
+  },
+  {
+    "id1": "leviathan",
+    "id2": "exorcist",
+    "rule": "If the Leviathan nominates and executes the Exorcist-chosen player, good wins."
+  },
+  {
+    "id1": "leviathan",
+    "id2": "farmer",
+    "rule": "Each night*, the Leviathan chooses an alive good player (different to previous nights): a chosen Farmer uses their ability but does not die."
+  },
+  {
+    "id1": "leviathan",
+    "id2": "grandmother",
+    "rule": "If the Leviathan is in play and the Grandchild dies by execution, evil wins."
+  },
+  {
+    "id1": "leviathan",
+    "id2": "hatter",
+    "rule": "The Leviathan cannot enter play after day 5."
+  },
+  {
+    "id1": "leviathan",
+    "id2": "innkeeper",
+    "rule": "If the Leviathan nominates and executes an Innkeeper-protected player, good wins."
+  },
+  {
+    "id1": "leviathan",
+    "id2": "king",
+    "rule": "If the Leviathan is in play, and at least 1 player is dead, the King learns an alive character each night."
+  },
+  {
+    "id1": "leviathan",
+    "id2": "mayor",
+    "rule": "If the Leviathan and the Mayor are alive on day 5 & no execution occurs, good wins."
+  },
+  {
+    "id1": "leviathan",
+    "id2": "monk",
+    "rule": "If the Leviathan nominates and executes the Monk-protected player, good wins."
+  },
+  {
+    "id1": "leviathan",
+    "id2": "pithag",
+    "rule": "The Leviathan cannot enter play after day 5."
+  },
+  {
+    "id1": "leviathan",
+    "id2": "ravenkeeper",
+    "rule": "Each night*, the Leviathan chooses an alive player (different to previous nights): a chosen Ravenkeeper uses their ability but does not die."
+  },
+  {
+    "id1": "leviathan",
+    "id2": "sage",
+    "rule": "Each night*, the Leviathan chooses an alive good player (different to previous nights): a chosen Sage uses their ability but does not die."
+  },
+  {
+    "id1": "leviathan",
+    "id2": "soldier",
+    "rule": "If the Leviathan nominates and executes the Soldier, good wins."
+  },
+  {
+    "id1": "lilmonsta",
+    "id2": "hatter",
+    "rule": "If the Hatter dies & the Demon chooses Lil' Monsta, they also choose a Minion to become."
+  },
+  {
+    "id1": "lilmonsta",
+    "id2": "magician",
+    "rule": "If the Magician is alive, the Storyteller chooses which Minion babysits Lil' Monsta. "
+  },
+  {
+    "id1": "lilmonsta",
+    "id2": "poppygrower",
+    "rule": "If Lil' Monsta & the Poppy Grower are alive, Minions wake one by one, until one of them chooses to take the Lil' Monsta token."
+  },
+  {
+    "id1": "lilmonsta",
+    "id2": "psychopath",
+    "rule": "If the Psychopath is babysitting Lil' Monsta, they die when executed."
+  },
+  {
+    "id1": "lilmonsta",
+    "id2": "scarletwoman",
+    "rule": "If Lil' Monsta dies with 5 or more players alive, the Scarlet Woman babysits Lil' Monsta for the rest of the game."
+  },
+  {
+    "id1": "lilmonsta",
+    "id2": "vizier",
+    "rule": "If the Vizier is babysitting Lil' Monsta, they die when executed."
+  },
+  {
+    "id1": "lleech",
+    "id2": "mastermind",
+    "rule": "If the Mastermind is alive and the Lleech host dies by execution, the Lleech lives but loses their ability."
+  },
+  {
+    "id1": "lleech",
+    "id2": "slayer",
+    "rule": "If the Slayer slays the Lleech host, the host dies."
+  },
+  {
+    "id1": "magician",
+    "id2": "legion",
+    "rule": "The Magician wakes with Legion and might register as evil. Legion knows if a Magician is in play, but not which player it is."
+  },
+  {
+    "id1": "magician",
+    "id2": "marionette",
+    "rule": "If the Magician is alive, the Demon doesn't know which neighbor is the Marionette."
+  },
+  {
+    "id1": "magician",
+    "id2": "spy",
+    "rule": "When the Spy sees the Grimoire, the Demon and Magician's character tokens are removed."
+  },
+  {
+    "id1": "magician",
+    "id2": "vizier",
+    "rule": "If the Vizier is in play, the Magician has no ability but is immune to the Vizier's ability."
+  },
+  {
+    "id1": "magician",
+    "id2": "widow",
+    "rule": "When the Widow sees the Grimoire, the Demon and Magician's character tokens are removed."
+  },
+  {
+    "id1": "magician",
+    "id2": "wraith",
+    "rule": "After each execution, the living Magician may publicly guess a living player as the Wraith. If correct, the Demon must choose the Wraith tonight."
+  },
+  {
+    "id1": "marionette",
+    "id2": "balloonist",
+    "rule": "If the Marionette thinks that they are the Balloonist, an Outsider might have been added during setup."
+  },
+  {
+    "id1": "marionette",
+    "id2": "huntsman",
+    "rule": "If the Marionette thinks that they are the Huntsman, the Damsel was added during setup."
+  },
+  {
+    "id1": "marionette",
+    "id2": "kazali",
+    "rule": "If there would be a Marionette in play, they enter play after the Demon & must start as their neighbor."
+  },
+  {
+    "id1": "marionette",
+    "id2": "lilmonsta",
+    "rule": "If there would be a Marionette in play, they enter play after the Demon & must start as their neighbor."
+  },
+  {
+    "id1": "marionette",
+    "id2": "summoner",
+    "rule": "If there would be a Marionette in play, they enter play after the Demon & must start as their neighbor."
+  },
+  {
+    "id1": "mastermind",
+    "id2": "vigormortis",
+    "rule": "A Mastermind that has their ability keeps it if the Vigormortis dies."
+  },
+  {
+    "id1": "mathematician",
+    "id2": "chambermaid",
+    "rule": "The Chambermaid can detect if the Mathematician will wake tonight."
+  },
+  {
+    "id1": "mathematician",
+    "id2": "drunk",
+    "rule": "The Mathematician might learn if the Drunk's ability yielded false info or failed to work properly."
+  },
+  {
+    "id1": "mathematician",
+    "id2": "lunatic",
+    "rule": "The Mathematician might learn if the Lunatic attacks a different player than the real Demon attacked."
+  },
+  {
+    "id1": "mathematician",
+    "id2": "marionette",
+    "rule": "The Mathematician might learn if the Marionette's ability yielded false info or failed to work properly."
+  },
+  {
+    "id1": "pithag",
+    "id2": "cultleader",
+    "rule": "If the Pit-Hag turns an evil player into the Cult Leader, they can't turn good due to their own ability."
+  },
+  {
+    "id1": "pithag",
+    "id2": "damsel",
+    "rule": "If a Pit-Hag creates a Damsel, the Storyteller chooses which player it is."
+  },
+  {
+    "id1": "pithag",
+    "id2": "goon",
+    "rule": "If the Pit-Hag turns an evil player into the Goon, they can't turn good due to their own ability."
+  },
+  {
+    "id1": "pithag",
+    "id2": "ogre",
+    "rule": "If the Pit-Hag turns an evil player into the Ogre, they can't turn good due to their own ability."
+  },
+  {
+    "id1": "pithag",
+    "id2": "politician",
+    "rule": "If the Pit-Hag turns an evil player into the Politician, they can't turn good due to their own ability."
+  },
+  {
+    "id1": "pithag",
+    "id2": "villageidiot",
+    "rule": "If there is a spare token, the Pit-Hag can create an extra Village Idiot. If so, the drunk Village Idiot might change."
+  },
+  {
+    "id1": "plaguedoctor",
+    "id2": "baron",
+    "rule": "If the Storyteller would gain the Baron ability, up to two players become Outsiders."
+  },
+  {
+    "id1": "plaguedoctor",
+    "id2": "boomdandy",
+    "rule": "If the Storyteller would gain the Boomdandy ability, a player becomes the Boomdandy."
+  },
+  {
+    "id1": "plaguedoctor",
+    "id2": "eviltwin",
+    "rule": "If the Storyteller would gain the Evil Twin ability, a player becomes the Evil Twin."
+  },
+  {
+    "id1": "plaguedoctor",
+    "id2": "fearmonger",
+    "rule": "If the Storyteller would gain the Fearmonger ability, a Minion gains it, and learns this."
+  },
+  {
+    "id1": "plaguedoctor",
+    "id2": "goblin",
+    "rule": "If the Storyteller would gain the Goblin ability, a Minion gains it, and learns this."
+  },
+  {
+    "id1": "plaguedoctor",
+    "id2": "marionette",
+    "rule": "If the Storyteller would gain the Marionette ability, one of the Demon's good neighbors becomes the Marionette."
+  },
+  {
+    "id1": "plaguedoctor",
+    "id2": "scarletwoman",
+    "rule": "If the Storyteller would gain the Scarlet Woman ability, a Minion gains it, and learns this."
+  },
+  {
+    "id1": "plaguedoctor",
+    "id2": "spy",
+    "rule": "If the Storyteller would gain the Spy ability, a Minion gains it, and learns this."
+  },
+  {
+    "id1": "plaguedoctor",
+    "id2": "wraith",
+    "rule": "If the Storyteller would gain the Wraith ability, a Minion gains it, and learns this."
+  },
+  {
+    "id1": "recluse",
+    "id2": "ogre",
+    "rule": "If the Recluse registers as evil to the Ogre, the Ogre learns that they are evil."
+  },
+  {
+    "id1": "recluse",
+    "id2": "sage",
+    "rule": "The Recluse might register as the Demon to the Sage."
+  },
+  {
+    "id1": "riot",
+    "id2": "atheist",
+    "rule": "During a riot, if the Storyteller is nominated, players vote. If they are \"about to die\", the game ends. If not, they nominate again."
+  },
+  {
+    "id1": "riot",
+    "id2": "banshee",
+    "rule": "Each night*, Riot chooses an alive good player (different to previous nights): a chosen Banshee dies & gains their ability."
+  },
+  {
+    "id1": "riot",
+    "id2": "exorcist",
+    "rule": "If Riot nominates and executes the Exorcist-chosen player, good wins."
+  },
+  {
+    "id1": "riot",
+    "id2": "farmer",
+    "rule": "Each night*, Riot chooses an alive good player (different to previous nights): a chosen Farmer uses their ability but does not die."
+  },
+  {
+    "id1": "riot",
+    "id2": "grandmother",
+    "rule": "If Riot is in play and the Grandchild dies by execution, evil wins."
+  },
+  {
+    "id1": "riot",
+    "id2": "innkeeper",
+    "rule": "If Riot nominates and executes an Innkeeper-protected player, good wins."
+  },
+  {
+    "id1": "riot",
+    "id2": "king",
+    "rule": "If Riot is in play, and at least 1 player is dead, the King learns an alive character each night."
+  },
+  {
+    "id1": "riot",
+    "id2": "mayor",
+    "rule": "The Mayor may choose to stop the riot. If they do so when only 1 Riot is alive, good wins. Otherwise, evil wins."
+  },
+  {
+    "id1": "riot",
+    "id2": "monk",
+    "rule": "If Riot nominates and executes the Monk-protected player, good wins."
+  },
+  {
+    "id1": "riot",
+    "id2": "ravenkeeper",
+    "rule": "Each night*, Riot chooses an alive good player (different to previous nights): a chosen Ravenkeeper uses their ability but does not die."
+  },
+  {
+    "id1": "riot",
+    "id2": "sage",
+    "rule": "Each night*, Riot chooses an alive good player (different to previous nights): a chosen Sage uses their ability but does not die."
+  },
+  {
+    "id1": "riot",
+    "id2": "soldier",
+    "rule": "If Riot nominates and executes the Soldier, good wins."
+  },
+  {
+    "id1": "scarletwoman",
+    "id2": "alhadikhia",
+    "rule": "If there would be two Demons, one of which was the Scarlet Woman, the Scarlet Woman becomes the Scarlet Woman again."
+  },
+  {
+    "id1": "scarletwoman",
+    "id2": "fanggu",
+    "rule": "If there would be two Demons, one of which was the Scarlet Woman, the Scarlet Woman remains the Scarlet Woman."
+  },
+  {
+    "id1": "spy",
+    "id2": "damsel",
+    "rule": "If the Spy is (or has been) in play, the Damsel is poisoned."
+  },
+  {
+    "id1": "spy",
+    "id2": "ogre",
+    "rule": "The Spy registers as evil to the Ogre."
+  },
+  {
+    "id1": "spy",
+    "id2": "poppygrower",
+    "rule": "If the Poppy Grower has their ability, the Spy does not see the Grimoire."
+  },
+  {
+    "id1": "summoner",
+    "id2": "clockmaker",
+    "rule": "The Summoner registers as the Demon to the Clockmaker."
+  },
+  {
+    "id1": "summoner",
+    "id2": "courtier",
+    "rule": "If the living Summoner has no ability, the Storyteller has the Summoner ability."
+  },
+  {
+    "id1": "summoner",
+    "id2": "engineer",
+    "rule": "If the living Summoner is removed from play, the Storyteller has the Summoner ability."
+  },
+  {
+    "id1": "summoner",
+    "id2": "hatter",
+    "rule": "If the Summoner creates a second living Demon, deaths tonight are arbitrary."
+  },
+  {
+    "id1": "summoner",
+    "id2": "kazali",
+    "rule": "If the Summoner creates a second living Demon, deaths tonight are arbitrary."
+  },
+  {
+    "id1": "summoner",
+    "id2": "lordoftyphon",
+    "rule": "If a Lord of Typhon is summoned, they must neighbor a Minion & their other neighbor becomes an evil Minion."
+  },
+  {
+    "id1": "summoner",
+    "id2": "pithag",
+    "rule": "If the Summoner creates a second living Demon, deaths tonight are arbitrary."
+  },
+  {
+    "id1": "summoner",
+    "id2": "poppygrower",
+    "rule": "If the Poppy Grower is alive on the 3rd night, the Summoner chooses which Demon but not which player."
+  },
+  {
+    "id1": "summoner",
+    "id2": "preacher",
+    "rule": "If the living Summoner has no ability, the Storyteller has the Summoner ability."
+  },
+  {
+    "id1": "summoner",
+    "id2": "pukka",
+    "rule": "The Summoner may summon a Pukka on the 2nd night instead of the 3rd."
+  },
+  {
+    "id1": "summoner",
+    "id2": "zombuul",
+    "rule": "If the Summoner summons a dead player into the Zombuul, the Zombuul has already \"died once\"."
+  },
+  {
+    "id1": "vizier",
+    "id2": "alsaahir",
+    "rule": "The Storyteller doesn't declare the Vizier is in play."
+  },
+  {
+    "id1": "vizier",
+    "id2": "courtier",
+    "rule": "If the Vizier loses their ability, they learn this, and cannot die during the day."
+  },
+  {
+    "id1": "vizier",
+    "id2": "fearmonger",
+    "rule": "The Vizier wakes with the Fearmonger, learns who they choose and cannot choose to immediately execute that player."
+  },
+  {
+    "id1": "vizier",
+    "id2": "investigator",
+    "rule": "The Storyteller doesn't declare the Vizier is in play."
+  },
+  {
+    "id1": "vizier",
+    "id2": "politician",
+    "rule": "The Politician might register as evil to the Vizier."
+  },
+  {
+    "id1": "vizier",
+    "id2": "preacher",
+    "rule": "If the Vizier loses their ability, they learn this, and cannot die during the day."
+  },
+  {
+    "id1": "vizier",
+    "id2": "zealot",
+    "rule": "The Zealot might register as evil to the Vizier."
+  },
+  {
+    "id1": "vortox",
+    "id2": "banshee",
+    "rule": "If the Vortox kills the Banshee, all players learn that the Banshee has died."
+  },
+  {
+    "id1": "widow",
+    "id2": "damsel",
+    "rule": "If the Widow is (or has been) in play, the Damsel is poisoned."
+  },
+  {
+    "id1": "widow",
+    "id2": "poppygrower",
+    "rule": "If the Poppy Grower has their ability, the Widow does not see the Grimoire."
+  },
+  {
+    "id1": "yaggababble",
+    "id2": "exorcist",
+    "rule": "If the Exorcist chooses the Yaggababble, the Yaggababble does not kill tonight."
+  }
 ]
