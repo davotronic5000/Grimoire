@@ -45,7 +45,13 @@ export default function ScriptScannerModal({ rolesDb, onConfirm, onClose }: Prop
       const { data: { text } } = await worker.recognize(file);
       await worker.terminate();
 
-      const ids = matchRolesFromText(text, rolesDb);
+      const TEAM_ORDER: Record<string, number> = { townsfolk: 0, outsider: 1, minion: 2, demon: 3, traveler: 4 };
+      const ids = matchRolesFromText(text, rolesDb)
+        .filter(id => {
+          const team = rolesDb[id]?.team;
+          return team && team in TEAM_ORDER;
+        })
+        .sort((a, b) => (TEAM_ORDER[rolesDb[a]?.team ?? ''] ?? 99) - (TEAM_ORDER[rolesDb[b]?.team ?? ''] ?? 99));
       setMatchedIds(ids);
       setSelectedIds(new Set(ids));
       setScanState('results');
