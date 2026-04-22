@@ -29,6 +29,7 @@ export default function ClearableInput({
       {hasValue && (
         <button
           type="button"
+          onMouseDown={e => e.preventDefault()}
           onClick={onClear}
           tabIndex={-1}
           aria-label="Clear"
