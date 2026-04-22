@@ -67,6 +67,20 @@ export default function HomePage() {
           </p>
         </div>
 
+        {/* ── Parchment banner ────────────────────────────────── */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/ccc-parchment.png"
+          alt="Blood on the Clocktower"
+          style={{
+            width: '100%',
+            borderRadius: 16,
+            marginBottom: 28,
+            display: 'block',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.5)',
+          }}
+        />
+
         {/* ── New Game button ─────────────────────────────────── */}
         <button
           onClick={() => router.push('/setup')}
