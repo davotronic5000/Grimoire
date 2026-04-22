@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { RoleDefinition } from '@/lib/types';
 import { getGenericIconPath, getRoleIconPath, getRoleTeamColor } from '@/lib/roles';
+import ClearableInput from './ClearableInput';
 
 interface Props {
   scriptRoleIds: string[];
@@ -204,10 +205,11 @@ export default function RoleRevealScreen({ scriptRoleIds, rolesDb, onClose }: Pr
 
       {/* Search */}
       <div className="px-4 pb-2 pt-2 flex-shrink-0">
-        <input
+        <ClearableInput
           type="text"
           value={search}
           onChange={e => setSearch(e.target.value)}
+          onClear={() => setSearch('')}
           placeholder="Search roles…"
           className="w-full rounded-xl outline-none"
           style={{

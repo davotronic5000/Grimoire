@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useMemo } from 'react';
 import type { Game, Player, RoleDefinition } from '@/lib/types';
 import { useStore } from '@/lib/store';
 import { getRoleDistribution } from '@/lib/roles';
+import ClearableInput from './ClearableInput';
 import PlayerToken from './PlayerToken';
 import PlayerModal from './PlayerModal';
 import NightOrderPanel from './NightOrderPanel';
@@ -671,11 +672,12 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
             <p className="font-semibold" style={{ fontSize: 17, color: 'var(--botc-gold)' }}>
               Add Player
             </p>
-            <input
+            <ClearableInput
               type="text"
               placeholder="Player name"
               value={newPlayerName}
               onChange={e => setNewPlayerName(e.target.value)}
+              onClear={() => setNewPlayerName('')}
               onKeyDown={e => {
                 if (e.key === 'Enter' && newPlayerName.trim()) handleAddPlayer();
                 if (e.key === 'Escape') setShowAddPlayer(false);

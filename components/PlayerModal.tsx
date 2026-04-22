@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { Player, RoleDefinition, Game } from '@/lib/types';
 import { getRoleIconPath, getRoleTeamColor } from '@/lib/roles';
+import ClearableInput from './ClearableInput';
 import { useIsWide } from '@/lib/hooks';
 import { useStore } from '@/lib/store';
 import RoleSelector from './RoleSelector';
@@ -401,10 +402,11 @@ export default function PlayerModal({ player, game, rolesDb, onClose }: Props) {
             <p className="text-xs mb-2" style={{ color: 'var(--color-text-dim)' }}>
               Pick source role:
             </p>
-            <input
+            <ClearableInput
               type="text"
               value={reminderSearch}
               onChange={e => setReminderSearch(e.target.value)}
+              onClear={() => setReminderSearch('')}
               placeholder="Search roles…"
               className="w-full rounded-lg outline-none mb-2"
               style={{

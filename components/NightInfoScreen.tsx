@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { RoleDefinition } from '@/lib/types';
 import { getGenericIconPath, getRoleIconPath, getRoleTeamColor } from '@/lib/roles';
+import ClearableInput from './ClearableInput';
 
 interface Props {
   scriptRoleIds: string[];
@@ -327,10 +328,11 @@ export default function NightInfoScreen({ scriptRoleIds, rolesDb, onClose }: Pro
         {!isSimple && (
           <>
             <div className="px-4 pt-3 pb-2">
-              <input
+              <ClearableInput
                 type="text"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
+                onClear={() => setSearch('')}
                 placeholder={cardType === 'cerenovus' ? 'Select role to be mad as…' : 'Search roles…'}
                 className="w-full rounded-xl outline-none"
                 style={{

@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import type { RoleDefinition, RoleTeam } from '@/lib/types';
 import { getGenericIconPath, getRoleIconPath, getRoleTeamColor, TEAM_LABELS } from '@/lib/roles';
+import ClearableInput from './ClearableInput';
 import { useIsWide } from '@/lib/hooks';
 
 const ALL_TEAM_FILTERS = ['all', 'townsfolk', 'outsider', 'minion', 'demon', 'traveler', 'loric'] as const;
@@ -89,10 +90,11 @@ export default function RoleSelector({
 
       {/* Search */}
       <div className="px-5 pt-4 pb-2 flex-shrink-0">
-        <input
+        <ClearableInput
           type="text"
           value={search}
           onChange={e => setSearch(e.target.value)}
+          onClear={() => setSearch('')}
           placeholder="Search roles…"
           className="w-full rounded-xl outline-none"
           style={{

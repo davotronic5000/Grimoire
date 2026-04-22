@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import type { Game, RoleDefinition } from '@/lib/types';
+import ClearableInput from './ClearableInput';
 import { getGenericIconPath, getRoleIconPath, getRoleTeamColor } from '@/lib/roles';
 import { useStore } from '@/lib/store';
 
@@ -54,10 +55,11 @@ function RolePicker({ team, rolesDb, activeIds, onToggle, onClose }: PickerProps
       </div>
 
       <div className="px-4 pt-3 pb-2 flex-shrink-0">
-        <input
+        <ClearableInput
           type="text"
           value={search}
           onChange={e => setSearch(e.target.value)}
+          onClear={() => setSearch('')}
           placeholder={`Search ${label}…`}
           autoFocus
           className="botc-input"
