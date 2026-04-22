@@ -8,7 +8,8 @@ export interface RoleDefinition {
   firstNightReminder: string;
   otherNight: number; // 0 = does not wake
   otherNightReminder: string;
-  reminders: string[]; // reminder token labels this role uses
+  reminders: string[]; // reminder token labels this role uses (player-specific)
+  remindersGlobal?: string[]; // reminder tokens that can be placed on any player
   setup: boolean;
   ability: string;
   /** Custom image URL for homebrew roles (from script JSON "image" field) */

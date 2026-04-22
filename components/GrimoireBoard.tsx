@@ -19,6 +19,8 @@ import SoundboardPanel from './SoundboardPanel';
 import NightInfoScreen from './NightInfoScreen';
 import GameSettingsScreen from './GameSettingsScreen';
 import ScriptShareDrawer from './ScriptShareDrawer';
+import ReminderPickerModal from './ReminderPickerModal';
+import CustomReminderModal from './CustomReminderModal';
 
 interface Props {
   game: Game;
@@ -59,6 +61,9 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
 
   // ── UI visibility state ──────────────────────────────────────────
   const [selectedPlayer, setSelectedPlayer]       = useState<Player | null>(null);
+  const [tokenMenuPlayer, setTokenMenuPlayer]     = useState<Player | null>(null);
+  const [reminderPlayer, setReminderPlayer]       = useState<Player | null>(null);
+  const [customReminderPlayer, setCustomReminderPlayer] = useState<Player | null>(null);
   const [showNightOrder, setShowNightOrder]       = useState(false);
   const [showJinxes, setShowJinxes]               = useState(false);
   const [showAddPlayer, setShowAddPlayer]         = useState(false);
@@ -110,6 +115,18 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
 
   const livePlayer = selectedPlayer
     ? game.players.find(p => p.id === selectedPlayer.id) ?? null
+    : null;
+
+  const liveTokenMenuPlayer = tokenMenuPlayer
+    ? game.players.find(p => p.id === tokenMenuPlayer.id) ?? null
+    : null;
+
+  const liveReminderPlayer = reminderPlayer
+    ? game.players.find(p => p.id === reminderPlayer.id) ?? null
+    : null;
+
+  const liveCustomReminderPlayer = customReminderPlayer
+    ? game.players.find(p => p.id === customReminderPlayer.id) ?? null
     : null;
 
   function getTokenPos(index: number, player: Player) {
@@ -514,7 +531,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
                   rolesDb={rolesDb}
                   sizePx={tokenPx}
                   inwardAngle={angle + Math.PI}
-                  onClick={() => { if (!dragActiveRef.current && !dragJustEndedRef.current) setSelectedPlayer(player); }}
+                  onClick={() => { if (!dragActiveRef.current && !dragJustEndedRef.current) setTokenMenuPlayer(player); }}
                   onRemoveReminder={tokenId => removeReminderToken(game.id, player.id, tokenId)}
                   firstNightOrder={player.isAlive && player.roleId ? (firstNightRanks.get(player.roleId) ?? null) : null}
                   otherNightOrder={player.isAlive && player.roleId ? (otherNightRanks.get(player.roleId) ?? null) : null}
@@ -662,6 +679,104 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
       {/* ══════════════════════════════════════════════════════════
           PANELS & SCREENS
           ══════════════════════════════════════════════════════════ */}
+      {/* ── Token action sheet ─────────────────────────────────────── */}
+      {liveTokenMenuPlayer && (
+        <>
+          <div
+            className="fixed inset-0 z-[70]"
+            style={{ background: 'rgba(0,0,0,0.5)' }}
+            onClick={() => setTokenMenuPlayer(null)}
+          />
+          <div
+            className="fixed left-0 right-0 bottom-0 z-[71] flex flex-col"
+            style={{
+              background: 'var(--color-bg)',
+              borderTop: '1px solid var(--color-border)',
+              borderRadius: '20px 20px 0 0',
+              padding: '8px 16px 32px',
+              gap: 8,
+            }}
+          >
+            <div
+              className="mx-auto mb-2 rounded-full"
+              style={{ width: 36, height: 4, background: 'var(--color-border)' }}
+            />
+            <p
+              className="text-center font-semibold pb-1"
+              style={{ color: 'var(--color-text)', fontSize: 16 }}
+            >
+              {liveTokenMenuPlayer.name || 'Player'}
+            </p>
+            <button
+              onClick={() => { setSelectedPlayer(liveTokenMenuPlayer); setTokenMenuPlayer(null); }}
+              className="w-full rounded-2xl py-4 font-semibold text-left flex items-center gap-3 px-5 transition-all active:scale-[0.98]"
+              style={{
+                background: 'rgba(20,12,40,0.8)',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text)',
+                fontSize: 16,
+              }}
+            >
+              <span style={{ fontSize: 22 }}>⚙️</span> Settings
+            </button>
+            <button
+              onClick={() => { setReminderPlayer(liveTokenMenuPlayer); setTokenMenuPlayer(null); }}
+              className="w-full rounded-2xl py-4 font-semibold text-left flex items-center gap-3 px-5 transition-all active:scale-[0.98]"
+              style={{
+                background: 'rgba(20,12,40,0.8)',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text)',
+                fontSize: 16,
+              }}
+            >
+              <span style={{ fontSize: 22 }}>🔖</span> Add Reminder
+            </button>
+            <button
+              onClick={() => { setCustomReminderPlayer(liveTokenMenuPlayer); setTokenMenuPlayer(null); }}
+              className="w-full rounded-2xl py-4 font-semibold text-left flex items-center gap-3 px-5 transition-all active:scale-[0.98]"
+              style={{
+                background: 'rgba(20,12,40,0.8)',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text)',
+                fontSize: 16,
+              }}
+            >
+              <span style={{ fontSize: 22 }}>✏️</span> Custom Reminder
+            </button>
+            <button
+              onClick={() => setTokenMenuPlayer(null)}
+              className="w-full rounded-2xl py-4 font-semibold transition-all active:scale-[0.98]"
+              style={{
+                background: 'transparent',
+                border: '1px solid var(--color-border)',
+                color: 'var(--color-text-dim)',
+                fontSize: 16,
+                marginTop: 4,
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </>
+      )}
+
+      {liveReminderPlayer && (
+        <ReminderPickerModal
+          player={liveReminderPlayer}
+          game={game}
+          rolesDb={rolesDb}
+          onClose={() => setReminderPlayer(null)}
+        />
+      )}
+
+      {liveCustomReminderPlayer && (
+        <CustomReminderModal
+          player={liveCustomReminderPlayer}
+          game={game}
+          onClose={() => setCustomReminderPlayer(null)}
+        />
+      )}
+
       {livePlayer && (
         <PlayerModal
           player={livePlayer}
