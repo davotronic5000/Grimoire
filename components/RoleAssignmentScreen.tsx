@@ -147,6 +147,25 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose }: Props) 
     }
   }
 
+  // ── Random role selection ───────────────────────────────────────────
+  function randomiseRoles() {
+    const next = new Map<string, number>();
+    const teams: Array<keyof typeof dist> = ['townsfolk', 'outsider', 'minion', 'demon'];
+    for (const team of teams) {
+      const needed = dist[team];
+      if (needed <= 0) continue;
+      const pool = (rolesByTeam[team as RoleTeam] ?? []).slice();
+      // Fisher-Yates shuffle the pool
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+      }
+      const picked = pool.slice(0, needed);
+      for (const role of picked) next.set(role.id, 1);
+    }
+    setRoleCounts(next);
+  }
+
   // ── Shuffle & deal ──────────────────────────────────────────────────
   function doShuffle() {
     const arr: Tile[] = [];
@@ -233,23 +252,39 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose }: Props) 
           <p className="font-semibold" style={{ color: 'var(--botc-text)', fontSize: 16 }}>
             Select Roles
           </p>
-          <button
-            onClick={handleShuffle}
-            disabled={!canShuffle}
-            className="flex items-center gap-2 rounded-xl font-semibold active:scale-95"
-            style={{
-              padding: '8px 16px',
-              minHeight: 40,
-              background: canShuffle ? 'linear-gradient(135deg, #2d1f5e, #3d2878)' : 'rgba(30,20,50,0.4)',
-              border: `1px solid ${canShuffle ? '#6366f1' : 'var(--botc-border)'}`,
-              color: canShuffle ? '#a5b4fc' : 'var(--botc-muted)',
-              fontSize: 15,
-              cursor: canShuffle ? 'pointer' : 'default',
-              opacity: canShuffle ? 1 : 0.5,
-            }}
-          >
-            Shuffle & Deal →
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={randomiseRoles}
+              className="flex items-center gap-1 rounded-xl font-semibold active:scale-95"
+              style={{
+                padding: '8px 14px',
+                minHeight: 40,
+                background: 'rgba(30,20,50,0.6)',
+                border: '1px solid var(--botc-border)',
+                color: 'var(--botc-muted)',
+                fontSize: 15,
+              }}
+            >
+              🎲
+            </button>
+            <button
+              onClick={handleShuffle}
+              disabled={!canShuffle}
+              className="flex items-center gap-2 rounded-xl font-semibold active:scale-95"
+              style={{
+                padding: '8px 16px',
+                minHeight: 40,
+                background: canShuffle ? 'linear-gradient(135deg, #2d1f5e, #3d2878)' : 'rgba(30,20,50,0.4)',
+                border: `1px solid ${canShuffle ? '#6366f1' : 'var(--botc-border)'}`,
+                color: canShuffle ? '#a5b4fc' : 'var(--botc-muted)',
+                fontSize: 15,
+                cursor: canShuffle ? 'pointer' : 'default',
+                opacity: canShuffle ? 1 : 0.5,
+              }}
+            >
+              Shuffle & Deal →
+            </button>
+          </div>
         </div>
 
         {/* Distribution guide + duplicate toggle */}

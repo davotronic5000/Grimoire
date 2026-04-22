@@ -3,12 +3,15 @@ import type { RoleDefinition } from './types';
 // Common OCR substitutions to normalise before matching.
 // Applied to BOTH the OCR text and the role name needle so confusion is symmetric.
 const OCR_FIXES: [RegExp, string][] = [
-  [/0/g,  'o'],   // digit zero → o
-  [/[1|]/g, 'l'], // digit one / pipe → l
-  [/i/g,  'l'],   // unify i and l (visually identical in many fonts)
-  [/vv/g, 'w'],   // vv → w
-  [/rn/g, 'm'],   // rn → m
-  [/cb/g, 'ch'],  // ch → cb OCR error (helps Psychopath)
+  [/0/g,    'o'],  // digit zero → o
+  [/[1|]/g, 'l'],  // digit one / pipe → l
+  [/i/g,    'l'],  // unify i and l (visually identical in many fonts)
+  [/j/g,    'l'],  // j often OCR'd as i/l (helps Ojo)
+  [/q/g,    'g'],  // q/g confusion, e.g. "kniqht" → "knlght" (helps Knight)
+  [/vv/g,   'w'],  // vv → w
+  [/rn/g,   'm'],  // rn → m
+  [/cb/g,   'ch'], // ch → cb OCR error (helps Psychopath)
+  [/ck/g,   'ch'], // ck/ch confusion in gothic fonts
   [/[^a-z ']/g, ' '],
 ];
 

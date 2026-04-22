@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { Game, Player, RoleDefinition } from '@/lib/types';
 import { getGenericIconPath, getRoleIconPath, getRoleTeamColor } from '@/lib/roles';
 import { useStore } from '@/lib/store';
@@ -14,8 +14,6 @@ interface Props {
   onClose: () => void;
 }
 
-type Tab = 'inplay' | 'script';
-
 const TEAM_ORDER: Record<string, number> = {
   townsfolk: 0, outsider: 1, minion: 2, demon: 3, traveler: 4, loric: 5, fabled: 6,
 };
@@ -23,7 +21,6 @@ const TEAM_ORDER: Record<string, number> = {
 export default function RolePickerModal({ player, game, rolesDb, onClose }: Props) {
   const { updatePlayer } = useStore();
   const isWide = useIsWide();
-  const [tab, setTab] = useState<Tab>('script');
   const [search, setSearch] = useState('');
 
   // Map roleId → player names that have it assigned
@@ -39,27 +36,17 @@ export default function RolePickerModal({ player, game, rolesDb, onClose }: Prop
     return map;
   }, [game.players]);
 
-  const inPlayRoles = useMemo(() => {
-    const ids = new Set<string>();
-    for (const p of game.players) { if (p.roleId) ids.add(p.roleId); }
-    return Array.from(ids)
-      .map(id => rolesDb[id])
-      .filter(Boolean) as RoleDefinition[];
-  }, [game.players, rolesDb]);
-
   const scriptRoles = useMemo(() =>
     game.scriptRoleIds.map(id => rolesDb[id]).filter(Boolean) as RoleDefinition[],
     [game.scriptRoleIds, rolesDb]
   );
 
-  const baseRoles = tab === 'inplay' ? inPlayRoles : scriptRoles;
-
   const filteredRoles = useMemo(() => {
     const roles = search
-      ? baseRoles.filter(r => r.name.toLowerCase().includes(search.toLowerCase()))
-      : baseRoles;
+      ? scriptRoles.filter(r => r.name.toLowerCase().includes(search.toLowerCase()))
+      : scriptRoles;
     return [...roles].sort((a, b) => (TEAM_ORDER[a.team] ?? 99) - (TEAM_ORDER[b.team] ?? 99));
-  }, [baseRoles, search]);
+  }, [scriptRoles, search]);
 
   function handleSelect(roleId: string) {
     updatePlayer(game.id, player.id, { roleId });
@@ -87,24 +74,6 @@ export default function RolePickerModal({ player, game, rolesDb, onClose }: Prop
           Assign Role · {player.name}
         </p>
         <div style={{ width: 56 }} />
-      </div>
-
-      {/* Tabs */}
-      <div className="flex px-4 pt-3 gap-2 flex-shrink-0">
-        {(['inplay', 'script'] as Tab[]).map(t => (
-          <button
-            key={t}
-            onClick={() => { setTab(t); setSearch(''); }}
-            className="flex-1 rounded-xl py-2.5 font-semibold text-sm transition-all"
-            style={{
-              background: tab === t ? 'rgba(201,168,76,0.15)' : 'rgba(20,12,40,0.6)',
-              border: `1.5px solid ${tab === t ? 'var(--color-gold)' : 'var(--color-border)'}`,
-              color: tab === t ? 'var(--color-gold)' : 'var(--color-text-dim)',
-            }}
-          >
-            {t === 'inplay' ? 'In Play' : 'Full Script'}
-          </button>
-        ))}
       </div>
 
       {/* Search */}

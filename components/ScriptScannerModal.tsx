@@ -36,7 +36,7 @@ export default function ScriptScannerModal({ rolesDb, onConfirm, onClose }: Prop
     const d = imageData.data;
     const pixels = canvas.width * canvas.height;
 
-    // Convert to greyscale and build histogram for Otsu's method
+    // Convert to greyscale and build histogram
     const grey = new Uint8Array(pixels);
     const hist = new Array(256).fill(0);
     for (let i = 0; i < pixels; i++) {
@@ -44,6 +44,23 @@ export default function ScriptScannerModal({ rolesDb, onConfirm, onClose }: Prop
       grey[i] = v;
       hist[v]++;
     }
+
+    // Percentile contrast stretch: map 2nd→0 and 98th→255 so faint prints
+    // get maximum contrast before thresholding (handles parchment-coloured scripts).
+    const lo2 = pixels * 0.02, hi2 = pixels * 0.98;
+    let cumulative = 0, stretchLo = 0, stretchHi = 255;
+    for (let t = 0; t < 256; t++) {
+      cumulative += hist[t];
+      if (cumulative <= lo2) stretchLo = t;
+      if (cumulative <= hi2) stretchHi = t;
+    }
+    const stretchRange = Math.max(1, stretchHi - stretchLo);
+    for (let i = 0; i < pixels; i++) {
+      grey[i] = Math.round(Math.min(255, Math.max(0, (grey[i] - stretchLo) * 255 / stretchRange)));
+    }
+    // Rebuild histogram after stretch for accurate Otsu
+    hist.fill(0);
+    for (let i = 0; i < pixels; i++) hist[grey[i]]++;
 
     // Otsu's threshold: maximises inter-class variance
     let sumAll = 0;
