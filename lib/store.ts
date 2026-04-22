@@ -50,6 +50,7 @@ interface AppState {
   togglePhase: (gameId: string) => void;
   togglePhaseBack: (gameId: string) => void;
   reorderPlayer: (gameId: string, fromIndex: number, toIndex: number) => void;
+  swapPlayers: (gameId: string, indexA: number, indexB: number) => void;
   resetGame: (gameId: string) => void;
   changeScript: (gameId: string, scriptId: string, scriptName: string, scriptRoleIds: string[], homebrewRoles?: Record<string, RoleDefinition>, scriptAuthor?: string) => void;
 }
@@ -296,6 +297,22 @@ export const useStore = create<AppState>()(
           const players = [...game.players];
           const [moved] = players.splice(fromIndex, 1);
           players.splice(toIndex, 0, moved);
+          return {
+            games: {
+              ...state.games,
+              [gameId]: { ...game, players: players.map((p, i) => ({ ...p, seat: i })) },
+            },
+          };
+        });
+      },
+
+      swapPlayers: (gameId, indexA, indexB) => {
+        if (indexA === indexB) return;
+        set(state => {
+          const game = state.games[gameId];
+          if (!game) return state;
+          const players = [...game.players];
+          [players[indexA], players[indexB]] = [players[indexB], players[indexA]];
           return {
             games: {
               ...state.games,

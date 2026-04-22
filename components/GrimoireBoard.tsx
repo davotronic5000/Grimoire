@@ -28,6 +28,16 @@ interface Props {
 
 const RADIUS_PCT = 44;
 
+// Arch layout: 120° gap at the bottom, 240° of arc
+const ARCH_GAP   = (2 * Math.PI) / 6;
+const ARCH_SPAN  = 2 * Math.PI - ARCH_GAP;
+const ARCH_START = Math.PI / 2 + ARCH_GAP / 2; // 150° — bottom-left start
+
+function getArchAngle(index: number, total: number): number {
+  if (total <= 1) return -Math.PI / 2; // top-centre for a single token
+  return ARCH_START + (index / (total - 1)) * ARCH_SPAN;
+}
+
 function computeTokenPx(boardPx: number, count: number): number {
   if (boardPx === 0) return 100;
   const fraction =
@@ -45,7 +55,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
     ? { ...rolesDbProp, ...game.homebrewRoles }
     : rolesDbProp;
 
-  const { togglePhase, togglePhaseBack, removeReminderToken, addPlayer, reorderPlayer } = useStore();
+  const { togglePhase, togglePhaseBack, removeReminderToken, addPlayer, reorderPlayer, swapPlayers } = useStore();
 
   // ── UI visibility state ──────────────────────────────────────────
   const [selectedPlayer, setSelectedPlayer]       = useState<Player | null>(null);
@@ -73,7 +83,11 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
   // ── Drag state ───────────────────────────────────────────────────
   const [dragPlayerId, setDragPlayerId]   = useState<string | null>(null);
   const [dragPos, setDragPos]             = useState<{ x: number; y: number } | null>(null);
-  const [dropTargetIndex, setDropTargetIndex] = useState<number | null>(null);
+  const [dropTarget, setDropTarget] = useState<
+    | { mode: 'swap';   slotIndex: number }
+    | { mode: 'insert'; gapIndex: number }
+    | null
+  >(null);
   const dragOriginRef = useRef<{ x: number; y: number; index: number } | null>(null);
   const dragActiveRef = useRef(false);
   const dragJustEndedRef = useRef(false);
@@ -99,7 +113,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
     : null;
 
   function getTokenPos(index: number, player: Player) {
-    const angle = (2 * Math.PI * index) / players.length - Math.PI / 2;
+    const angle = getArchAngle(index, players.length);
     if (!boardWidth || !boardHeight) {
       return {
         left: `${50 + RADIUS_PCT * Math.cos(angle)}%` as string | number,
@@ -117,17 +131,45 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
     };
   }
 
-  // ── Drag handlers ────────────────────────────────────────────────
-  function getNearestSlotIndex(clientX: number, clientY: number): number {
+  // ── Drag helpers ─────────────────────────────────────────────────
+  function slotPos(index: number) {
+    const angle = getArchAngle(index, players.length);
+    return {
+      x: boardWidth  * (50 + RADIUS_PCT * Math.cos(angle)) / 100,
+      y: boardHeight * (50 + RADIUS_PCT * Math.sin(angle)) / 100,
+    };
+  }
+
+  function getDropTarget(clientX: number, clientY: number): { mode: 'swap'; slotIndex: number } | { mode: 'insert'; gapIndex: number } {
     const board = boardRef.current;
-    if (!board) return 0;
+    if (!board || players.length <= 1) return { mode: 'swap', slotIndex: 0 };
     const rect = board.getBoundingClientRect();
-    const cx = rect.left + rect.width  / 2;
-    const cy = rect.top  + rect.height / 2;
-    const angle = Math.atan2(clientY - cy, clientX - cx) + Math.PI / 2;
-    const norm = ((angle % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-    const raw = norm / (2 * Math.PI) * players.length;
-    return Math.round(raw) % players.length;
+    const px = clientX - rect.left;
+    const py = clientY - rect.top;
+
+    let nearestSlot = 0;
+    let nearestSlotDist = Infinity;
+    for (let i = 0; i < players.length; i++) {
+      const s = slotPos(i);
+      const d = Math.hypot(px - s.x, py - s.y);
+      if (d < nearestSlotDist) { nearestSlotDist = d; nearestSlot = i; }
+    }
+
+    let nearestGap = 0;
+    let nearestGapDist = Infinity;
+    for (let i = 0; i < players.length - 1; i++) {
+      const a = slotPos(i);
+      const b = slotPos(i + 1);
+      const mx = (a.x + b.x) / 2;
+      const my = (a.y + b.y) / 2;
+      const d = Math.hypot(px - mx, py - my);
+      if (d < nearestGapDist) { nearestGapDist = d; nearestGap = i; }
+    }
+
+    if (nearestGapDist < nearestSlotDist) {
+      return { mode: 'insert', gapIndex: nearestGap };
+    }
+    return { mode: 'swap', slotIndex: nearestSlot };
   }
 
   function handleTokenPointerDown(e: React.PointerEvent, playerId: string, index: number) {
@@ -149,7 +191,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
       setDragPlayerId(origin.playerId ?? null);
     }
     setDragPos({ x: e.clientX, y: e.clientY });
-    setDropTargetIndex(getNearestSlotIndex(e.clientX, e.clientY));
+    setDropTarget(getDropTarget(e.clientX, e.clientY));
   }
 
   function handleBoardPointerUp(e: React.PointerEvent) {
@@ -160,11 +202,18 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
     dragActiveRef.current = false;
     setDragPlayerId(null);
     setDragPos(null);
-    setDropTargetIndex(null);
+    setDropTarget(null);
     if (!wasDragging) return;
     dragJustEndedRef.current = true;
     setTimeout(() => { dragJustEndedRef.current = false; }, 50);
-    reorderPlayer(game.id, origin.index, getNearestSlotIndex(e.clientX, e.clientY));
+    const target = getDropTarget(e.clientX, e.clientY);
+    if (target.mode === 'swap') {
+      swapPlayers(game.id, origin.index, target.slotIndex);
+    } else {
+      const g = target.gapIndex;
+      const toIndex = origin.index <= g ? g : g + 1;
+      reorderPlayer(game.id, origin.index, toIndex);
+    }
   }
 
   function handleBoardPointerCancel() {
@@ -172,7 +221,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
     dragActiveRef.current = false;
     setDragPlayerId(null);
     setDragPos(null);
-    setDropTargetIndex(null);
+    setDropTarget(null);
   }
 
   const isNight    = game.phase === 'night';
@@ -293,18 +342,33 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
           onPointerUp={handleBoardPointerUp}
           onPointerCancel={handleBoardPointerCancel}
         >
-          {/* Dashed ellipse guide */}
-          <div
-            className="absolute pointer-events-none"
-            style={{
-              width:  `${RADIUS_PCT * 2}%`,
-              height: `${RADIUS_PCT * 2}%`,
-              left:   `${50 - RADIUS_PCT}%`,
-              top:    `${50 - RADIUS_PCT}%`,
-              borderRadius: '50%',
-              border: '1px dashed rgba(201,168,76,0.10)',
-            }}
-          />
+          {/* Arch guide arc (SVG) */}
+          <svg
+            className="absolute inset-0 pointer-events-none"
+            style={{ width: '100%', height: '100%', overflow: 'visible' }}
+          >
+            {boardWidth > 0 && boardHeight > 0 && (() => {
+              const cx = boardWidth / 2;
+              const cy = boardHeight / 2;
+              const rx = boardWidth  * RADIUS_PCT / 100;
+              const ry = boardHeight * RADIUS_PCT / 100;
+              const startAngle = ARCH_START;
+              const endAngle   = ARCH_START + ARCH_SPAN;
+              const x1 = cx + rx * Math.cos(startAngle);
+              const y1 = cy + ry * Math.sin(startAngle);
+              const x2 = cx + rx * Math.cos(endAngle);
+              const y2 = cy + ry * Math.sin(endAngle);
+              return (
+                <path
+                  d={`M ${x1} ${y1} A ${rx} ${ry} 0 1 1 ${x2} ${y2}`}
+                  fill="none"
+                  stroke="rgba(201,168,76,0.10)"
+                  strokeWidth="1"
+                  strokeDasharray="4 6"
+                />
+              );
+            })()}
+          </svg>
 
           {/* Centre display */}
           {(() => {
@@ -374,20 +438,43 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
           })()}
 
           {/* Drop target indicator */}
-          {dragPlayerId && dropTargetIndex !== null && (() => {
-            const tPos = getTokenPos(dropTargetIndex, players[dropTargetIndex]);
+          {dragPlayerId && dropTarget && (() => {
+            if (dropTarget.mode === 'swap') {
+              const tPos = getTokenPos(dropTarget.slotIndex, players[dropTarget.slotIndex]);
+              return (
+                <div
+                  className="absolute pointer-events-none"
+                  style={{
+                    left: tPos.left,
+                    top: tPos.top,
+                    transform: 'translate(-50%, -50%)',
+                    width: tokenPx + 12,
+                    height: tokenPx + 12,
+                    borderRadius: '50%',
+                    border: '3px dashed rgba(201,168,76,0.8)',
+                    boxShadow: '0 0 16px rgba(201,168,76,0.4)',
+                    zIndex: 25,
+                  }}
+                />
+              );
+            }
+            // Insert mode: glowing dot at the gap midpoint
+            const a = slotPos(dropTarget.gapIndex);
+            const b = slotPos(dropTarget.gapIndex + 1);
+            const mx = (a.x + b.x) / 2;
+            const my = (a.y + b.y) / 2;
             return (
               <div
                 className="absolute pointer-events-none"
                 style={{
-                  left: tPos.left,
-                  top: tPos.top,
+                  left: mx,
+                  top: my,
                   transform: 'translate(-50%, -50%)',
-                  width: tokenPx + 12,
-                  height: tokenPx + 12,
+                  width: 18,
+                  height: 18,
                   borderRadius: '50%',
-                  border: '3px dashed rgba(201,168,76,0.8)',
-                  boxShadow: '0 0 16px rgba(201,168,76,0.4)',
+                  background: 'rgba(99,102,241,0.9)',
+                  boxShadow: '0 0 20px rgba(99,102,241,0.8), 0 0 6px rgba(99,102,241,1)',
                   zIndex: 25,
                 }}
               />
@@ -396,7 +483,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
 
           {/* Player tokens */}
           {players.map((player, index) => {
-            const angle   = (2 * Math.PI * index) / players.length - Math.PI / 2;
+            const angle   = getArchAngle(index, players.length);
             const pos     = getTokenPos(index, player);
             const role    = player.roleId ? rolesDb[player.roleId] : null;
             const isDragging = dragPlayerId === player.id;
