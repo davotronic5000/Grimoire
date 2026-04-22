@@ -22,6 +22,31 @@ export default function ScriptScannerModal({ rolesDb, onConfirm, onClose }: Prop
   const [errorMsg, setErrorMsg] = useState('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
+  async function preprocessImage(file: File): Promise<Blob> {
+    const bitmap = await createImageBitmap(file);
+    const canvas = document.createElement('canvas');
+    // Scale up small images for better OCR accuracy (max 2400px on longest side)
+    const MAX = 2400;
+    const scale = Math.min(1, MAX / Math.max(bitmap.width, bitmap.height));
+    canvas.width  = Math.round(bitmap.width  * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    const ctx = canvas.getContext('2d')!;
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const d = imageData.data;
+    for (let i = 0; i < d.length; i += 4) {
+      // Greyscale
+      const g = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+      // High-contrast threshold: white paper ~255, dark text ~0
+      const v = g > 140 ? 255 : 0;
+      d[i] = d[i + 1] = d[i + 2] = v;
+    }
+    ctx.putImageData(imageData, 0, 0);
+    return new Promise<Blob>(resolve =>
+      canvas.toBlob(b => resolve(b!), 'image/png')
+    );
+  }
+
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -32,6 +57,8 @@ export default function ScriptScannerModal({ rolesDb, onConfirm, onClose }: Prop
     setProgress(0);
 
     try {
+      const processed = await preprocessImage(file);
+
       // Dynamic import keeps Tesseract out of the initial bundle
       const { createWorker } = await import('tesseract.js');
       const worker = await createWorker('eng', 1, {
@@ -41,8 +68,13 @@ export default function ScriptScannerModal({ rolesDb, onConfirm, onClose }: Prop
           }
         },
       });
+      // PSM 11 = sparse text (handles mixed icon+text layouts well)
+      await worker.setParameters({
+        tessedit_pageseg_mode: '11' as never,
+        tessedit_char_whitelist: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz '",
+      });
 
-      const { data: { text } } = await worker.recognize(file);
+      const { data: { text } } = await worker.recognize(processed);
       await worker.terminate();
 
       const EXCLUDED = new Set(['loric', 'fabled']);

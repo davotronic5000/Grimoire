@@ -5,7 +5,10 @@ const OCR_FIXES: [RegExp, string][] = [
   [/0/g, 'o'],
   [/1/g, 'l'],
   [/\|/g, 'l'],
-  [/[^a-z ]/g, ' '],
+  [/vv/g, 'w'],
+  [/rn/g, 'm'],
+  [/li/g, 'h'],  // rare but catches 'h' rendered as 'li'
+  [/[^a-z ']/g, ' '],
 ];
 
 function normalise(text: string): string {
