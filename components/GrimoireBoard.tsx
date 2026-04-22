@@ -22,6 +22,7 @@ import ScriptShareDrawer from './ScriptShareDrawer';
 import ReminderPickerModal from './ReminderPickerModal';
 import RolePickerModal from './RolePickerModal';
 import CustomReminderModal from './CustomReminderModal';
+import AddToScriptModal from './AddToScriptModal';
 
 interface Props {
   game: Game;
@@ -78,6 +79,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
   const [showNightInfo, setShowNightInfo]         = useState(false);
   const [showGameSettings, setShowGameSettings]   = useState(false);
   const [showShare, setShowShare]                 = useState(false);
+  const [showAddToScript, setShowAddToScript]     = useState(false);
   // Controlled drawer state (bottom tab bar)
   const [showBluffs, setShowBluffs]               = useState(false);
   const [showTools, setShowTools]                 = useState(false);
@@ -312,6 +314,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
     { emoji: '👁',  label: 'Show Roles',  action: () => { setShowMore(false); setShowRoleReveal(true); } },
     { emoji: '⭐',  label: 'Tools',       action: () => { setShowMore(false); setShowTools(true); } },
     { emoji: '🎴',  label: 'Deal Roles',  action: () => { setShowMore(false); setShowRoleAssignment(true); } },
+    { emoji: '➕',  label: 'Add Role',    action: () => { setShowMore(false); setShowAddToScript(true); } },
     { emoji: '⚡',  label: 'Jinxes',      action: () => { setShowMore(false); setShowJinxes(true); } },
     { emoji: '💬',  label: 'Message',     action: () => { setShowMore(false); setShowCustomMessage(true); } },
     { emoji: '✏️', label: 'Whiteboard',  action: () => { setShowMore(false); setShowWhiteboard(true); } },
@@ -838,6 +841,15 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
           game={game}
           rolesDb={rolesDb}
           onClose={() => setRolePickerPlayer(null)}
+        />
+      )}
+
+      {showAddToScript && (
+        <AddToScriptModal
+          game={game}
+          rolesDb={rolesDb}
+          allRoles={allRoles}
+          onClose={() => setShowAddToScript(false)}
         />
       )}
 

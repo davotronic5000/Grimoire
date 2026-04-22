@@ -53,6 +53,8 @@ interface AppState {
   swapPlayers: (gameId: string, indexA: number, indexB: number) => void;
   resetGame: (gameId: string) => void;
   changeScript: (gameId: string, scriptId: string, scriptName: string, scriptRoleIds: string[], homebrewRoles?: Record<string, RoleDefinition>, scriptAuthor?: string) => void;
+  addRoleToScript: (gameId: string, roleId: string) => void;
+  removeRoleFromScript: (gameId: string, roleId: string) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -380,6 +382,35 @@ export const useStore = create<AppState>()(
                   isAlive: true,
                   hasGhostVote: false,
                 })),
+              },
+            },
+          };
+        });
+      },
+
+      addRoleToScript: (gameId, roleId) => {
+        set(state => {
+          const game = state.games[gameId];
+          if (!game || game.scriptRoleIds.includes(roleId)) return state;
+          return {
+            games: {
+              ...state.games,
+              [gameId]: { ...game, scriptRoleIds: [...game.scriptRoleIds, roleId] },
+            },
+          };
+        });
+      },
+
+      removeRoleFromScript: (gameId, roleId) => {
+        set(state => {
+          const game = state.games[gameId];
+          if (!game) return state;
+          return {
+            games: {
+              ...state.games,
+              [gameId]: {
+                ...game,
+                scriptRoleIds: game.scriptRoleIds.filter(id => id !== roleId),
               },
             },
           };
