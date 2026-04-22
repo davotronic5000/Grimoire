@@ -7,7 +7,6 @@ const OCR_FIXES: [RegExp, string][] = [
   [/\|/g, 'l'],
   [/vv/g, 'w'],
   [/rn/g, 'm'],
-  [/li/g, 'h'],  // rare but catches 'h' rendered as 'li'
   [/[^a-z ']/g, ' '],
 ];
 
@@ -33,9 +32,11 @@ export function matchRolesFromText(
     if (!role.team) continue;
     const needle = normalise(role.name);
     if (needle.length < 3) continue;
-    const pos = haystack.indexOf(needle);
-    if (pos !== -1) {
-      matches.push({ id: role.id, pos });
+    // Word-boundary regex: prevents "Imp" matching inside "Important" etc.
+    const pattern = new RegExp(`(?<![a-z])${needle.replace(/ +/g, ' +')}(?![a-z])`);
+    const m = pattern.exec(haystack);
+    if (m) {
+      matches.push({ id: role.id, pos: m.index });
     }
   }
 

@@ -34,12 +34,43 @@ export default function ScriptScannerModal({ rolesDb, onConfirm, onClose }: Prop
     ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const d = imageData.data;
-    for (let i = 0; i < d.length; i += 4) {
-      // Greyscale
-      const g = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
-      // High-contrast threshold: white paper ~255, dark text ~0
-      const v = g > 140 ? 255 : 0;
-      d[i] = d[i + 1] = d[i + 2] = v;
+    const pixels = canvas.width * canvas.height;
+
+    // Convert to greyscale and build histogram for Otsu's method
+    const grey = new Uint8Array(pixels);
+    const hist = new Array(256).fill(0);
+    for (let i = 0; i < pixels; i++) {
+      const v = Math.round(0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2]);
+      grey[i] = v;
+      hist[v]++;
+    }
+
+    // Otsu's threshold: maximises inter-class variance
+    let sumAll = 0;
+    for (let t = 0; t < 256; t++) sumAll += t * hist[t];
+    let sumB = 0, wB = 0, maxVar = 0, threshold = 128;
+    for (let t = 0; t < 256; t++) {
+      wB += hist[t];
+      if (wB === 0) continue;
+      const wF = pixels - wB;
+      if (wF === 0) break;
+      sumB += t * hist[t];
+      const mB = sumB / wB;
+      const mF = (sumAll - sumB) / wF;
+      const variance = wB * wF * (mB - mF) ** 2;
+      if (variance > maxVar) { maxVar = variance; threshold = t; }
+    }
+
+    // Auto-invert if the image is predominantly dark (white text on dark bg)
+    const meanBrightness = grey.reduce((s, v) => s + v, 0) / pixels;
+    const invert = meanBrightness < 128;
+
+    // Apply threshold (with optional invert)
+    for (let i = 0; i < pixels; i++) {
+      const above = grey[i] > threshold;
+      const white = invert ? !above : above;
+      const v = white ? 255 : 0;
+      d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = v;
     }
     ctx.putImageData(imageData, 0, 0);
     return new Promise<Blob>(resolve =>
