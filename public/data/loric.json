@@ -1,8 +1,24 @@
 [
   {
-    "id": "big_wig",
+    "id": "bootlegger",
+    "name": "Bootlegger",
+    "edition": "loric",
+    "team": "loric",
+    "firstNight": 0,
+    "firstNightReminder": "",
+    "otherNight": 0,
+    "otherNightReminder": "",
+    "reminders": [
+      "?",
+      "?"
+    ],
+    "setup": true,
+    "ability": "This script has homebrew characters or rules."
+  },
+  {
+    "id": "bigwig",
     "name": "Big Wig",
-    "edition": "",
+    "edition": "loric",
     "team": "loric",
     "firstNight": 0,
     "firstNightReminder": "",
@@ -13,22 +29,9 @@
     "ability": "Each nominee chooses a player: until voting, only they may speak & they are mad the nominee is good or they might die."
   },
   {
-    "id": "bootlegger",
-    "name": "Bootlegger",
-    "edition": "",
-    "team": "loric",
-    "firstNight": 0,
-    "firstNightReminder": "",
-    "otherNight": 0,
-    "otherNightReminder": "",
-    "reminders": [],
-    "setup": false,
-    "ability": "This script has homebrew characters or rules."
-  },
-  {
     "id": "gardener",
     "name": "Gardener",
-    "edition": "",
+    "edition": "loric",
     "team": "loric",
     "firstNight": 0,
     "firstNightReminder": "",
@@ -36,25 +39,27 @@
     "otherNightReminder": "",
     "reminders": [],
     "setup": true,
-    "ability": "The Storyteller assigns 1 or more players' characters."
+    "ability": "The Storyteller assigns all players' characters."
   },
   {
-    "id": "god_of_ug",
+    "id": "godofug",
     "name": "God of Ug",
-    "edition": "",
+    "edition": "loric",
     "team": "loric",
     "firstNight": 0,
     "firstNightReminder": "",
     "otherNight": 0,
     "otherNightReminder": "",
-    "reminders": ["Ug Hat"],
+    "reminders": [
+      "Hat"
+    ],
     "setup": false,
     "ability": "One Ug hat. When wear Ug hat, must speak one sound at a time but vote twice. If fail, pass Ug hat."
   },
   {
     "id": "hindu",
     "name": "Hindu",
-    "edition": "",
+    "edition": "loric",
     "team": "loric",
     "firstNight": 0,
     "firstNightReminder": "",
@@ -67,20 +72,20 @@
   {
     "id": "knaves",
     "name": "Knaves",
-    "edition": "",
+    "edition": "loric",
     "team": "loric",
     "firstNight": 0,
     "firstNightReminder": "",
     "otherNight": 0,
     "otherNightReminder": "",
     "reminders": [],
-    "setup": true,
+    "setup": false,
     "ability": "There are 2 Storytellers: one lies & one tells the truth. Once per game, at dusk, they might switch."
   },
   {
     "id": "pope",
     "name": "Pope",
-    "edition": "",
+    "edition": "loric",
     "team": "loric",
     "firstNight": 0,
     "firstNightReminder": "",
@@ -91,27 +96,29 @@
     "ability": "There are duplicate good characters in play. They might also be bluffs."
   },
   {
-    "id": "storm_catcher",
+    "id": "stormcatcher",
     "name": "Storm Catcher",
-    "edition": "",
+    "edition": "loric",
     "team": "loric",
-    "firstNight": 0,
-    "firstNightReminder": "",
+    "firstNight": 5,
+    "firstNightReminder": "Announce which character is stormcaught. If that character is in play, mark that player as *STORMCAUGHT*. Wake each evil player and show them the character token, then the marked player. If not in play, wake each evil player, show them the *THESE CHARACTERS ARE NOT IN PLAY* token & the relevant character token.",
     "otherNight": 0,
     "otherNightReminder": "",
-    "reminders": ["Safe", "This Player Is", "Not In Play"],
+    "reminders": [
+      "Stormcaught"
+    ],
     "setup": false,
     "ability": "Name a good character. If in play, they can only die by execution, but evil players learn which player it is."
   },
   {
     "id": "tor",
     "name": "Tor",
-    "edition": "",
+    "edition": "loric",
     "team": "loric",
     "firstNight": 0,
     "firstNightReminder": "",
-    "otherNight": 0,
-    "otherNightReminder": "",
+    "otherNight": 74,
+    "otherNightReminder": "If a player died tonight, show the *YOU ARE* info token, their character token, & a thumbs up or thumbs down.",
     "reminders": [],
     "setup": true,
     "ability": "Players don't know their character or alignment. They learn them when they die."
@@ -119,26 +126,32 @@
   {
     "id": "ventriloquist",
     "name": "Ventriloquist",
-    "edition": "",
+    "edition": "loric",
     "team": "loric",
     "firstNight": 0,
     "firstNightReminder": "",
     "otherNight": 0,
     "otherNightReminder": "",
-    "reminders": ["Mad"],
+    "reminders": [
+      "Mad"
+    ],
     "setup": false,
     "ability": "If a player is mad as a fresh character during their nomination, they might not die if executed today."
   },
   {
     "id": "zenomancer",
     "name": "Zenomancer",
-    "edition": "",
+    "edition": "loric",
     "team": "loric",
     "firstNight": 0,
     "firstNightReminder": "",
     "otherNight": 0,
     "otherNightReminder": "",
-    "reminders": ["Goal"],
+    "reminders": [
+      "Goal",
+      "Goal",
+      "Goal"
+    ],
     "setup": false,
     "ability": "One or more players each have a goal. When achieved, that player learns a piece of true info."
   }

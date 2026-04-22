@@ -16,13 +16,13 @@
     "id": "chambermaid"
   },
   {
-    "id": "exorcist"
-  },
-  {
     "id": "innkeeper"
   },
   {
     "id": "gambler"
+  },
+  {
+    "id": "exorcist"
   },
   {
     "id": "gossip"
@@ -37,19 +37,13 @@
     "id": "minstrel"
   },
   {
-    "id": "tea_lady"
-  },
-  {
-    "id": "pacifist"
+    "id": "tealady"
   },
   {
     "id": "fool"
   },
   {
-    "id": "tinker"
-  },
-  {
-    "id": "moonchild"
+    "id": "pacifist"
   },
   {
     "id": "goon"
@@ -58,19 +52,22 @@
     "id": "lunatic"
   },
   {
+    "id": "tinker"
+  },
+  {
+    "id": "moonchild"
+  },
+  {
     "id": "godfather"
   },
   {
-    "id": "devils_advocate"
+    "id": "devilsadvocate"
   },
   {
     "id": "assassin"
   },
   {
     "id": "mastermind"
-  },
-  {
-    "id": "zombuul"
   },
   {
     "id": "pukka"
@@ -82,13 +79,16 @@
     "id": "po"
   },
   {
-    "id": "apprentice"
+    "id": "zombuul"
   },
   {
     "id": "matron"
   },
   {
     "id": "judge"
+  },
+  {
+    "id": "apprentice"
   },
   {
     "id": "bishop"

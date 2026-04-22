@@ -1,32 +1,99 @@
 [
   {
     "id": "_meta",
-    "name": "Sects & Violets",
-    "colour": "#8B0000"
+    "name": "Sects and Violets",
+    "author": "",
+    "logo": "",
+    "colour": "#4B0082"
   },
-  { "id": "clockmaker" },
-  { "id": "dreamer" },
-  { "id": "mathematician" },
-  { "id": "snake_charmer" },
-  { "id": "flowergirl" },
-  { "id": "town_crier" },
-  { "id": "oracle" },
-  { "id": "juggler" },
-  { "id": "savant" },
-  { "id": "artist" },
-  { "id": "seamstress" },
-  { "id": "philosopher" },
-  { "id": "sage" },
-  { "id": "sweetheart" },
-  { "id": "mutant" },
-  { "id": "barber" },
-  { "id": "klutz" },
-  { "id": "witch" },
-  { "id": "cerenovus" },
-  { "id": "evil_twin" },
-  { "id": "pit-hag" },
-  { "id": "no_dashii" },
-  { "id": "fang_gu" },
-  { "id": "vigormortis" },
-  { "id": "vortox" }
+  {
+    "id": "clockmaker"
+  },
+  {
+    "id": "snakecharmer"
+  },
+  {
+    "id": "mathematician"
+  },
+  {
+    "id": "dreamer"
+  },
+  {
+    "id": "flowergirl"
+  },
+  {
+    "id": "towncrier"
+  },
+  {
+    "id": "oracle"
+  },
+  {
+    "id": "savant"
+  },
+  {
+    "id": "seamstress"
+  },
+  {
+    "id": "philosopher"
+  },
+  {
+    "id": "artist"
+  },
+  {
+    "id": "juggler"
+  },
+  {
+    "id": "sage"
+  },
+  {
+    "id": "sweetheart"
+  },
+  {
+    "id": "klutz"
+  },
+  {
+    "id": "barber"
+  },
+  {
+    "id": "mutant"
+  },
+  {
+    "id": "witch"
+  },
+  {
+    "id": "cerenovus"
+  },
+  {
+    "id": "pithag"
+  },
+  {
+    "id": "eviltwin"
+  },
+  {
+    "id": "nodashii"
+  },
+  {
+    "id": "vigormortis"
+  },
+  {
+    "id": "vortox"
+  },
+  {
+    "id": "fanggu"
+  },
+  {
+    "id": "barista"
+  },
+  {
+    "id": "harlot"
+  },
+  {
+    "id": "butcher"
+  },
+  {
+    "id": "bonecollector"
+  },
+  {
+    "id": "deviant"
+  }
 ]

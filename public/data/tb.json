@@ -4,33 +4,87 @@
     "name": "Trouble Brewing",
     "author": "",
     "logo": "",
-    "colour": "#00008B"
+    "colour": "#8B0000"
   },
-  { "id": "washerwoman" },
-  { "id": "librarian" },
-  { "id": "investigator" },
-  { "id": "chef" },
-  { "id": "empath" },
-  { "id": "fortune_teller" },
-  { "id": "undertaker" },
-  { "id": "monk" },
-  { "id": "soldier" },
-  { "id": "ravenkeeper" },
-  { "id": "slayer" },
-  { "id": "virgin" },
-  { "id": "mayor" },
-  { "id": "butler" },
-  { "id": "saint" },
-  { "id": "recluse" },
-  { "id": "drunk" },
-  { "id": "baron" },
-  { "id": "poisoner" },
-  { "id": "spy" },
-  { "id": "scarlet_woman" },
-  { "id": "imp" },
-  { "id": "scapegoat" },
-  { "id": "beggar" },
-  { "id": "gunslinger" },
-  { "id": "thief" },
-  { "id": "bureaucrat" }
+  {
+    "id": "chef"
+  },
+  {
+    "id": "investigator"
+  },
+  {
+    "id": "washerwoman"
+  },
+  {
+    "id": "librarian"
+  },
+  {
+    "id": "empath"
+  },
+  {
+    "id": "fortuneteller"
+  },
+  {
+    "id": "undertaker"
+  },
+  {
+    "id": "monk"
+  },
+  {
+    "id": "slayer"
+  },
+  {
+    "id": "soldier"
+  },
+  {
+    "id": "ravenkeeper"
+  },
+  {
+    "id": "mayor"
+  },
+  {
+    "id": "virgin"
+  },
+  {
+    "id": "butler"
+  },
+  {
+    "id": "drunk"
+  },
+  {
+    "id": "recluse"
+  },
+  {
+    "id": "saint"
+  },
+  {
+    "id": "poisoner"
+  },
+  {
+    "id": "spy"
+  },
+  {
+    "id": "scarletwoman"
+  },
+  {
+    "id": "baron"
+  },
+  {
+    "id": "imp"
+  },
+  {
+    "id": "thief"
+  },
+  {
+    "id": "bureaucrat"
+  },
+  {
+    "id": "gunslinger"
+  },
+  {
+    "id": "beggar"
+  },
+  {
+    "id": "scapegoat"
+  }
 ]
