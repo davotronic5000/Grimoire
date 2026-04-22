@@ -16,24 +16,25 @@ function normalise(text: string): string {
 
 /**
  * Given raw OCR text and the full roles database, return IDs of roles whose
- * names appear in the text.  Uses normalised substring matching, so minor OCR
- * noise (extra spaces, punctuation) is tolerated.
+ * names appear in the text, ordered by their position in the text (i.e. the
+ * order they appear on the printed script).
  */
 export function matchRolesFromText(
   ocrText: string,
   rolesDb: Record<string, RoleDefinition>,
 ): string[] {
   const haystack = normalise(ocrText);
-  const matched: string[] = [];
+  const matches: { id: string; pos: number }[] = [];
 
   for (const role of Object.values(rolesDb)) {
-    if (!role.team) continue; // skip special entries
+    if (!role.team) continue;
     const needle = normalise(role.name);
-    if (needle.length < 3) continue; // skip very short names to avoid false positives
-    if (haystack.includes(needle)) {
-      matched.push(role.id);
+    if (needle.length < 3) continue;
+    const pos = haystack.indexOf(needle);
+    if (pos !== -1) {
+      matches.push({ id: role.id, pos });
     }
   }
 
-  return matched;
+  return matches.sort((a, b) => a.pos - b.pos).map(m => m.id);
 }
