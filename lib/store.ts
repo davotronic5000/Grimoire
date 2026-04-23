@@ -22,7 +22,6 @@ interface AppState {
   rolesDb: Record<string, RoleDefinition> | null;
   allRoles: RoleDefinition[] | null; // full array including special entries
   jinxes: { id1: string; id2: string; rule: string }[] | null;
-  _hasHydrated: boolean;
 
   // Actions
   loadRolesDb: () => Promise<void>;
@@ -68,7 +67,6 @@ export const useStore = create<AppState>()(
       rolesDb: null,
       allRoles: null,
       jinxes: null,
-      _hasHydrated: false,
 
       loadRolesDb: async () => {
         if (get().rolesDb) return; // already loaded
@@ -472,9 +470,6 @@ export const useStore = create<AppState>()(
         games: state.games,
         activeGameId: state.activeGameId,
       }),
-      onRehydrateStorage: () => () => {
-        useStore.setState({ _hasHydrated: true });
-      },
     }
   )
 );

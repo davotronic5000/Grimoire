@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, Suspense } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useStore } from '@/lib/store';
 import GrimoireBoard from '@/components/GrimoireBoard';
@@ -11,7 +11,15 @@ function GameContent() {
   const { games, rolesDb, allRoles, loadRolesDb } = useStore();
 
   const gameId = searchParams.get('id');
-  const hasHydrated = useStore(s => s._hasHydrated);
+  // localStorage hydration in Zustand v5 is synchronous, so hasHydrated() is true
+  // on first render. The onFinishHydration subscription handles async storage adapters.
+  const [hasHydrated, setHasHydrated] = useState(() => useStore.persist.hasHydrated());
+  useEffect(() => {
+    if (!hasHydrated) {
+      return useStore.persist.onFinishHydration(() => setHasHydrated(true));
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const game = gameId ? games[gameId] : null;
 
   useEffect(() => {
