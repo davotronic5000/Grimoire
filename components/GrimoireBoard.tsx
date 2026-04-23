@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import type { Game, Player, RoleDefinition } from '@/lib/types';
 import { useStore } from '@/lib/store';
 import { getRoleDistribution } from '@/lib/roles';
@@ -54,10 +54,7 @@ function computeTokenPx(boardPx: number, count: number): number {
   return Math.max(64, Math.round(boardPx * fraction));
 }
 
-export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: Props) {
-  const rolesDb = (game.homebrewRoles && Object.keys(game.homebrewRoles).length > 0)
-    ? { ...rolesDbProp, ...game.homebrewRoles }
-    : rolesDbProp;
+export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
 
   const { togglePhase, togglePhaseBack, removeReminderToken, addPlayer, reorderPlayer, swapPlayers, updatePlayer } = useStore();
 
@@ -97,7 +94,7 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
     | { mode: 'insert'; gapIndex: number }
     | null
   >(null);
-  const dragOriginRef = useRef<{ x: number; y: number; index: number } | null>(null);
+  const dragOriginRef = useRef<{ x: number; y: number; index: number; playerId: string; pointerId: number } | null>(null);
   const dragActiveRef = useRef(false);
   const dragJustEndedRef = useRef(false);
 
@@ -200,21 +197,19 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
 
   function handleTokenPointerDown(e: React.PointerEvent, playerId: string, index: number) {
     if (e.button !== undefined && e.button > 0) return;
-    dragOriginRef.current = { x: e.clientX, y: e.clientY, index };
+    dragOriginRef.current = { x: e.clientX, y: e.clientY, index, playerId, pointerId: e.pointerId };
     dragActiveRef.current = false;
-    (dragOriginRef.current as typeof dragOriginRef.current & { playerId: string; pointerId: number }).playerId = playerId;
-    (dragOriginRef.current as typeof dragOriginRef.current & { playerId: string; pointerId: number }).pointerId = e.pointerId;
   }
 
   function handleBoardPointerMove(e: React.PointerEvent) {
-    const origin = dragOriginRef.current as (typeof dragOriginRef.current & { playerId?: string; pointerId?: number }) | null;
+    const origin = dragOriginRef.current;
     if (!origin) return;
     const dx = e.clientX - origin.x;
     const dy = e.clientY - origin.y;
     if (!dragActiveRef.current && Math.sqrt(dx * dx + dy * dy) < 8) return;
     if (!dragActiveRef.current) {
       dragActiveRef.current = true;
-      setDragPlayerId(origin.playerId ?? null);
+      setDragPlayerId(origin.playerId);
       // Capture pointer to board so moves/ups always reach us, even over child elements
       if (origin.pointerId != null) boardRef.current?.setPointerCapture(origin.pointerId);
     }
@@ -322,6 +317,14 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
     { emoji: '🔗',  label: 'Share',       action: () => { setShowMore(false); setShowShare(true); } },
     { emoji: '⬇️', label: 'Download Script', action: handleDownloadScript },
   ] as const;
+
+  // Stable callbacks so React.memo on PlayerToken can skip re-renders
+  const handleTokenClick = useCallback((player: Player) => {
+    if (!dragActiveRef.current && !dragJustEndedRef.current) setTokenMenuPlayer(player);
+  }, []);
+  const handleRemoveReminder = useCallback((playerId: string, tokenId: string) => {
+    removeReminderToken(game.id, playerId, tokenId);
+  }, [game.id, removeReminderToken]);
 
   return (
     <div
@@ -563,8 +566,8 @@ export default function GrimoireBoard({ game, rolesDb: rolesDbProp, allRoles }: 
                   rolesDb={rolesDb}
                   sizePx={tokenPx}
                   inwardAngle={angle + Math.PI}
-                  onClick={() => { if (!dragActiveRef.current && !dragJustEndedRef.current) setTokenMenuPlayer(player); }}
-                  onRemoveReminder={tokenId => removeReminderToken(game.id, player.id, tokenId)}
+                  onClick={() => handleTokenClick(player)}
+                  onRemoveReminder={tokenId => handleRemoveReminder(player.id, tokenId)}
                   firstNightOrder={player.isAlive && player.roleId ? (firstNightRanks.get(player.roleId) ?? null) : null}
                   otherNightOrder={player.isAlive && player.roleId ? (otherNightRanks.get(player.roleId) ?? null) : null}
                 />

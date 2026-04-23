@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import type { Game, RoleDefinition } from '@/lib/types';
 import { useStore } from '@/lib/store';
 import {
@@ -205,15 +205,17 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose }: Props) 
 
   function handleAssign(playerId: string) {
     if (activeTileIdx === null) return;
-    const tile = tiles[activeTileIdx];
-    setTiles(prev =>
-      prev.map((t, i) => {
-        if (i === activeTileIdx) return { ...t, assignedPlayerId: playerId };
+    const idx = activeTileIdx;
+    setTiles(prev => {
+      const tile = prev[idx];
+      if (!tile) return prev;
+      updatePlayer(game.id, playerId, { roleId: tile.roleId });
+      return prev.map((t, i) => {
+        if (i === idx) return { ...t, assignedPlayerId: playerId };
         if (t.assignedPlayerId === playerId) return { ...t, assignedPlayerId: null };
         return t;
-      })
-    );
-    updatePlayer(game.id, playerId, { roleId: tile.roleId });
+      });
+    });
     setActiveTileIdx(null);
   }
 
@@ -661,9 +663,11 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose }: Props) 
   // ASSIGN PHASE
   // ══════════════════════════════════════════════════════════════
   const activeTile = activeTileIdx !== null ? tiles[activeTileIdx] : null;
-  if (activeTile && activeTileIdx !== null) {
-    lastActiveTileRef.current = { tile: activeTile, idx: activeTileIdx };
-  }
+  useEffect(() => {
+    if (activeTile && activeTileIdx !== null) {
+      lastActiveTileRef.current = { tile: activeTile, idx: activeTileIdx };
+    }
+  }, [activeTile, activeTileIdx]);
   const displayTile = activeTile ?? lastActiveTileRef.current?.tile ?? null;
   const displayTileIdx = activeTile ? activeTileIdx! : (lastActiveTileRef.current?.idx ?? 0);
   const displayRole = displayTile ? rolesDb[displayTile.roleId] : null;

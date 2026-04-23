@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 interface Props {
   onClose: () => void;
@@ -97,12 +97,12 @@ function playThunder(ctx: AudioContext) {
 
 function playBanshee(_ctx: AudioContext) {
   const audio = new Audio('/sounds/banshee.mp3');
-  audio.play();
+  audio.play().catch(() => {});
 }
 
 function playWilhelm(_ctx: AudioContext) {
   const audio = new Audio('/sounds/wilhelm.mp3');
-  audio.play();
+  audio.play().catch(() => {});
 }
 
 // ── Component ────────────────────────────────────────────────────────
@@ -111,6 +111,13 @@ export default function SoundboardPanel({ onClose }: Props) {
   const audioCtxRef = useRef<AudioContext | null>(null);
   const [playing, setPlaying] = useState<string | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      audioCtxRef.current?.close();
+    };
+  }, []);
 
   function getCtx(): AudioContext {
     if (!audioCtxRef.current) {

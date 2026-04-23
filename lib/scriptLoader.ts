@@ -1,5 +1,6 @@
 import type { RoleDefinition, ParsedScript } from './types';
 import { normalizeRoleId } from './roles';
+import { nanoid } from 'nanoid';
 
 // Per the official schema, entries can be strings (official IDs) or objects
 type RawEntry = string | Record<string, unknown>;
@@ -148,6 +149,6 @@ export function parseUploadedScript(
     };
   }
 
-  const customId = `custom-${Date.now()}`;
+  const customId = `custom-${nanoid(8)}`;
   return parseScript(raw as RawEntry[], customId, rolesDb);
 }

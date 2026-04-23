@@ -6,6 +6,88 @@ import ClearableInput from './ClearableInput';
 import { getGenericIconPath, getRoleIconPath, getRoleTeamColor } from '@/lib/roles';
 import { useStore } from '@/lib/store';
 
+function TokenRow({
+  ids,
+  team,
+  label,
+  color,
+  rolesDb,
+  onEdit,
+}: {
+  ids: string[];
+  team: 'loric' | 'fabled';
+  label: string;
+  color: string;
+  rolesDb: Record<string, RoleDefinition>;
+  onEdit: (team: 'loric' | 'fabled') => void;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center justify-between">
+        <p className="section-label" style={{ color }}>
+          {label}
+        </p>
+        <button
+          onClick={() => onEdit(team)}
+          className="text-xs rounded-lg px-2 py-1 transition-all active:opacity-60"
+          style={{
+            background: `${color}22`,
+            border: `1px solid ${color}55`,
+            color,
+          }}
+        >
+          Edit
+        </button>
+      </div>
+
+      {ids.length === 0 ? (
+        <p className="text-xs" style={{ color: 'var(--botc-muted)', opacity: 0.6 }}>
+          None active
+        </p>
+      ) : (
+        <div className="flex flex-wrap gap-2">
+          {ids.map(id => {
+            const role = rolesDb[id];
+            if (!role) return null;
+            return (
+              <div key={id} className="flex flex-col items-center gap-0.5" style={{ maxWidth: 56 }}>
+                <div
+                  className="rounded-full relative"
+                  style={{
+                    width: 48,
+                    height: 48,
+                    background: `radial-gradient(circle at 40% 30%, ${color}44, #1a1025 70%)`,
+                    border: `2px solid ${color}`,
+                    boxShadow: `0 0 10px ${color}44`,
+                    padding: '10%',
+                  }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={getRoleIconPath(role)}
+                    alt={role.name}
+                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    onError={e => {
+                      const img = e.target as HTMLImageElement;
+                      if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = getGenericIconPath(role.team); }
+                    }}
+                  />
+                </div>
+                <span
+                  className="text-center leading-tight"
+                  style={{ fontSize: 9, color, maxWidth: 52, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                >
+                  {role.name}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface Props {
   game: Game;
   rolesDb: Record<string, RoleDefinition>;
@@ -160,89 +242,11 @@ export default function StorytoolsDrawer({ game, rolesDb, isOpen: isOpenProp, on
     );
   }
 
-  function TokenRow({
-    ids,
-    team,
-    label,
-    color,
-  }: {
-    ids: string[];
-    team: 'loric' | 'fabled';
-    label: string;
-    color: string;
-  }) {
-    return (
-      <div className="flex flex-col gap-1.5">
-        <div className="flex items-center justify-between">
-          <p className="section-label" style={{ color }}>
-            {label}
-          </p>
-          <button
-            onClick={() => setPicking(team)}
-            className="text-xs rounded-lg px-2 py-1 transition-all active:opacity-60"
-            style={{
-              background: `${color}22`,
-              border: `1px solid ${color}55`,
-              color,
-            }}
-          >
-            Edit
-          </button>
-        </div>
-
-        {ids.length === 0 ? (
-          <p className="text-xs" style={{ color: 'var(--botc-muted)', opacity: 0.6 }}>
-            None active
-          </p>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {ids.map(id => {
-              const role = rolesDb[id];
-              if (!role) return null;
-              return (
-                <div key={id} className="flex flex-col items-center gap-0.5" style={{ maxWidth: 56 }}>
-                  <div
-                    className="rounded-full relative"
-                    style={{
-                      width: 48,
-                      height: 48,
-                      background: `radial-gradient(circle at 40% 30%, ${color}44, #1a1025 70%)`,
-                      border: `2px solid ${color}`,
-                      boxShadow: `0 0 10px ${color}44`,
-                      padding: '10%',
-                    }}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={getRoleIconPath(role)}
-                      alt={role.name}
-                      style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                      onError={e => {
-                        const img = e.target as HTMLImageElement;
-                        if (!img.dataset.fallback) { img.dataset.fallback = '1'; img.src = getGenericIconPath(role.team); }
-                      }}
-                    />
-                  </div>
-                  <span
-                    className="text-center leading-tight"
-                    style={{ fontSize: 9, color, maxWidth: 52, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
-                  >
-                    {role.name}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    );
-  }
-
   const panelContent = (
     <div className="flex flex-col gap-4 p-4">
-      <TokenRow ids={fabledIds} team="fabled" label="Fabled" color={fabledColor} />
+      <TokenRow ids={fabledIds} team="fabled" label="Fabled" color={fabledColor} rolesDb={rolesDb} onEdit={setPicking} />
       <div style={{ borderTop: '1px solid var(--botc-border)' }} />
-      <TokenRow ids={loricIds} team="loric" label="Loric" color={loricColor} />
+      <TokenRow ids={loricIds} team="loric" label="Loric" color={loricColor} rolesDb={rolesDb} onEdit={setPicking} />
     </div>
   );
 

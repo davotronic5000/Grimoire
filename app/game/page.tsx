@@ -11,6 +11,7 @@ function GameContent() {
   const { games, rolesDb, allRoles, loadRolesDb } = useStore();
 
   const gameId = searchParams.get('id');
+  const hasHydrated = useStore(s => s._hasHydrated);
   const game = gameId ? games[gameId] : null;
 
   useEffect(() => {
@@ -18,6 +19,14 @@ function GameContent() {
       loadRolesDb().catch(console.error);
     }
   }, [rolesDb, loadRolesDb]);
+
+  if (!hasHydrated) {
+    return (
+      <div className="h-screen-safe flex items-center justify-center" style={{ color: 'var(--color-text-dim)' }}>
+        <div className="text-4xl animate-pulse">📖</div>
+      </div>
+    );
+  }
 
   if (!gameId || !game) {
     return (

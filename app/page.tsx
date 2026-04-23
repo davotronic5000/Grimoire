@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from '@/lib/store';
 import type { Game } from '@/lib/types';
@@ -9,10 +9,20 @@ export default function HomePage() {
   const router = useRouter();
   const { games, loadRolesDb, deleteGame } = useStore();
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     loadRolesDb().catch(console.error);
   }, [loadRolesDb]);
+
+  // Auto-cancel delete confirmation after 3 s
+  useEffect(() => {
+    if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
+    if (confirmDelete) {
+      confirmTimerRef.current = setTimeout(() => setConfirmDelete(null), 3000);
+    }
+    return () => { if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current); };
+  }, [confirmDelete]);
 
   const sortedGames: Game[] = Object.values(games).sort(
     (a, b) => b.createdAt - a.createdAt

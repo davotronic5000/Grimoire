@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import type { RoleDefinition } from '@/lib/types';
 import { matchRolesFromText } from '@/lib/scriptMatcher';
 import { getGenericIconPath, getRoleIconPath, getRoleTeamColor } from '@/lib/roles';
@@ -21,6 +21,16 @@ export default function ScriptScannerModal({ rolesDb, onConfirm, onClose }: Prop
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [errorMsg, setErrorMsg] = useState('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const workerRef = useRef<{ terminate: () => Promise<unknown> } | null>(null);
+  const previewUrlRef = useRef<string | null>(null);
+
+  // Clean up blob URL and any running worker on unmount
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+      workerRef.current?.terminate();
+    };
+  }, []);
 
   async function preprocessImage(file: File): Promise<Blob> {
     const bitmap = await createImageBitmap(file);
@@ -32,6 +42,7 @@ export default function ScriptScannerModal({ rolesDb, onConfirm, onClose }: Prop
     canvas.height = Math.round(bitmap.height * scale);
     const ctx = canvas.getContext('2d')!;
     ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close(); // release GPU/GC reference
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const d = imageData.data;
     const pixels = canvas.width * canvas.height;
@@ -100,7 +111,11 @@ export default function ScriptScannerModal({ rolesDb, onConfirm, onClose }: Prop
     if (!file) return;
     e.target.value = '';
 
-    setPreviewUrl(URL.createObjectURL(file));
+    // Revoke previous preview blob URL before creating a new one
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    const blobUrl = URL.createObjectURL(file);
+    previewUrlRef.current = blobUrl;
+    setPreviewUrl(blobUrl);
     setScanState('processing');
     setProgress(0);
 
@@ -116,6 +131,7 @@ export default function ScriptScannerModal({ rolesDb, onConfirm, onClose }: Prop
           }
         },
       });
+      workerRef.current = worker;
       // PSM 11 = sparse text (handles mixed icon+text layouts well)
       await worker.setParameters({
         tessedit_pageseg_mode: '11' as never,
@@ -124,6 +140,7 @@ export default function ScriptScannerModal({ rolesDb, onConfirm, onClose }: Prop
 
       const { data: { text } } = await worker.recognize(processed);
       await worker.terminate();
+      workerRef.current = null;
 
       const EXCLUDED = new Set(['loric', 'fabled']);
       const ids = matchRolesFromText(text, rolesDb)
@@ -243,7 +260,7 @@ export default function ScriptScannerModal({ rolesDb, onConfirm, onClose }: Prop
                 {errorMsg}
               </p>
               <button
-                onClick={() => { setScanState('idle'); setPreviewUrl(null); }}
+                onClick={() => { if (previewUrlRef.current) { URL.revokeObjectURL(previewUrlRef.current); previewUrlRef.current = null; } setScanState('idle'); setPreviewUrl(null); }}
                 className="rounded-xl px-6 py-3 font-semibold active:scale-95"
                 style={{ border: '1px solid var(--color-border)', color: 'var(--color-text-dim)', fontSize: 15 }}
               >
@@ -310,7 +327,7 @@ export default function ScriptScannerModal({ rolesDb, onConfirm, onClose }: Prop
               </div>
 
               <button
-                onClick={() => { setScanState('idle'); setPreviewUrl(null); }}
+                onClick={() => { if (previewUrlRef.current) { URL.revokeObjectURL(previewUrlRef.current); previewUrlRef.current = null; } setScanState('idle'); setPreviewUrl(null); }}
                 className="w-full mt-4 rounded-xl py-3 text-sm active:opacity-60"
                 style={{ border: '1px dashed var(--color-border)', color: 'var(--color-text-dim)' }}
               >

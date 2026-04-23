@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import type { Player, RoleDefinition } from '@/lib/types';
 import { getIconPath, getGenericIconPath, getRoleIconPath, getRoleTeamColor } from '@/lib/roles';
 
@@ -20,7 +20,7 @@ interface Props {
   otherNightOrder: number | null;
 }
 
-export default function PlayerToken({ player, role, rolesDb, sizePx: px, inwardAngle, onClick, onRemoveReminder, firstNightOrder, otherNightOrder }: Props) {
+const PlayerToken = memo(function PlayerToken({ player, role, rolesDb, sizePx: px, inwardAngle, onClick, onRemoveReminder, firstNightOrder, otherNightOrder }: Props) {
   const isDead = !player.isAlive;
   const teamColor = getRoleTeamColor(role?.team);
   const [popupTokenId, setPopupTokenId] = useState<string | null>(null);
@@ -434,4 +434,6 @@ export default function PlayerToken({ player, role, rolesDb, sizePx: px, inwardA
       })()}
     </div>
   );
-}
+});
+
+export default PlayerToken;

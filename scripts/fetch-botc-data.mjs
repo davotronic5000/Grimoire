@@ -229,4 +229,4 @@ function cleanReminder(text) {
   const otherNightWakers = rolesJson.filter(r => r.otherNight > 0 && r.otherNight < 100).length;
   console.log(`  First-night wakers: ${firstNightWakers}, Other-night wakers: ${otherNightWakers}`);
   console.log('\nDone. Run download-wiki-icons.mjs to fetch icons for any new roles.');
-})();
+})().catch(err => { console.error('\nFailed:', err); process.exit(1); });

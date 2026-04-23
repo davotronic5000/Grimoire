@@ -21,6 +21,8 @@ interface AppState {
   // Runtime state (not persisted — reloaded each session)
   rolesDb: Record<string, RoleDefinition> | null;
   allRoles: RoleDefinition[] | null; // full array including special entries
+  jinxes: { id1: string; id2: string; rule: string }[] | null;
+  _hasHydrated: boolean;
 
   // Actions
   loadRolesDb: () => Promise<void>;
@@ -55,6 +57,7 @@ interface AppState {
   changeScript: (gameId: string, scriptId: string, scriptName: string, scriptRoleIds: string[], homebrewRoles?: Record<string, RoleDefinition>, scriptAuthor?: string) => void;
   addRoleToScript: (gameId: string, roleId: string) => void;
   removeRoleFromScript: (gameId: string, roleId: string) => void;
+  loadJinxes: () => Promise<void>;
 }
 
 export const useStore = create<AppState>()(
@@ -64,6 +67,8 @@ export const useStore = create<AppState>()(
       activeGameId: null,
       rolesDb: null,
       allRoles: null,
+      jinxes: null,
+      _hasHydrated: false,
 
       loadRolesDb: async () => {
         if (get().rolesDb) return; // already loaded
@@ -74,12 +79,28 @@ export const useStore = create<AppState>()(
         ]);
         if (!rolesRes.ok) throw new Error('Failed to load roles database');
         const raw: RoleDefinition[] = await rolesRes.json();
-        const loricRaw: RoleDefinition[] = loricRes.ok ? await loricRes.json() : [];
-        const fabledRaw: RoleDefinition[] = fabledRes.ok ? await fabledRes.json() : [];
+        const loricRaw: RoleDefinition[] = await (async () => {
+          try { return loricRes.ok ? (await loricRes.json() as RoleDefinition[]) : []; }
+          catch { return []; }
+        })();
+        const fabledRaw: RoleDefinition[] = await (async () => {
+          try { return fabledRes.ok ? (await fabledRes.json() as RoleDefinition[]) : []; }
+          catch { return []; }
+        })();
         const allRaw = [...raw, ...loricRaw, ...fabledRaw];
         const db = buildRolesIndex(allRaw);
         buildAliasMap(db);
         set({ rolesDb: db, allRoles: allRaw });
+      },
+
+      loadJinxes: async () => {
+        if (get().jinxes) return;
+        try {
+          const res = await fetch('/data/jinxes.json');
+          if (!res.ok) return;
+          const data = await res.json();
+          set({ jinxes: data });
+        } catch { /* silently ignore */ }
       },
 
       createGame: (params) => {
@@ -451,6 +472,9 @@ export const useStore = create<AppState>()(
         games: state.games,
         activeGameId: state.activeGameId,
       }),
+      onRehydrateStorage: () => () => {
+        useStore.setState({ _hasHydrated: true });
+      },
     }
   )
 );

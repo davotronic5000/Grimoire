@@ -1,15 +1,10 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { Game, RoleDefinition } from '@/lib/types';
 import { getIconPath, getGenericIconPath, getRoleIconPath } from '@/lib/roles';
 import { useIsWide } from '@/lib/hooks';
-
-interface Jinx {
-  id1: string;
-  id2: string;
-  rule: string;
-}
+import { useStore } from '@/lib/store';
 
 interface Props {
   game: Game;
@@ -20,16 +15,11 @@ interface Props {
 
 export default function JinxPanel({ game, rolesDb, isOpen, onClose }: Props) {
   const isWide = useIsWide();
-  const [allJinxes, setAllJinxes] = useState<Jinx[] | null>(null);
-  const [loadError, setLoadError] = useState(false);
+  const { jinxes: allJinxes, loadJinxes } = useStore();
 
   useEffect(() => {
-    if (!isOpen || allJinxes !== null) return;
-    fetch('/data/jinxes.json')
-      .then(r => r.json())
-      .then(setAllJinxes)
-      .catch(() => setLoadError(true));
-  }, [isOpen, allJinxes]);
+    if (isOpen && !allJinxes) loadJinxes();
+  }, [isOpen, allJinxes, loadJinxes]);
 
   const assignedRoleIds = useMemo(() => {
     const ids = new Set<string>();
@@ -51,9 +41,7 @@ export default function JinxPanel({ game, rolesDb, isOpen, onClose }: Props) {
     });
   }, [allJinxes, game.scriptRoleIds, assignedRoleIds]);
 
-  const subtitle = loadError
-    ? 'Failed to load'
-    : allJinxes === null
+  const subtitle = allJinxes === null
     ? 'Loading…'
     : relevant.length === 1
     ? '1 active jinx'
@@ -101,15 +89,9 @@ export default function JinxPanel({ game, rolesDb, isOpen, onClose }: Props) {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
-          {allJinxes === null && !loadError && (
+          {allJinxes === null && (
             <p className="text-center py-8 text-sm" style={{ color: 'var(--color-text-dim)' }}>
               Loading…
-            </p>
-          )}
-
-          {loadError && (
-            <p className="text-center py-8 text-sm" style={{ color: 'var(--color-text-dim)' }}>
-              Failed to load jinxes.
             </p>
           )}
 

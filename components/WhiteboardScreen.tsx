@@ -23,19 +23,38 @@ export default function WhiteboardScreen({ onClose }: Props) {
   const isDrawing = useRef(false);
   const lastPos = useRef<{ x: number; y: number } | null>(null);
 
-  // Size the canvas buffer to match its rendered CSS size
+  // Size the canvas buffer to match its rendered CSS size; re-size on orientation change,
+  // preserving existing strokes by snapshotting to an off-screen canvas first.
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const raf = requestAnimationFrame(() => {
+
+    function resize() {
+      if (!canvas) return;
       const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+
+      // Preserve existing content
+      let snap: HTMLCanvasElement | null = null;
+      if (canvas.width > 0 && canvas.height > 0) {
+        snap = document.createElement('canvas');
+        snap.width = canvas.width;
+        snap.height = canvas.height;
+        snap.getContext('2d')!.drawImage(canvas, 0, 0);
+      }
+
       canvas.width = rect.width;
       canvas.height = rect.height;
       const ctx = canvas.getContext('2d')!;
       ctx.fillStyle = '#06040f';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-    });
-    return () => cancelAnimationFrame(raf);
+      if (snap) ctx.drawImage(snap, 0, 0);
+    }
+
+    let raf = requestAnimationFrame(resize);
+    const obs = new ResizeObserver(() => { raf = requestAnimationFrame(resize); });
+    obs.observe(canvas);
+    return () => { cancelAnimationFrame(raf); obs.disconnect(); };
   }, []);
 
   function getPos(e: React.PointerEvent<HTMLCanvasElement>) {

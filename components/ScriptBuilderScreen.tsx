@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { nanoid } from 'nanoid';
 import type { ParsedScript, RoleDefinition, RoleTeam } from '@/lib/types';
 import { getGenericIconPath, getRoleIconPath, getRoleTeamColor, TEAM_LABELS } from '@/lib/roles';
 import { useIsWide } from '@/lib/hooks';
@@ -73,7 +74,7 @@ export default function ScriptBuilderScreen({ rolesDb, onSelect, onClose }: Prop
     if (selected.size === 0) return;
     onSelect({
       meta: {
-        id: `custom-${Date.now()}`,
+        id: `custom-${nanoid(8)}`,
         name: scriptName.trim() || 'Custom Script',
         author: authorName.trim() || undefined,
       },

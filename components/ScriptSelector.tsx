@@ -73,6 +73,11 @@ export default function ScriptSelector({ rolesDb, onSelect, onBuild }: Props) {
   function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    e.target.value = '';
+    if (file.size > 2 * 1024 * 1024) {
+      setError('File is too large — please select a script JSON file under 2 MB.');
+      return;
+    }
     setError(null);
     const reader = new FileReader();
     reader.onload = ev => {
@@ -85,8 +90,6 @@ export default function ScriptSelector({ rolesDb, onSelect, onBuild }: Props) {
       }
     };
     reader.readAsText(file);
-    // Reset input so the same file can be re-selected
-    e.target.value = '';
   }
 
   return (
