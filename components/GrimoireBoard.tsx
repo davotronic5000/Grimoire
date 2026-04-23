@@ -359,7 +359,7 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
   const moreItems = [
     { emoji: '👁',  label: 'Show Roles',  action: () => { setShowMore(false); setShowRoleReveal(true); } },
     { emoji: '⭐',  label: 'Tools',       action: () => { setShowMore(false); setShowTools(true); } },
-    { emoji: '🎴',  label: 'Deal Roles',  action: () => { setShowMore(false); setShowRoleAssignment(true); } },
+    { emoji: '🎴',  label: 'Setup Roles', action: () => { setShowMore(false); setShowRoleAssignment(true); } },
     { emoji: '➕',  label: 'Add Role',    action: () => { setShowMore(false); setShowAddToScript(true); } },
     { emoji: '⚡',  label: 'Jinxes',      action: () => { setShowMore(false); setShowJinxes(true); } },
     { emoji: '💬',  label: 'Message',     action: () => { setShowMore(false); setShowCustomMessage(true); } },
