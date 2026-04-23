@@ -23,6 +23,7 @@ import ReminderPickerModal from './ReminderPickerModal';
 import RolePickerModal from './RolePickerModal';
 import CustomReminderModal from './CustomReminderModal';
 import AddToScriptModal from './AddToScriptModal';
+import DirectAssignModal from './DirectAssignModal';
 
 interface Props {
   game: Game;
@@ -77,6 +78,11 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
   const [showGameSettings, setShowGameSettings]   = useState(false);
   const [showShare, setShowShare]                 = useState(false);
   const [showAddToScript, setShowAddToScript]     = useState(false);
+
+  // ── Assign mode state ────────────────────────────────────────────
+  const [assignMode, setAssignMode]               = useState(false);
+  const [assignRoleCounts, setAssignRoleCounts]   = useState<Map<string, number> | null>(null);
+  const [assignModePlayer, setAssignModePlayer]   = useState<Player | null>(null);
   // Controlled drawer state (bottom tab bar)
   const [showBluffs, setShowBluffs]               = useState(false);
   const [showTools, setShowTools]                 = useState(false);
@@ -278,6 +284,51 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
     return ranks;
   }, [players, rolesDb]);
 
+  // Pool remaining = original counts minus what's currently assigned to any player
+  const assignRemaining = useMemo(() => {
+    if (!assignRoleCounts) return new Map<string, number>();
+    const remaining = new Map(assignRoleCounts);
+    game.players.forEach(p => {
+      if (!p.roleId) return;
+      const n = remaining.get(p.roleId);
+      if (n !== undefined) {
+        if (n <= 1) remaining.delete(p.roleId);
+        else remaining.set(p.roleId, n - 1);
+      }
+    });
+    return remaining;
+  }, [assignRoleCounts, game.players]);
+
+  const assignRemainingCount = useMemo(() => {
+    let n = 0;
+    assignRemaining.forEach(c => { n += c; });
+    return n;
+  }, [assignRemaining]);
+
+  // Remaining shown to the modal includes the current player's own slot returned to the pool
+  const liveAssignModePlayer = assignModePlayer
+    ? game.players.find(p => p.id === assignModePlayer.id) ?? null
+    : null;
+
+  const assignRemainingForModal = useMemo(() => {
+    if (!liveAssignModePlayer || !assignRoleCounts) return assignRemaining;
+    const remaining = new Map(assignRemaining);
+    const roleId = liveAssignModePlayer.roleId;
+    if (roleId && assignRoleCounts.has(roleId)) {
+      remaining.set(roleId, (remaining.get(roleId) ?? 0) + 1);
+    }
+    return remaining;
+  }, [assignRemaining, liveAssignModePlayer, assignRoleCounts]);
+
+  function handleStartAssign(roleCounts: Map<string, number>) {
+    game.players.forEach(p => {
+      if (p.roleId) updatePlayer(game.id, p.id, { roleId: null });
+    });
+    setAssignRoleCounts(roleCounts);
+    setAssignMode(true);
+    setShowRoleAssignment(false);
+  }
+
   function handleAddPlayer() {
     addPlayer(game.id, newPlayerName);
     setNewPlayerName('');
@@ -320,8 +371,14 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
 
   // Stable callbacks so React.memo on PlayerToken can skip re-renders
   const handleTokenClick = useCallback((player: Player) => {
-    if (!dragActiveRef.current && !dragJustEndedRef.current) setTokenMenuPlayer(player);
-  }, []);
+    if (!dragActiveRef.current && !dragJustEndedRef.current) {
+      if (assignMode) {
+        setAssignModePlayer(player);
+      } else {
+        setTokenMenuPlayer(player);
+      }
+    }
+  }, [assignMode]);
   const handleRemoveReminder = useCallback((playerId: string, tokenId: string) => {
     removeReminderToken(game.id, playerId, tokenId);
   }, [game.id, removeReminderToken]);
@@ -576,6 +633,44 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
           })}
         </div>
       </div>
+
+      {/* ══════════════════════════════════════════════════════════
+          ASSIGN MODE BANNER
+          ══════════════════════════════════════════════════════════ */}
+      {assignMode && (
+        <div
+          className="flex-shrink-0 flex items-center justify-between px-4"
+          style={{
+            height: 46,
+            background: 'rgba(8,6,18,0.97)',
+            borderTop: `1px solid ${assignRemainingCount === 0 ? 'rgba(34,197,94,0.35)' : 'rgba(99,102,241,0.35)'}`,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 15 }}>{assignRemainingCount === 0 ? '✓' : '🎯'}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: assignRemainingCount === 0 ? '#86efac' : '#a5b4fc' }}>
+              {assignRemainingCount === 0 ? 'All roles assigned' : 'Assigning Roles'}
+            </span>
+            {assignRemainingCount > 0 && (
+              <span style={{ fontSize: 12, color: 'var(--botc-muted)' }}>
+                — {assignRemainingCount} remaining
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => { setAssignMode(false); setAssignRoleCounts(null); }}
+            style={{
+              padding: '5px 14px', borderRadius: 8,
+              background: assignRemainingCount === 0 ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.1)',
+              border: `1px solid ${assignRemainingCount === 0 ? '#22c55e' : 'rgba(239,68,68,0.35)'}`,
+              color: assignRemainingCount === 0 ? '#86efac' : '#ef4444',
+              fontSize: 12, fontWeight: 600,
+            }}
+          >
+            {assignRemainingCount === 0 ? 'Done ✓' : 'Exit Mode'}
+          </button>
+        </div>
+      )}
 
       {/* ══════════════════════════════════════════════════════════
           BOTTOM TAB BAR
@@ -927,6 +1022,24 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
           game={game}
           rolesDb={rolesDb}
           onClose={() => setShowRoleAssignment(false)}
+          onStartAssign={handleStartAssign}
+        />
+      )}
+
+      {liveAssignModePlayer && (
+        <DirectAssignModal
+          player={liveAssignModePlayer}
+          rolesDb={rolesDb}
+          remaining={assignRemainingForModal}
+          onAssign={(playerId, roleId) => {
+            updatePlayer(game.id, playerId, { roleId });
+            setAssignModePlayer(null);
+          }}
+          onClear={(playerId) => {
+            updatePlayer(game.id, playerId, { roleId: null });
+            setAssignModePlayer(null);
+          }}
+          onClose={() => setAssignModePlayer(null)}
         />
       )}
 

@@ -17,6 +17,7 @@ interface Props {
   game: Game;
   rolesDb: Record<string, RoleDefinition>;
   onClose: () => void;
+  onStartAssign: (roleCounts: Map<string, number>) => void;
 }
 
 interface Tile {
@@ -57,7 +58,7 @@ function alwaysMulti(role: RoleDefinition): boolean {
   );
 }
 
-export default function RoleAssignmentScreen({ game, rolesDb, onClose }: Props) {
+export default function RoleAssignmentScreen({ game, rolesDb, onClose, onStartAssign }: Props) {
   const { updatePlayer } = useStore();
   const [phase, setPhase] = useState<'select' | 'assign'>('select');
 
@@ -74,6 +75,7 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose }: Props) 
   const [allowDuplicates, setAllowDuplicates] = useState(false);
   const [search, setSearch] = useState('');
   const [showDealWarning, setShowDealWarning] = useState(false);
+  const [pendingAction, setPendingAction] = useState<'shuffle' | 'assign'>('shuffle');
 
   const [tiles, setTiles] = useState<Tile[]>([]);
   const [activeTileIdx, setActiveTileIdx] = useState<number | null>(null);
@@ -195,11 +197,26 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose }: Props) 
     return found;
   }, [roleCounts, rolesDb]);
 
+  function doAssignRoles() {
+    setShowDealWarning(false);
+    onStartAssign(roleCounts);
+  }
+
   function handleShuffle() {
     if (warnRoles.length > 0) {
+      setPendingAction('shuffle');
       setShowDealWarning(true);
     } else {
       doShuffle();
+    }
+  }
+
+  function handleAssignRoles() {
+    if (warnRoles.length > 0) {
+      setPendingAction('assign');
+      setShowDealWarning(true);
+    } else {
+      doAssignRoles();
     }
   }
 
@@ -254,39 +271,21 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose }: Props) 
           <p className="font-semibold" style={{ color: 'var(--botc-text)', fontSize: 16 }}>
             Select Roles
           </p>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={randomiseRoles}
-              className="flex items-center gap-1 rounded-xl font-semibold active:scale-95"
-              style={{
-                padding: '8px 14px',
-                minHeight: 40,
-                background: 'rgba(30,20,50,0.6)',
-                border: '1px solid var(--botc-border)',
-                color: 'var(--botc-muted)',
-                fontSize: 15,
-              }}
-            >
-              🎲
-            </button>
-            <button
-              onClick={handleShuffle}
-              disabled={!canShuffle}
-              className="flex items-center gap-2 rounded-xl font-semibold active:scale-95"
-              style={{
-                padding: '8px 16px',
-                minHeight: 40,
-                background: canShuffle ? 'linear-gradient(135deg, #2d1f5e, #3d2878)' : 'rgba(30,20,50,0.4)',
-                border: `1px solid ${canShuffle ? '#6366f1' : 'var(--botc-border)'}`,
-                color: canShuffle ? '#a5b4fc' : 'var(--botc-muted)',
-                fontSize: 15,
-                cursor: canShuffle ? 'pointer' : 'default',
-                opacity: canShuffle ? 1 : 0.5,
-              }}
-            >
-              Shuffle & Deal →
-            </button>
-          </div>
+          <button
+            onClick={randomiseRoles}
+            className="flex items-center gap-1 rounded-xl font-semibold active:scale-95"
+            style={{
+              padding: '8px 14px',
+              minHeight: 40,
+              background: 'rgba(30,20,50,0.6)',
+              border: '1px solid var(--botc-border)',
+              color: 'var(--botc-muted)',
+              fontSize: 15,
+            }}
+            aria-label="Random selection"
+          >
+            🎲
+          </button>
         </div>
 
         {/* Distribution guide + duplicate toggle */}
@@ -575,6 +574,45 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose }: Props) 
           })}
         </div>
 
+        {/* ── Action footer ────────────────────────────────────── */}
+        <div
+          className="flex-shrink-0 flex gap-3 px-4 py-3"
+          style={{ borderTop: '1px solid var(--botc-border)', background: 'rgba(8,6,18,0.97)' }}
+        >
+          <button
+            onClick={handleAssignRoles}
+            disabled={!canShuffle}
+            className="flex-1 rounded-xl font-semibold active:scale-95"
+            style={{
+              padding: '13px 12px',
+              fontSize: 15,
+              background: canShuffle ? 'rgba(99,102,241,0.18)' : 'rgba(30,20,50,0.4)',
+              border: `1px solid ${canShuffle ? 'rgba(99,102,241,0.6)' : 'var(--botc-border)'}`,
+              color: canShuffle ? '#a5b4fc' : 'var(--botc-muted)',
+              cursor: canShuffle ? 'pointer' : 'default',
+              opacity: canShuffle ? 1 : 0.5,
+            }}
+          >
+            🎯 Assign Roles
+          </button>
+          <button
+            onClick={handleShuffle}
+            disabled={!canShuffle}
+            className="flex-1 rounded-xl font-semibold active:scale-95"
+            style={{
+              padding: '13px 12px',
+              fontSize: 15,
+              background: canShuffle ? 'linear-gradient(135deg, #2d1f5e, #3d2878)' : 'rgba(30,20,50,0.4)',
+              border: `1px solid ${canShuffle ? '#6366f1' : 'var(--botc-border)'}`,
+              color: canShuffle ? '#a5b4fc' : 'var(--botc-muted)',
+              cursor: canShuffle ? 'pointer' : 'default',
+              opacity: canShuffle ? 1 : 0.5,
+            }}
+          >
+            🔀 Shuffle & Deal
+          </button>
+        </div>
+
         {/* ── Warning confirmation modal ───────────────────────── */}
         {showDealWarning && (
           <>
@@ -640,7 +678,7 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose }: Props) 
                   Cancel
                 </button>
                 <button
-                  onClick={doShuffle}
+                  onClick={() => pendingAction === 'shuffle' ? doShuffle() : doAssignRoles()}
                   className="flex-1 rounded-xl py-3 font-semibold active:scale-95"
                   style={{
                     background: 'linear-gradient(135deg, #2d1f5e, #3d2878)',
@@ -649,7 +687,7 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose }: Props) 
                     fontSize: 15,
                   }}
                 >
-                  Deal anyway →
+                  {pendingAction === 'shuffle' ? 'Deal anyway →' : 'Assign anyway →'}
                 </button>
               </div>
             </div>
