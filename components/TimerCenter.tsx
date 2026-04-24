@@ -42,15 +42,86 @@ function playChime(ctx: AudioContext) {
 }
 
 function playGong(ctx: AudioContext) {
-  // Deep resonant gong: low fundamentals + inharmonic overtones, long decay
-  [[82.4, 0.4, 5.5], [110, 0.22, 4.5], [164.8, 0.12, 3.5], [246.9, 0.07, 2.5], [329.6, 0.04, 1.8]].forEach(
-    ([f, v, d]) => scheduleOsc(ctx, f, v, d),
-  );
+  // Same synthesis as the Soundboard gong
+  const now = ctx.currentTime;
+  const master = ctx.createGain();
+  master.connect(ctx.destination);
+
+  const partials = [
+    { freq: 110,  amp: 1.00, decay: 9.0 },
+    { freq: 175,  amp: 0.65, decay: 7.0 },
+    { freq: 281,  amp: 0.45, decay: 5.5 },
+    { freq: 452,  amp: 0.25, decay: 4.0 },
+    { freq: 730,  amp: 0.12, decay: 2.5 },
+    { freq: 220,  amp: 0.30, decay: 6.0 },
+  ];
+  partials.forEach(({ freq, amp, decay }) => {
+    const osc = ctx.createOscillator();
+    const g   = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    g.gain.setValueAtTime(amp * 0.18, now);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + decay);
+    osc.connect(g);
+    g.connect(master);
+    osc.start(now);
+    osc.stop(now + decay + 0.1);
+  });
+
+  // Strike transient — short filtered noise burst
+  const strikeDur  = 0.06;
+  const strikeBuf  = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * strikeDur), ctx.sampleRate);
+  const strikeData = strikeBuf.getChannelData(0);
+  for (let i = 0; i < strikeData.length; i++) strikeData[i] = Math.random() * 2 - 1;
+  const strike     = ctx.createBufferSource();
+  strike.buffer    = strikeBuf;
+  const strikeGain = ctx.createGain();
+  strikeGain.gain.setValueAtTime(0.5, now);
+  strikeGain.gain.exponentialRampToValueAtTime(0.0001, now + strikeDur);
+  strike.connect(strikeGain);
+  strikeGain.connect(master);
+  strike.start(now);
 }
 
 function playTick(ctx: AudioContext, isTick: boolean) {
-  // Short percussive click: higher pitch for tick, lower for tock
-  scheduleOsc(ctx, isTick ? 1400 : 950, 0.18, 0.055, 'square');
+  // Old clock escapement: band-passed noise burst + short woody body resonance
+  const now = ctx.currentTime;
+  const dur = 0.048;
+
+  // Noise (escapement click)
+  const bufLen = Math.ceil(ctx.sampleRate * dur);
+  const buf    = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+  const d      = buf.getChannelData(0);
+  for (let i = 0; i < bufLen; i++) d[i] = Math.random() * 2 - 1;
+
+  const noise = ctx.createBufferSource();
+  noise.buffer = buf;
+
+  const bpf    = ctx.createBiquadFilter();
+  bpf.type     = 'bandpass';
+  bpf.frequency.value = isTick ? 2800 : 1600;
+  bpf.Q.value  = 1.4;
+
+  const noiseGain = ctx.createGain();
+  noiseGain.gain.setValueAtTime(isTick ? 0.65 : 0.45, now);
+  noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+  noise.connect(bpf);
+  bpf.connect(noiseGain);
+  noiseGain.connect(ctx.destination);
+  noise.start(now);
+
+  // Wooden case body resonance (short low sine)
+  const body     = ctx.createOscillator();
+  const bodyGain = ctx.createGain();
+  body.type      = 'sine';
+  body.frequency.value = isTick ? 720 : 520;
+  bodyGain.gain.setValueAtTime(0.07, now);
+  bodyGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.038);
+  body.connect(bodyGain);
+  bodyGain.connect(ctx.destination);
+  body.start(now);
+  body.stop(now + 0.04);
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
