@@ -131,7 +131,7 @@ export default function TimerCenter({ boardWidth, boardHeight, boardMinDim }: Pr
   const cy = boardHeight / 2;
 
   // Toggle button sits just below the centre-info cluster
-  const toggleTop = cy + Math.max(62, boardMinDim * 0.17);
+  const toggleTop = cy + Math.max(44, boardMinDim * 0.11);
 
   // Responsive sizing
   const timeFontSize = Math.max(34, Math.min(58, boardMinDim * 0.1));
