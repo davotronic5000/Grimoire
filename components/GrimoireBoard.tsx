@@ -24,6 +24,7 @@ import RolePickerModal from './RolePickerModal';
 import CustomReminderModal from './CustomReminderModal';
 import AddToScriptModal from './AddToScriptModal';
 import DirectAssignModal from './DirectAssignModal';
+import TimerCenter from './TimerCenter';
 
 interface Props {
   game: Game;
@@ -587,6 +588,13 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
               />
             );
           })()}
+
+          {/* Timer widget */}
+          <TimerCenter
+            boardWidth={boardWidth}
+            boardHeight={boardHeight}
+            boardMinDim={boardMinDim}
+          />
 
           {/* Player tokens */}
           {players.map((player, index) => {
