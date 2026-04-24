@@ -184,7 +184,7 @@ export default function TimerCenter({ boardWidth, boardHeight, boardMinDim }: Pr
   function adjustMinutes(delta: number) {
     const newTarget = Math.max(60, resetTarget + delta * 60);
     setResetTarget(newTarget);
-    setSeconds(prev => Math.max(60, prev + delta * 60));
+    setSeconds(prev => Math.max(0, prev + delta * 60));
   }
 
   function reset() {
