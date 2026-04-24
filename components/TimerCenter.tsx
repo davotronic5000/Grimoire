@@ -144,21 +144,21 @@ export default function TimerCenter({ boardWidth, boardHeight, boardMinDim }: Pr
       >
         <button
           onClick={() => setVisible(v => !v)}
-          className="flex items-center gap-1.5 rounded-full active:scale-90 transition-transform"
+          className="flex items-center gap-3 rounded-full active:scale-90 transition-transform"
           style={{
-            padding: '4px 11px',
-            height: 24,
+            padding: '16px 44px',
+            height: 96,
             background: running || visible
               ? 'rgba(201,168,76,0.16)'
               : 'rgba(14,9,28,0.7)',
             border: `1px solid ${running ? '#fbbf2466' : visible ? 'rgba(201,168,76,0.35)' : 'rgba(255,255,255,0.1)'}`,
             color: running ? '#fbbf24' : 'var(--botc-muted)',
-            fontSize: 11,
+            fontSize: 22,
             fontWeight: 600,
           }}
           aria-label="Toggle timer"
         >
-          <span>⏱</span>
+          <span style={{ fontSize: 28 }}>⏱</span>
           {/* Show live countdown on toggle when panel is collapsed */}
           {running && !visible && (
             <span
