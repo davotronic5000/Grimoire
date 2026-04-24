@@ -48,6 +48,11 @@ function playGong(ctx: AudioContext) {
   );
 }
 
+function playTick(ctx: AudioContext, isTick: boolean) {
+  // Short percussive click: higher pitch for tick, lower for tock
+  scheduleOsc(ctx, isTick ? 1400 : 950, 0.18, 0.055, 'square');
+}
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function fmt(s: number) {
@@ -92,9 +97,12 @@ export default function TimerCenter({ boardWidth, boardHeight, boardMinDim }: Pr
           }
           return 0;
         }
-        if (next % 60 === 0 && !mutedRef.current) {
+        if (!mutedRef.current) {
           const ctx = getCtx(audioCtxRef);
-          if (ctx) playChime(ctx);
+          if (ctx) {
+            if (next % 60 === 0) playChime(ctx);
+            if (next <= 30) playTick(ctx, next % 2 === 0);
+          }
         }
         return next;
       });
