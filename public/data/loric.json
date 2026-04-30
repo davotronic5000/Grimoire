@@ -139,6 +139,19 @@
     "ability": "If a player is mad as a fresh character during their nomination, they might not die if executed today."
   },
   {
+    "id": "plussy_mcone_face",
+    "name": "Plussy McOne Face",
+    "edition": "loric",
+    "team": "loric",
+    "firstNight": 0,
+    "firstNightReminder": "",
+    "otherNight": 0,
+    "otherNightReminder": "",
+    "reminders": [],
+    "setup": true,
+    "ability": "1 extra role is added to the game, the role can be from any set, and can be good, evil or a bluff."
+  },
+  {
     "id": "zenomancer",
     "name": "Zenomancer",
     "edition": "loric",
