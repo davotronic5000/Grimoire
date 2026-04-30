@@ -111,9 +111,17 @@ export default async function ScriptPage({ params }: { params: Promise<{ slug: s
       ))}
 
       {/* Footer */}
-      <p style={{ marginTop: 32, fontSize: 11, color: '#4a4060', textAlign: 'center' }}>
-        Blood on the Clocktower · Grimoire
-      </p>
+      <div style={{ marginTop: 32, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/ccc-parchment.png"
+          alt="Community Created Content"
+          style={{ width: 180, opacity: 0.85 }}
+        />
+        <p style={{ margin: 0, fontSize: 11, color: '#4a4060', textAlign: 'center' }}>
+          Blood on the Clocktower · Grimoire
+        </p>
+      </div>
     </div>
   );
 }
