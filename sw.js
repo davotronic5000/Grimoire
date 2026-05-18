@@ -17,6 +17,20 @@ cleanupOutdatedCaches();
 const NINETY_DAYS = 90 * 24 * 60 * 60;
 const ONE_YEAR    = 365 * 24 * 60 * 60;
 
+// The /game page is fully client-side: the server always renders the same
+// loading-spinner shell regardless of the ?id= param. Normalising all
+// /game?id=X requests to a single cache key means one cached entry covers
+// every game — including ones created offline that have never been fetched.
+const gameKeyPlugin = {
+  cacheKeyWillBeUsed: async ({ request }) => {
+    const url = new URL(request.url);
+    if (url.pathname === '/game') {
+      return new URL('/game', url.origin).href;
+    }
+    return request.url;
+  },
+};
+
 // ── Start URL ──────────────────────────────────────────────────────────────
 // NetworkFirst so the home page stays fresh, with opaque-redirect handling
 // for iOS standalone mode.
@@ -42,25 +56,10 @@ registerRoute(
   'GET'
 );
 
-// ── Next.js RSC prefetch requests ──────────────────────────────────────────
-// StaleWhileRevalidate: cached immediately on first visit, stays available
-// offline for 30 days regardless of when the app was last used online.
-registerRoute(
-  ({ request, url, sameOrigin }) =>
-    request.headers.get('RSC') === '1' &&
-    request.headers.get('Next-Router-Prefetch') === '1' &&
-    sameOrigin &&
-    !url.pathname.startsWith('/api/'),
-  new StaleWhileRevalidate({
-    cacheName: 'pages-rsc-prefetch',
-    plugins: [new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: NINETY_DAYS })],
-  }),
-  'GET'
-);
-
-// ── Next.js RSC navigation requests ────────────────────────────────────────
-// Same strategy: once a page has been visited online, its RSC payload stays
-// cached for 30 days. This is the key fix for offline navigation.
+// ── Next.js RSC requests (prefetch + navigation) ───────────────────────────
+// Both use the same cache so that a prefetch of /game (triggered on home-page
+// load) satisfies a later navigation RSC request to /game?id=NEW_ID.
+// gameKeyPlugin collapses all /game?id=* keys into one entry.
 registerRoute(
   ({ request, url, sameOrigin }) =>
     request.headers.get('RSC') === '1' &&
@@ -68,7 +67,10 @@ registerRoute(
     !url.pathname.startsWith('/api/'),
   new StaleWhileRevalidate({
     cacheName: 'pages-rsc',
-    plugins: [new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: NINETY_DAYS })],
+    plugins: [
+      gameKeyPlugin,
+      new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: NINETY_DAYS }),
+    ],
   }),
   'GET'
 );
@@ -78,7 +80,10 @@ registerRoute(
   ({ url, sameOrigin }) => sameOrigin && !url.pathname.startsWith('/api/'),
   new StaleWhileRevalidate({
     cacheName: 'pages',
-    plugins: [new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: NINETY_DAYS })],
+    plugins: [
+      gameKeyPlugin,
+      new ExpirationPlugin({ maxEntries: 32, maxAgeSeconds: NINETY_DAYS }),
+    ],
   }),
   'GET'
 );
