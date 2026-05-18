@@ -8,6 +8,20 @@ import { RangeRequestsPlugin } from 'workbox-range-requests';
 self.skipWaiting();
 clientsClaim();
 
+// ── Pre-warm critical routes at install time ───────────────────────────────
+// Runs before the user interacts with the app, so /game and /setup are
+// available offline from the very first session.
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open('pages-rsc').then((cache) =>
+      Promise.allSettled([
+        fetch('/game',  { headers: { RSC: '1' } }).then(r => r.ok && cache.put('/game',  r)),
+        fetch('/setup', { headers: { RSC: '1' } }).then(r => r.ok && cache.put('/setup', r)),
+      ])
+    )
+  );
+});
+
 // Inject precache manifest at build time — all static assets, data files, icons
 precacheAndRoute(self.__WB_MANIFEST, {
   ignoreURLParametersMatching: [/^utm_/, /^fbclid$/],
