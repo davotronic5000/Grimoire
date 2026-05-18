@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useStore } from '@/lib/store';
 import type { Game } from '@/lib/types';
 
@@ -13,7 +14,9 @@ export default function HomePage() {
 
   useEffect(() => {
     loadRolesDb().catch(console.error);
-  }, [loadRolesDb]);
+    router.prefetch('/setup');
+    router.prefetch('/game');
+  }, [loadRolesDb, router]);
 
   // Auto-cancel delete confirmation after 3 s
   useEffect(() => {
@@ -78,14 +81,14 @@ export default function HomePage() {
         </div>
 
         {/* ── New Game button ─────────────────────────────────── */}
-        <button
-          onClick={() => router.push('/setup')}
+        <Link
+          href="/setup"
           className="botc-btn-primary w-full transition-all active:scale-[0.98]"
-          style={{ marginBottom: 28, fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}
+          style={{ marginBottom: 28, fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, textDecoration: 'none' }}
         >
           <span style={{ fontSize: 20 }}>+</span>
           New Game
-        </button>
+        </Link>
 
         {/* ── Game list ───────────────────────────────────────── */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

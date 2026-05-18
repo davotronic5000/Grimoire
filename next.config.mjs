@@ -2,12 +2,13 @@ import withPWA from '@ducanh2912/next-pwa';
 
 const pwaConfig = withPWA({
   dest: 'public',
-  cacheOnFrontEndNav: true,
-  aggressiveFrontEndNavCaching: true,
   reloadOnOnline: true,
   disable: process.env.NODE_ENV === 'development',
   workboxOptions: {
-    disableDevLogs: true,
+    // InjectManifest: our custom sw.js defines all caching strategies,
+    // letting us use StaleWhileRevalidate for RSC payloads so pages
+    // remain available offline for 30 days after the last online visit.
+    swSrc: 'sw.js',
   },
 });
 
