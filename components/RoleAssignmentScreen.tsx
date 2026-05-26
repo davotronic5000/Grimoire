@@ -25,7 +25,7 @@ interface Tile {
   assignedPlayerId: string | null;
 }
 
-const TEAM_ORDER: RoleTeam[] = ['townsfolk', 'outsider', 'minion', 'demon', 'traveler'];
+const TEAM_ORDER: RoleTeam[] = ['townsfolk', 'outsider', 'minion', 'demon'];
 
 /**
  * Roles that inherently support multiple copies and should always show the
@@ -63,10 +63,11 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose, onStartAs
   const [phase, setPhase] = useState<'select' | 'assign'>('select');
 
   // ── Role counts: Map<roleId, count> — supports duplicates ──────────
+  // Traveler roles are excluded — they're assigned manually outside this flow
   const [roleCounts, setRoleCounts] = useState<Map<string, number>>(() => {
     const counts = new Map<string, number>();
     game.players.forEach(p => {
-      if (p.roleId && rolesDb[p.roleId]) {
+      if (p.roleId && rolesDb[p.roleId] && rolesDb[p.roleId].team !== 'traveler') {
         counts.set(p.roleId, (counts.get(p.roleId) ?? 0) + 1);
       }
     });
@@ -81,7 +82,10 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose, onStartAs
   const [activeTileIdx, setActiveTileIdx] = useState<number | null>(null);
   const lastActiveTileRef = useRef<{ tile: Tile; idx: number } | null>(null);
 
-  const playerCount = game.players.length;
+  // Traveler players are excluded from this flow — they assign roles manually
+  const nonTravelerPlayerCount = game.players.filter(
+    p => !(p.roleId && rolesDb[p.roleId]?.team === 'traveler')
+  ).length;
 
   // Derived selection values
   const selectedTotal = useMemo(() => {
@@ -90,16 +94,8 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose, onStartAs
     return n;
   }, [roleCounts]);
 
-  const travelerSelectedCount = useMemo(() => {
-    let n = 0;
-    roleCounts.forEach((count, id) => {
-      if (rolesDb[id]?.team === 'traveler') n += count;
-    });
-    return n;
-  }, [roleCounts, rolesDb]);
-
-  // Distribution target excludes traveler seats — travelers don't affect TF/OUT/MIN/DEM ratio
-  const dist = getRoleDistribution(playerCount - travelerSelectedCount);
+  // Distribution target based on non-traveler seats only
+  const dist = getRoleDistribution(nonTravelerPlayerCount);
 
   const selectionCounts = useMemo(() => {
     const counts: Partial<Record<RoleTeam, number>> = {};
@@ -112,7 +108,7 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose, onStartAs
     return counts;
   }, [roleCounts, rolesDb]);
 
-  const canShuffle = selectedTotal === playerCount;
+  const canShuffle = selectedTotal === nonTravelerPlayerCount;
 
   // Group script roles by team
   const rolesByTeam = useMemo(() => {
@@ -318,7 +314,7 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose, onStartAs
         >
           {/* Count indicator */}
           <span style={{ fontSize: 13, color: 'var(--botc-muted)', marginRight: 2 }}>
-            {selectedTotal}/{playerCount}
+            {selectedTotal}/{nonTravelerPlayerCount}
           </span>
 
           {/* Team distribution */}
