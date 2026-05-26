@@ -49,7 +49,6 @@ export interface Player {
   name: string;
   roleId: string | null;
   isAlive: boolean;
-  hasGhostVote: boolean; // dead players' ghost vote token
   reminderTokens: ReminderToken[];
   seat: number; // position index 0..n-1 for circle layout
   /** Explicit alignment override — null/undefined means use role default */

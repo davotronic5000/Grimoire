@@ -192,26 +192,6 @@ const PlayerToken = memo(function PlayerToken({ player, role, rolesDb, sizePx: p
           </div>
         )}
 
-        {/* Ghost vote badge */}
-        {isDead && player.hasGhostVote && (
-          <div
-            className="absolute rounded-full flex items-center justify-center font-bold"
-            style={{
-              width: Math.max(20, px * 0.29),
-              height: Math.max(20, px * 0.29),
-              top: Math.max(2, px * 0.03),
-              left: '50%',
-              transform: 'translateX(-50%)',
-              fontSize: Math.max(11, px * 0.17),
-              background: 'rgba(168,85,247,0.92)',
-              color: '#fff',
-              border: '2px solid rgba(216,180,254,0.8)',
-              boxShadow: '0 0 8px rgba(168,85,247,0.7)',
-            }}
-          >
-            👻
-          </div>
-        )}
       </button>
 
       {/* ── Night order badges — outside button so they're not clipped ── */}

@@ -890,8 +890,7 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
             <div className="flex gap-2">
               <button
                 onClick={() => {
-                  const dying = liveTokenMenuPlayer.isAlive;
-                  updatePlayer(game.id, liveTokenMenuPlayer.id, { isAlive: !liveTokenMenuPlayer.isAlive, hasGhostVote: dying });
+                  updatePlayer(game.id, liveTokenMenuPlayer.id, { isAlive: !liveTokenMenuPlayer.isAlive });
                 }}
                 className="flex-1 rounded-2xl py-4 font-semibold transition-all active:scale-[0.98]"
                 style={{
@@ -903,20 +902,6 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
               >
                 {liveTokenMenuPlayer.isAlive ? '❤️ Alive' : '✝️ Dead'}
               </button>
-              {!liveTokenMenuPlayer.isAlive && (
-                <button
-                  onClick={() => updatePlayer(game.id, liveTokenMenuPlayer.id, { hasGhostVote: !liveTokenMenuPlayer.hasGhostVote })}
-                  className="flex-1 rounded-2xl py-4 font-semibold transition-all active:scale-[0.98]"
-                  style={{
-                    fontSize: 16,
-                    background: liveTokenMenuPlayer.hasGhostVote ? 'rgba(168,85,247,0.2)' : 'rgba(20,12,40,0.8)',
-                    border: `1px solid ${liveTokenMenuPlayer.hasGhostVote ? '#a855f7' : 'var(--color-border)'}`,
-                    color: liveTokenMenuPlayer.hasGhostVote ? '#a855f7' : 'var(--color-text-dim)',
-                  }}
-                >
-                  👻 Ghost Vote
-                </button>
-              )}
             </div>
 
             {/* ── Role actions ── */}

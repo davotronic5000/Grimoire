@@ -108,7 +108,6 @@ export const useStore = create<AppState>()(
           name,
           roleId: null,
           isAlive: true,
-          hasGhostVote: false,
           reminderTokens: [],
           seat: i,
         }));
@@ -228,7 +227,6 @@ export const useStore = create<AppState>()(
             name: name.trim() || `Player ${game.players.length + 1}`,
             roleId: null,
             isAlive: true,
-            hasGhostVote: false,
             reminderTokens: [],
             seat: game.players.length,
           };
@@ -366,7 +364,6 @@ export const useStore = create<AppState>()(
                   reminderTokens: [],
                   alignment: null,
                   isAlive: true,
-                  hasGhostVote: false,
                 })),
               },
             },
@@ -402,7 +399,6 @@ export const useStore = create<AppState>()(
                   reminderTokens: [],
                   alignment: null,
                   isAlive: true,
-                  hasGhostVote: false,
                 })),
               },
             },

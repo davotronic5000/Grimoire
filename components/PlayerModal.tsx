@@ -22,8 +22,7 @@ export default function PlayerModal({ player, game, rolesDb, onClose }: Props) {
   const isWide = useIsWide(); // true on iPad Pro in all orientations
 
   function handleToggleAlive() {
-    const dying = player.isAlive;
-    updatePlayer(game.id, player.id, { isAlive: !player.isAlive, hasGhostVote: dying });
+    updatePlayer(game.id, player.id, { isAlive: !player.isAlive });
   }
 
   function handleNameSave() {
@@ -126,21 +125,6 @@ export default function PlayerModal({ player, game, rolesDb, onClose }: Props) {
             {player.isAlive ? '❤️ Alive' : '✝️ Dead'}
           </button>
 
-          {!player.isAlive && (
-            <button
-              onClick={() => updatePlayer(game.id, player.id, { hasGhostVote: !player.hasGhostVote })}
-              className="flex-1 rounded-xl font-semibold transition-all active:scale-95"
-              style={{
-                padding: '14px 16px',
-                fontSize: 15,
-                background: player.hasGhostVote ? 'rgba(168,85,247,0.2)' : 'var(--color-bg)',
-                border: `1px solid ${player.hasGhostVote ? '#a855f7' : 'var(--color-border)'}`,
-                color: player.hasGhostVote ? '#a855f7' : 'var(--color-text-dim)',
-              }}
-            >
-              👻 Ghost Vote
-            </button>
-          )}
         </div>
       </div>
 
