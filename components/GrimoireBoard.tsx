@@ -6,7 +6,6 @@ import { useStore } from '@/lib/store';
 import { getRoleDistribution } from '@/lib/roles';
 import ClearableInput from './ClearableInput';
 import PlayerToken from './PlayerToken';
-import PlayerModal from './PlayerModal';
 import NightOrderPanel from './NightOrderPanel';
 import JinxPanel from './JinxPanel';
 import RoleRevealScreen from './RoleRevealScreen';
@@ -58,11 +57,12 @@ function computeTokenPx(boardPx: number, count: number): number {
 
 export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
 
-  const { togglePhase, togglePhaseBack, removeReminderToken, addPlayer, reorderPlayer, swapPlayers, updatePlayer } = useStore();
+  const { togglePhase, togglePhaseBack, removeReminderToken, addPlayer, removePlayer, reorderPlayer, swapPlayers, updatePlayer } = useStore();
 
   // ── UI visibility state ──────────────────────────────────────────
-  const [selectedPlayer, setSelectedPlayer]       = useState<Player | null>(null);
   const [tokenMenuPlayer, setTokenMenuPlayer]     = useState<Player | null>(null);
+  const [menuNameValue, setMenuNameValue]         = useState('');
+  const [menuConfirmRemove, setMenuConfirmRemove] = useState(false);
   const [reminderPlayer, setReminderPlayer]       = useState<Player | null>(null);
   const [rolePickerPlayer, setRolePickerPlayer]   = useState<Player | null>(null);
   const [customReminderPlayer, setCustomReminderPlayer] = useState<Player | null>(null);
@@ -121,10 +121,6 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
     if (boardRef.current) obs.observe(boardRef.current);
     return () => obs.disconnect();
   }, []);
-
-  const livePlayer = selectedPlayer
-    ? game.players.find(p => p.id === selectedPlayer.id) ?? null
-    : null;
 
   const liveTokenMenuPlayer = tokenMenuPlayer
     ? game.players.find(p => p.id === tokenMenuPlayer.id) ?? null
@@ -376,6 +372,8 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
       if (assignMode) {
         setAssignModePlayer(player);
       } else {
+        setMenuNameValue(player.name);
+        setMenuConfirmRemove(false);
         setTokenMenuPlayer(player);
       }
     }
@@ -618,7 +616,7 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
                   left: pos.left,
                   top:  pos.top,
                   transform: 'translate(-50%, -50%)',
-                  zIndex: selectedPlayer?.id === player.id ? 20 : 1,
+                  zIndex: 1,
                   opacity: dragPlayerId && !isDragging ? 0.6 : 1,
                   transition: dragPlayerId ? 'none' : 'opacity 0.15s',
                   touchAction: 'none',
@@ -839,24 +837,89 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
               className="mx-auto mb-2 rounded-full"
               style={{ width: 36, height: 4, background: 'var(--color-border)' }}
             />
-            <p
-              className="text-center font-semibold pb-1"
-              style={{ color: 'var(--color-text)', fontSize: 16 }}
-            >
-              {liveTokenMenuPlayer.name || 'Player'}
-            </p>
-            <button
-              onClick={() => { setSelectedPlayer(liveTokenMenuPlayer); setTokenMenuPlayer(null); }}
-              className="w-full rounded-2xl py-4 font-semibold text-left flex items-center gap-3 px-5 transition-all active:scale-[0.98]"
+
+            {/* ── Player name ── */}
+            <ClearableInput
+              type="text"
+              value={menuNameValue}
+              onChange={e => setMenuNameValue(e.target.value)}
+              onClear={() => setMenuNameValue('')}
+              onBlur={() => {
+                const trimmed = menuNameValue.trim();
+                if (trimmed) updatePlayer(game.id, liveTokenMenuPlayer.id, { name: trimmed });
+                else setMenuNameValue(liveTokenMenuPlayer.name);
+              }}
+              onKeyDown={e => {
+                if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+              }}
+              className="w-full rounded-2xl px-5 font-semibold outline-none"
               style={{
+                height: 52,
+                fontSize: 18,
                 background: 'rgba(20,12,40,0.8)',
                 border: '1px solid var(--color-border)',
                 color: 'var(--color-text)',
-                fontSize: 16,
               }}
-            >
-              <span style={{ fontSize: 22 }}>⚙️</span> Settings
-            </button>
+            />
+
+            {/* ── Alignment ── */}
+            <div className="flex gap-2">
+              {(['good', 'evil'] as const).map(a => {
+                const isSet = liveTokenMenuPlayer.alignment === a;
+                const color = a === 'good' ? '#60a5fa' : '#f87171';
+                const bg    = a === 'good' ? 'rgba(96,165,250,0.15)' : 'rgba(248,113,113,0.15)';
+                return (
+                  <button
+                    key={a}
+                    onClick={() => updatePlayer(game.id, liveTokenMenuPlayer.id, { alignment: isSet ? null : a })}
+                    className="flex-1 rounded-2xl py-4 font-semibold transition-all active:scale-[0.98]"
+                    style={{
+                      fontSize: 16,
+                      background: isSet ? bg : 'rgba(20,12,40,0.8)',
+                      border: `1px solid ${isSet ? color : 'var(--color-border)'}`,
+                      color: isSet ? color : 'var(--color-text-dim)',
+                    }}
+                  >
+                    {a === 'good' ? '☀ Good' : '☽ Evil'}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* ── Alive / Dead ── */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => {
+                  const dying = liveTokenMenuPlayer.isAlive;
+                  updatePlayer(game.id, liveTokenMenuPlayer.id, { isAlive: !liveTokenMenuPlayer.isAlive, hasGhostVote: dying });
+                }}
+                className="flex-1 rounded-2xl py-4 font-semibold transition-all active:scale-[0.98]"
+                style={{
+                  fontSize: 16,
+                  background: liveTokenMenuPlayer.isAlive ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)',
+                  border: `1px solid ${liveTokenMenuPlayer.isAlive ? '#22c55e' : '#ef4444'}`,
+                  color: liveTokenMenuPlayer.isAlive ? '#22c55e' : '#ef4444',
+                }}
+              >
+                {liveTokenMenuPlayer.isAlive ? '❤️ Alive' : '✝️ Dead'}
+              </button>
+              {!liveTokenMenuPlayer.isAlive && (
+                <button
+                  onClick={() => updatePlayer(game.id, liveTokenMenuPlayer.id, { hasGhostVote: !liveTokenMenuPlayer.hasGhostVote })}
+                  className="flex-1 rounded-2xl py-4 font-semibold transition-all active:scale-[0.98]"
+                  style={{
+                    fontSize: 16,
+                    background: liveTokenMenuPlayer.hasGhostVote ? 'rgba(168,85,247,0.2)' : 'rgba(20,12,40,0.8)',
+                    border: `1px solid ${liveTokenMenuPlayer.hasGhostVote ? '#a855f7' : 'var(--color-border)'}`,
+                    color: liveTokenMenuPlayer.hasGhostVote ? '#a855f7' : 'var(--color-text-dim)',
+                  }}
+                >
+                  👻 Ghost Vote
+                </button>
+              )}
+            </div>
+
+            {/* ── Role actions ── */}
             <button
               onClick={() => { setRolePickerPlayer(liveTokenMenuPlayer); setTokenMenuPlayer(null); }}
               className="w-full rounded-2xl py-4 font-semibold text-left flex items-center gap-3 px-5 transition-all active:scale-[0.98]"
@@ -869,7 +932,7 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
             >
               <span style={{ fontSize: 22 }}>🎭</span> Assign Role
             </button>
-            {liveTokenMenuPlayer?.roleId && (
+            {liveTokenMenuPlayer.roleId && (
               <button
                 onClick={() => { updatePlayer(game.id, liveTokenMenuPlayer.id, { roleId: null }); setTokenMenuPlayer(null); }}
                 className="w-full rounded-2xl py-4 font-semibold text-left flex items-center gap-3 px-5 transition-all active:scale-[0.98]"
@@ -907,6 +970,40 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
             >
               <span style={{ fontSize: 22 }}>✏️</span> Custom Reminder
             </button>
+
+            {/* ── Remove player ── */}
+            {menuConfirmRemove ? (
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setMenuConfirmRemove(false)}
+                  className="flex-1 rounded-2xl py-4 font-semibold transition-all active:scale-[0.98]"
+                  style={{ border: '1px solid var(--color-border)', color: 'var(--color-text-dim)', fontSize: 16 }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => { removePlayer(game.id, liveTokenMenuPlayer.id); setTokenMenuPlayer(null); }}
+                  className="flex-1 rounded-2xl py-4 font-semibold transition-all active:scale-[0.98]"
+                  style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid #ef4444', color: '#ef4444', fontSize: 16 }}
+                >
+                  Remove {liveTokenMenuPlayer.name}
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setMenuConfirmRemove(true)}
+                className="w-full rounded-2xl py-3 transition-all active:opacity-60"
+                style={{
+                  background: 'transparent',
+                  border: '1px dashed rgba(239,68,68,0.4)',
+                  color: 'rgba(239,68,68,0.7)',
+                  fontSize: 15,
+                }}
+              >
+                Remove player
+              </button>
+            )}
+
             <button
               onClick={() => setTokenMenuPlayer(null)}
               className="w-full rounded-2xl py-4 font-semibold transition-all active:scale-[0.98]"
@@ -959,14 +1056,6 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
         />
       )}
 
-      {livePlayer && (
-        <PlayerModal
-          player={livePlayer}
-          game={game}
-          rolesDb={rolesDb}
-          onClose={() => setSelectedPlayer(null)}
-        />
-      )}
 
       <NightOrderPanel
         game={game}
