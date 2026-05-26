@@ -477,7 +477,8 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
 
           {/* Centre display */}
           {(() => {
-            const dist = getRoleDistribution(players.length);
+            const travelerCount = players.filter(p => p.roleId && rolesDb[p.roleId]?.team === 'traveler').length;
+            const dist = getRoleDistribution(players.length - travelerCount);
             const scriptLabel = game.scriptAuthor ? `by ${game.scriptAuthor}` : null;
             const distItems = [
               { label: 'TF',  count: dist.townsfolk, color: 'var(--botc-townsfolk)' },

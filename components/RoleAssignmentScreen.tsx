@@ -82,7 +82,6 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose, onStartAs
   const lastActiveTileRef = useRef<{ tile: Tile; idx: number } | null>(null);
 
   const playerCount = game.players.length;
-  const dist = getRoleDistribution(playerCount);
 
   // Derived selection values
   const selectedTotal = useMemo(() => {
@@ -90,6 +89,17 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose, onStartAs
     roleCounts.forEach(c => { n += c; });
     return n;
   }, [roleCounts]);
+
+  const travelerSelectedCount = useMemo(() => {
+    let n = 0;
+    roleCounts.forEach((count, id) => {
+      if (rolesDb[id]?.team === 'traveler') n += count;
+    });
+    return n;
+  }, [roleCounts, rolesDb]);
+
+  // Distribution target excludes traveler seats — travelers don't affect TF/OUT/MIN/DEM ratio
+  const dist = getRoleDistribution(playerCount - travelerSelectedCount);
 
   const selectionCounts = useMemo(() => {
     const counts: Partial<Record<RoleTeam, number>> = {};
