@@ -319,7 +319,7 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
 
   function handleStartAssign(roleCounts: Map<string, number>) {
     game.players.forEach(p => {
-      if (p.roleId) updatePlayer(game.id, p.id, { roleId: null });
+      if (p.roleId && rolesDb[p.roleId]?.team !== 'traveler') updatePlayer(game.id, p.id, { roleId: null });
     });
     setAssignRoleCounts(roleCounts);
     setAssignMode(true);

@@ -925,7 +925,7 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose, onStartAs
             Choose a player
           </p>
           <div className="flex flex-col gap-2">
-            {displayTile && [...game.players].sort((a, b) => {
+            {displayTile && [...game.players].filter(p => !(p.roleId && rolesDb[p.roleId]?.team === 'traveler')).sort((a, b) => {
               const aTaken = a.id !== displayTile.assignedPlayerId && tiles.some((t, i) => i !== displayTileIdx && t.assignedPlayerId === a.id);
               const bTaken = b.id !== displayTile.assignedPlayerId && tiles.some((t, i) => i !== displayTileIdx && t.assignedPlayerId === b.id);
               return Number(aTaken) - Number(bTaken);
