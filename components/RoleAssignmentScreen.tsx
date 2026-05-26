@@ -247,6 +247,14 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose, onStartAs
 
   const assignedCount = tiles.filter(t => t.assignedPlayerId !== null).length;
 
+  // Must be above the early return to satisfy Rules of Hooks
+  const activeTile = activeTileIdx !== null ? tiles[activeTileIdx] : null;
+  useEffect(() => {
+    if (activeTile && activeTileIdx !== null) {
+      lastActiveTileRef.current = { tile: activeTile, idx: activeTileIdx };
+    }
+  }, [activeTile, activeTileIdx]);
+
   // ══════════════════════════════════════════════════════════════
   // SELECT PHASE
   // ══════════════════════════════════════════════════════════════
@@ -700,12 +708,6 @@ export default function RoleAssignmentScreen({ game, rolesDb, onClose, onStartAs
   // ══════════════════════════════════════════════════════════════
   // ASSIGN PHASE
   // ══════════════════════════════════════════════════════════════
-  const activeTile = activeTileIdx !== null ? tiles[activeTileIdx] : null;
-  useEffect(() => {
-    if (activeTile && activeTileIdx !== null) {
-      lastActiveTileRef.current = { tile: activeTile, idx: activeTileIdx };
-    }
-  }, [activeTile, activeTileIdx]);
   const displayTile = activeTile ?? lastActiveTileRef.current?.tile ?? null;
   const displayTileIdx = activeTile ? activeTileIdx! : (lastActiveTileRef.current?.idx ?? 0);
   const displayRole = displayTile ? rolesDb[displayTile.roleId] : null;
