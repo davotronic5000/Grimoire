@@ -8,14 +8,19 @@ import ClearableInput from './ClearableInput';
 interface Props {
   scriptRoleIds: string[];
   rolesDb: Record<string, RoleDefinition>;
+  /** Pre-select these roles and jump straight to the reveal view (e.g. a single player's assigned role) */
+  initialRoleIds?: string[];
   onClose: () => void;
 }
 
 const MAX_ROLES = 6;
 
-export default function RoleRevealScreen({ scriptRoleIds, rolesDb, onClose }: Props) {
-  const [selected, setSelected] = useState<RoleDefinition[]>([]);
-  const [revealing, setRevealing] = useState(false);
+export default function RoleRevealScreen({ scriptRoleIds, rolesDb, initialRoleIds, onClose }: Props) {
+  const initialRoles = (initialRoleIds ?? [])
+    .map(id => rolesDb[id])
+    .filter((r): r is RoleDefinition => !!r);
+  const [selected, setSelected] = useState<RoleDefinition[]>(initialRoles);
+  const [revealing, setRevealing] = useState(initialRoles.length > 0);
   const [search, setSearch] = useState('');
 
   const scriptRoles = scriptRoleIds

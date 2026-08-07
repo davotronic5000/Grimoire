@@ -70,6 +70,7 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
   const [showJinxes, setShowJinxes]               = useState(false);
   const [showAddPlayer, setShowAddPlayer]         = useState(false);
   const [showRoleReveal, setShowRoleReveal]       = useState(false);
+  const [roleRevealPlayer, setRoleRevealPlayer]   = useState<Player | null>(null);
   const [showRoleAssignment, setShowRoleAssignment] = useState(false);
   const [showSoundboard, setShowSoundboard]       = useState(false);
   const [showCustomMessage, setShowCustomMessage] = useState(false);
@@ -932,6 +933,20 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
                 <span style={{ fontSize: 22 }}>✕</span> Clear Role
               </button>
             )}
+            {liveTokenMenuPlayer.roleId && (
+              <button
+                onClick={() => { setRoleRevealPlayer(liveTokenMenuPlayer); setTokenMenuPlayer(null); }}
+                className="w-full rounded-2xl py-4 font-semibold text-left flex items-center gap-3 px-5 transition-all active:scale-[0.98]"
+                style={{
+                  background: 'rgba(20,12,40,0.8)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text)',
+                  fontSize: 16,
+                }}
+              >
+                <span style={{ fontSize: 22 }}>👁</span> Show Role to Player
+              </button>
+            )}
             <button
               onClick={() => { setReminderPlayer(liveTokenMenuPlayer); setTokenMenuPlayer(null); }}
               className="w-full rounded-2xl py-4 font-semibold text-left flex items-center gap-3 px-5 transition-all active:scale-[0.98]"
@@ -1069,6 +1084,15 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
           scriptRoleIds={game.scriptRoleIds}
           rolesDb={rolesDb}
           onClose={() => setShowRoleReveal(false)}
+        />
+      )}
+
+      {roleRevealPlayer && (
+        <RoleRevealScreen
+          scriptRoleIds={game.scriptRoleIds}
+          rolesDb={rolesDb}
+          initialRoleIds={roleRevealPlayer.roleId ? [roleRevealPlayer.roleId] : []}
+          onClose={() => setRoleRevealPlayer(null)}
         />
       )}
 
