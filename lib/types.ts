@@ -44,6 +44,22 @@ export interface ReminderToken {
   label: string; // label text from role.reminders[]
 }
 
+/** One AI-generated Savant info pair — one statement true, one false. */
+export interface SavantInfoEntry {
+  id: string; // nanoid
+  day: number; // game.dayNumber when this was generated
+  trueStatement: string;
+  falseStatement: string;
+  createdAt: number; // Date.now()
+}
+
+/** AI-generated Fisherman advice — once per game, so a single entry (not a history). */
+export interface FishermanAdviceEntry {
+  day: number; // game.dayNumber when this was generated
+  advice: string;
+  createdAt: number; // Date.now()
+}
+
 export interface Player {
   id: string; // nanoid
   name: string;
@@ -53,6 +69,10 @@ export interface Player {
   seat: number; // position index 0..n-1 for circle layout
   /** Explicit alignment override — null/undefined means use role default */
   alignment?: 'good' | 'evil' | null;
+  /** History of AI-generated Savant info given to this player, newest last. */
+  savantInfo?: SavantInfoEntry[];
+  /** AI-generated Fisherman advice, once used (the ability is once-per-game). */
+  fishermanAdvice?: FishermanAdviceEntry | null;
 }
 
 export interface Game {

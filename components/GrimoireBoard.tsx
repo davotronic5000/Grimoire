@@ -17,6 +17,8 @@ import RoleAssignmentScreen from './RoleAssignmentScreen';
 import SoundboardPanel from './SoundboardPanel';
 import NightInfoScreen from './NightInfoScreen';
 import GameSettingsScreen from './GameSettingsScreen';
+import SavantInfoScreen from './SavantInfoScreen';
+import FishermanAdviceScreen from './FishermanAdviceScreen';
 import ScriptShareDrawer from './ScriptShareDrawer';
 import ReminderPickerModal from './ReminderPickerModal';
 import RolePickerModal from './RolePickerModal';
@@ -78,6 +80,8 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
   const [showMore, setShowMore]                   = useState(false);
   const [showNightInfo, setShowNightInfo]         = useState(false);
   const [showGameSettings, setShowGameSettings]   = useState(false);
+  const [savantInfoPlayer, setSavantInfoPlayer]   = useState<Player | null>(null);
+  const [fishermanAdvicePlayer, setFishermanAdvicePlayer] = useState<Player | null>(null);
   const [showShare, setShowShare]                 = useState(false);
   const [showAddToScript, setShowAddToScript]     = useState(false);
 
@@ -137,6 +141,14 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
 
   const liveCustomReminderPlayer = customReminderPlayer
     ? game.players.find(p => p.id === customReminderPlayer.id) ?? null
+    : null;
+
+  const liveSavantInfoPlayer = savantInfoPlayer
+    ? game.players.find(p => p.id === savantInfoPlayer.id) ?? null
+    : null;
+
+  const liveFishermanAdvicePlayer = fishermanAdvicePlayer
+    ? game.players.find(p => p.id === fishermanAdvicePlayer.id) ?? null
     : null;
 
   function getTokenPos(index: number, player: Player) {
@@ -947,6 +959,34 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
                 <span style={{ fontSize: 22 }}>👁</span> Show Role to Player
               </button>
             )}
+            {liveTokenMenuPlayer.roleId === 'savant' && (
+              <button
+                onClick={() => { setSavantInfoPlayer(liveTokenMenuPlayer); setTokenMenuPlayer(null); }}
+                className="w-full rounded-2xl py-4 font-semibold text-left flex items-center gap-3 px-5 transition-all active:scale-[0.98]"
+                style={{
+                  background: 'rgba(20,12,40,0.8)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text)',
+                  fontSize: 16,
+                }}
+              >
+                <span style={{ fontSize: 22 }}>🔮</span> Savant Info
+              </button>
+            )}
+            {liveTokenMenuPlayer.roleId === 'fisherman' && (
+              <button
+                onClick={() => { setFishermanAdvicePlayer(liveTokenMenuPlayer); setTokenMenuPlayer(null); }}
+                className="w-full rounded-2xl py-4 font-semibold text-left flex items-center gap-3 px-5 transition-all active:scale-[0.98]"
+                style={{
+                  background: 'rgba(20,12,40,0.8)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text)',
+                  fontSize: 16,
+                }}
+              >
+                <span style={{ fontSize: 22 }}>🎣</span> Fisherman Advice
+              </button>
+            )}
             <button
               onClick={() => { setReminderPlayer(liveTokenMenuPlayer); setTokenMenuPlayer(null); }}
               className="w-full rounded-2xl py-4 font-semibold text-left flex items-center gap-3 px-5 transition-all active:scale-[0.98]"
@@ -1121,6 +1161,24 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
           game={game}
           rolesDb={rolesDb}
           onClose={() => setShowGameSettings(false)}
+        />
+      )}
+
+      {liveSavantInfoPlayer && (
+        <SavantInfoScreen
+          player={liveSavantInfoPlayer}
+          game={game}
+          rolesDb={rolesDb}
+          onClose={() => setSavantInfoPlayer(null)}
+        />
+      )}
+
+      {liveFishermanAdvicePlayer && (
+        <FishermanAdviceScreen
+          player={liveFishermanAdvicePlayer}
+          game={game}
+          rolesDb={rolesDb}
+          onClose={() => setFishermanAdvicePlayer(null)}
         />
       )}
 

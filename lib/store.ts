@@ -9,6 +9,7 @@ import type {
   ReminderToken,
   RoleDefinition,
   CreateGameParams,
+  SavantInfoEntry,
 } from './types';
 
 import { buildRolesIndex, buildAliasMap } from './roles';
@@ -25,6 +26,12 @@ interface AppState {
 
   // Actions
   loadRolesDb: () => Promise<void>;
+  addSavantInfo: (
+    gameId: string,
+    playerId: string,
+    entry: Omit<SavantInfoEntry, 'id'>
+  ) => void;
+  removeSavantInfo: (gameId: string, playerId: string, entryId: string) => void;
   createGame: (params: CreateGameParams) => string;
   deleteGame: (gameId: string) => void;
   setActiveGame: (gameId: string | null) => void;
@@ -67,6 +74,47 @@ export const useStore = create<AppState>()(
       rolesDb: null,
       allRoles: null,
       jinxes: null,
+
+      addSavantInfo: (gameId, playerId, entry) => {
+        const newEntry: SavantInfoEntry = { ...entry, id: nanoid() };
+        set(state => {
+          const game = state.games[gameId];
+          if (!game) return state;
+          return {
+            games: {
+              ...state.games,
+              [gameId]: {
+                ...game,
+                players: game.players.map(p =>
+                  p.id === playerId
+                    ? { ...p, savantInfo: [...(p.savantInfo ?? []), newEntry] }
+                    : p
+                ),
+              },
+            },
+          };
+        });
+      },
+
+      removeSavantInfo: (gameId, playerId, entryId) => {
+        set(state => {
+          const game = state.games[gameId];
+          if (!game) return state;
+          return {
+            games: {
+              ...state.games,
+              [gameId]: {
+                ...game,
+                players: game.players.map(p =>
+                  p.id === playerId
+                    ? { ...p, savantInfo: (p.savantInfo ?? []).filter(e => e.id !== entryId) }
+                    : p
+                ),
+              },
+            },
+          };
+        });
+      },
 
       loadRolesDb: async () => {
         if (get().rolesDb) return; // already loaded
@@ -364,6 +412,8 @@ export const useStore = create<AppState>()(
                   reminderTokens: [],
                   alignment: null,
                   isAlive: true,
+                  savantInfo: [],
+                  fishermanAdvice: null,
                 })),
               },
             },
@@ -399,6 +449,8 @@ export const useStore = create<AppState>()(
                   reminderTokens: [],
                   alignment: null,
                   isAlive: true,
+                  savantInfo: [],
+                  fishermanAdvice: null,
                 })),
               },
             },
