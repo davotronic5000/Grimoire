@@ -137,6 +137,27 @@ export function getRoleTeamColor(team: RoleTeam | '' | undefined): string {
 }
 
 /**
+ * Split a script's own role list into the Loric/Fabled role IDs it directly
+ * includes, so they can default to "in play" instead of requiring the
+ * Storyteller to add them manually via the Storytools drawer.
+ */
+export function getScriptStoryTools(
+  scriptRoleIds: string[],
+  rolesDb: Record<string, RoleDefinition>,
+  homebrewRoles?: Record<string, RoleDefinition>
+): { loricIds: string[]; fabledIds: string[] } {
+  const loricIds: string[] = [];
+  const fabledIds: string[] = [];
+  for (const id of scriptRoleIds) {
+    const role = homebrewRoles?.[id] ?? rolesDb[id];
+    if (!role) continue;
+    if (role.team === 'loric') loricIds.push(id);
+    else if (role.team === 'fabled') fabledIds.push(id);
+  }
+  return { loricIds, fabledIds };
+}
+
+/**
  * Build the night order for a given phase.
  * Always includes Dusk (order 1) and Dawn (order 100).
  * First night only: also includes Minion_Information (6) and Demon_Information (9).

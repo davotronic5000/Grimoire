@@ -9,11 +9,10 @@ import type {
   ReminderToken,
   RoleDefinition,
   CreateGameParams,
-  SavantInfoEntry,
   NightOrderOverride,
 } from './types';
 
-import { buildRolesIndex, buildAliasMap } from './roles';
+import { buildRolesIndex, buildAliasMap, getScriptStoryTools } from './roles';
 
 interface AppState {
   // Persisted state
@@ -27,12 +26,6 @@ interface AppState {
 
   // Actions
   loadRolesDb: () => Promise<void>;
-  addSavantInfo: (
-    gameId: string,
-    playerId: string,
-    entry: Omit<SavantInfoEntry, 'id'>
-  ) => void;
-  removeSavantInfo: (gameId: string, playerId: string, entryId: string) => void;
   createGame: (params: CreateGameParams) => string;
   deleteGame: (gameId: string) => void;
   setActiveGame: (gameId: string | null) => void;
@@ -75,47 +68,6 @@ export const useStore = create<AppState>()(
       rolesDb: null,
       allRoles: null,
       jinxes: null,
-
-      addSavantInfo: (gameId, playerId, entry) => {
-        const newEntry: SavantInfoEntry = { ...entry, id: nanoid() };
-        set(state => {
-          const game = state.games[gameId];
-          if (!game) return state;
-          return {
-            games: {
-              ...state.games,
-              [gameId]: {
-                ...game,
-                players: game.players.map(p =>
-                  p.id === playerId
-                    ? { ...p, savantInfo: [...(p.savantInfo ?? []), newEntry] }
-                    : p
-                ),
-              },
-            },
-          };
-        });
-      },
-
-      removeSavantInfo: (gameId, playerId, entryId) => {
-        set(state => {
-          const game = state.games[gameId];
-          if (!game) return state;
-          return {
-            games: {
-              ...state.games,
-              [gameId]: {
-                ...game,
-                players: game.players.map(p =>
-                  p.id === playerId
-                    ? { ...p, savantInfo: (p.savantInfo ?? []).filter(e => e.id !== entryId) }
-                    : p
-                ),
-              },
-            },
-          };
-        });
-      },
 
       loadRolesDb: async () => {
         if (get().rolesDb) return; // already loaded
@@ -160,6 +112,11 @@ export const useStore = create<AppState>()(
           reminderTokens: [],
           seat: i,
         }));
+        const { loricIds, fabledIds } = getScriptStoryTools(
+          params.scriptRoleIds,
+          get().rolesDb ?? {},
+          params.homebrewRoles
+        );
         const game: Game = {
           id,
           name: params.name,
@@ -176,8 +133,8 @@ export const useStore = create<AppState>()(
           dayNumber: 0,
           nightNumber: 1,
           bluffRoleIds: [null, null, null],
-          loricIds: [],
-          fabledIds: [],
+          loricIds,
+          fabledIds,
           storytellerRoleIds: [],
         };
         set(state => ({
@@ -399,18 +356,24 @@ export const useStore = create<AppState>()(
         set(state => {
           const game = state.games[gameId];
           if (!game) return state;
+          const baseScriptRoleIds = game.baseScriptRoleIds ?? game.scriptRoleIds;
+          const { loricIds, fabledIds } = getScriptStoryTools(
+            baseScriptRoleIds,
+            state.rolesDb ?? {},
+            game.homebrewRoles
+          );
           return {
             games: {
               ...state.games,
               [gameId]: {
                 ...game,
-                scriptRoleIds: game.baseScriptRoleIds ?? game.scriptRoleIds,
+                scriptRoleIds: baseScriptRoleIds,
                 phase: 'night',
                 dayNumber: 0,
                 nightNumber: 1,
                 bluffRoleIds: [null, null, null],
-                loricIds: [],
-                fabledIds: [],
+                loricIds,
+                fabledIds,
                 storytellerRoleIds: [],
                 players: game.players.map(p => ({
                   ...p,
@@ -418,8 +381,6 @@ export const useStore = create<AppState>()(
                   reminderTokens: [],
                   alignment: null,
                   isAlive: true,
-                  savantInfo: [],
-                  fishermanAdvice: null,
                 })),
               },
             },
@@ -431,6 +392,11 @@ export const useStore = create<AppState>()(
         set(state => {
           const game = state.games[gameId];
           if (!game) return state;
+          const { loricIds, fabledIds } = getScriptStoryTools(
+            scriptRoleIds,
+            state.rolesDb ?? {},
+            homebrewRoles
+          );
           return {
             games: {
               ...state.games,
@@ -448,8 +414,8 @@ export const useStore = create<AppState>()(
                 dayNumber: 0,
                 nightNumber: 1,
                 bluffRoleIds: [null, null, null],
-                loricIds: [],
-                fabledIds: [],
+                loricIds,
+                fabledIds,
                 storytellerRoleIds: [],
                 players: game.players.map(p => ({
                   ...p,
@@ -457,8 +423,6 @@ export const useStore = create<AppState>()(
                   reminderTokens: [],
                   alignment: null,
                   isAlive: true,
-                  savantInfo: [],
-                  fishermanAdvice: null,
                 })),
               },
             },
