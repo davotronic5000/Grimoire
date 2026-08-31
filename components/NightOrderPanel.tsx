@@ -33,14 +33,24 @@ export default function NightOrderPanel({
     game.scriptName.toLowerCase().includes('whale') ||
     game.scriptRoleIds.length > 40;
 
-  // Set of role IDs that have at least one alive assigned player
+  // Roles the Storyteller is holding themselves — no player, but still "in play"
+  const storytellerHeldIds = useMemo(
+    () => new Set([
+      ...(game.storytellerRoleIds ?? []),
+      ...(game.loricIds ?? []),
+      ...(game.fabledIds ?? []),
+    ]),
+    [game.storytellerRoleIds, game.loricIds, game.fabledIds]
+  );
+
+  // Set of role IDs that have at least one alive assigned player, or are Storyteller-held
   const assignedRoleIds = useMemo(() => {
-    const ids = new Set<string>();
+    const ids = new Set<string>(storytellerHeldIds);
     for (const p of game.players) {
       if (p.roleId && p.isAlive) ids.add(p.roleId);
     }
     return ids;
-  }, [game.players]);
+  }, [game.players, storytellerHeldIds]);
 
   // Map roleId → alive player names for the in-play tab
   const roleToPlayers = useMemo(() => {
@@ -62,13 +72,13 @@ export default function NightOrderPanel({
   );
 
   const inPlayEntries = useMemo(() =>
-    getNightOrder(game.scriptRoleIds, rolesDb, allRoles, phase, assignedRoleIds),
-    [game.scriptRoleIds, rolesDb, allRoles, phase, assignedRoleIds]
+    getNightOrder(game.scriptRoleIds, rolesDb, allRoles, phase, assignedRoleIds, game.nightOrderOverride),
+    [game.scriptRoleIds, rolesDb, allRoles, phase, assignedRoleIds, game.nightOrderOverride]
   );
 
   const scriptEntries = useMemo(() =>
-    getNightOrder(game.scriptRoleIds, rolesDb, allRoles, phase, allScriptRoleSet),
-    [game.scriptRoleIds, rolesDb, allRoles, phase, allScriptRoleSet]
+    getNightOrder(game.scriptRoleIds, rolesDb, allRoles, phase, allScriptRoleSet, game.nightOrderOverride),
+    [game.scriptRoleIds, rolesDb, allRoles, phase, allScriptRoleSet, game.nightOrderOverride]
   );
 
   const entries = tab === 'in-play' ? inPlayEntries : scriptEntries;
@@ -212,11 +222,21 @@ export default function NightOrderPanel({
                     </p>
                     {(() => {
                       const players = roleToPlayers.get(entry.roleId);
-                      return players && players.length > 0 ? (
-                        <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-dim)' }}>
-                          {players.join(', ')}
-                        </p>
-                      ) : null;
+                      if (players && players.length > 0) {
+                        return (
+                          <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-dim)' }}>
+                            {players.join(', ')}
+                          </p>
+                        );
+                      }
+                      if (!entry.isSpecial && storytellerHeldIds.has(entry.roleId)) {
+                        return (
+                          <p className="text-xs mt-0.5 italic" style={{ color: 'var(--color-text-dim)' }}>
+                            Storyteller
+                          </p>
+                        );
+                      }
+                      return null;
                     })()}
                     {isActive && entry.reminder && (
                       <p

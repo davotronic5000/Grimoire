@@ -1,4 +1,4 @@
-import type { RoleDefinition, RoleTeam, NightOrderEntry } from './types';
+import type { RoleDefinition, RoleTeam, NightOrderEntry, NightOrderOverride } from './types';
 
 // Team display colors
 export const TEAM_COLORS: Record<RoleTeam, string> = {
@@ -23,6 +23,22 @@ export const TEAM_LABELS: Record<RoleTeam, string> = {
 
 // IDs of the 4 special night-order entries (no team, no icon)
 const SPECIAL_NIGHT_IDS = ['Dusk', 'Dawn', 'Minion_Information', 'Demon_Information'];
+
+// Recognized spellings for the 4 special entries as they appear in a script's
+// custom _meta.firstNight/otherNight override arrays (e.g. "dusk", "minioninfo").
+const SPECIAL_ID_ALIASES: Record<string, string> = {
+  dusk: 'Dusk',
+  dawn: 'Dawn',
+  minioninfo: 'Minion_Information',
+  minioninformation: 'Minion_Information',
+  demoninfo: 'Demon_Information',
+  demoninformation: 'Demon_Information',
+};
+
+function resolveSpecialId(rawId: string): string | null {
+  const key = rawId.toLowerCase().replace(/[\s_]/g, '');
+  return SPECIAL_ID_ALIASES[key] ?? null;
+}
 
 /**
  * Build a lookup map from role ID -> RoleDefinition.
@@ -133,8 +149,14 @@ export function getNightOrder(
   rolesDb: Record<string, RoleDefinition>,
   allRoles: RoleDefinition[], // full raw array including special entries
   phase: 'first' | 'other',
-  assignedRoleIds: Set<string>
+  assignedRoleIds: Set<string>,
+  nightOrderOverride?: NightOrderOverride
 ): NightOrderEntry[] {
+  const overrideList = phase === 'first' ? nightOrderOverride?.firstNight : nightOrderOverride?.otherNight;
+  if (overrideList && overrideList.length > 0) {
+    return buildOverrideNightOrder(overrideList, rolesDb, allRoles, phase, assignedRoleIds);
+  }
+
   const entries: NightOrderEntry[] = [];
 
   // Add special entries
@@ -217,6 +239,58 @@ export function getNightOrder(
 
   // Sort by order number
   entries.sort((a, b) => a.order - b.order);
+  return entries;
+}
+
+/**
+ * Build a night order from an explicit script-defined sequence of role IDs
+ * (plus 'dusk'/'dawn'/'minioninfo'/'demoninfo'), used when a script's _meta
+ * specifies its own firstNight/otherNight override. Position in the array
+ * is the order — this replaces each role's default firstNight/otherNight
+ * number entirely for that phase.
+ */
+function buildOverrideNightOrder(
+  overrideList: string[],
+  rolesDb: Record<string, RoleDefinition>,
+  allRoles: RoleDefinition[],
+  phase: 'first' | 'other',
+  assignedRoleIds: Set<string>
+): NightOrderEntry[] {
+  const entries: NightOrderEntry[] = [];
+  const specialLookup = new Map(
+    allRoles.filter(r => SPECIAL_NIGHT_IDS.includes(r.id)).map(r => [r.id, r])
+  );
+
+  overrideList.forEach((rawId, i) => {
+    const order = i + 1;
+    const specialId = resolveSpecialId(rawId);
+    if (specialId) {
+      const special = specialLookup.get(specialId);
+      if (!special) return;
+      entries.push({
+        roleId: specialId,
+        name: specialId.replace(/_/g, ' '),
+        order,
+        reminder: phase === 'first' ? special.firstNightReminder : special.otherNightReminder,
+        isSpecial: true,
+      });
+      return;
+    }
+
+    const id = rolesDb[rawId] ? rawId : normalizeRoleId(rawId, rolesDb);
+    const role = rolesDb[id];
+    if (!role) return;
+    if (!assignedRoleIds.has(id)) return;
+
+    entries.push({
+      roleId: role.id,
+      name: role.name,
+      order,
+      reminder: phase === 'first' ? role.firstNightReminder : role.otherNightReminder,
+      isSpecial: false,
+    });
+  });
+
   return entries;
 }
 

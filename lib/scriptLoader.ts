@@ -28,11 +28,26 @@ export function parseScript(
     e => typeof e === 'object' && e !== null && (e as Record<string, unknown>).id === '_meta'
   ) as Record<string, unknown> | undefined;
 
+  const rawFirstNight = metaEntry?.firstNight;
+  const rawOtherNight = metaEntry?.otherNight;
+  const nightOrder =
+    Array.isArray(rawFirstNight) || Array.isArray(rawOtherNight)
+      ? {
+          firstNight: Array.isArray(rawFirstNight)
+            ? rawFirstNight.filter((id): id is string => typeof id === 'string')
+            : undefined,
+          otherNight: Array.isArray(rawOtherNight)
+            ? rawOtherNight.filter((id): id is string => typeof id === 'string')
+            : undefined,
+        }
+      : undefined;
+
   const meta = {
     id: scriptId,
     name: (metaEntry?.name as string) ?? 'Custom Script',
     author: metaEntry?.author as string | undefined,
     colour: metaEntry?.colour as string | undefined,
+    nightOrder,
   };
 
   for (const entry of raw) {
@@ -71,7 +86,12 @@ export function parseScript(
         otherNightReminder: typeof e.otherNightReminder === 'string' ? e.otherNightReminder : '',
         reminders: Array.isArray(e.reminders) ? (e.reminders as string[]) : [],
         setup: typeof e.setup === 'boolean' ? e.setup : false,
-        image: typeof e.image === 'string' ? e.image : undefined,
+        // Schema allows a plain URL string or an array of URLs (first wins)
+        image: typeof e.image === 'string'
+          ? e.image
+          : Array.isArray(e.image) && typeof e.image[0] === 'string'
+            ? e.image[0]
+            : undefined,
       };
 
       if (!seen.has(rawId)) {

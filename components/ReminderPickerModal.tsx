@@ -42,17 +42,22 @@ export default function ReminderPickerModal({ player, game, rolesDb, onClose }: 
   const inPlayItems = useMemo(() => {
     const seen = new Set<string>();
     const items: ReminderItem[] = [];
-    for (const p of game.players) {
-      if (p.roleId && !seen.has(p.roleId)) {
-        const role = rolesDb[p.roleId];
-        if (role && role.reminders.length > 0) {
-          seen.add(p.roleId);
-          for (const label of role.reminders) items.push({ role, label });
-        }
+    const inPlayRoleIds = [
+      ...game.players.map(p => p.roleId).filter((id): id is string => !!id),
+      ...(game.storytellerRoleIds ?? []),
+      ...(game.loricIds ?? []),
+      ...(game.fabledIds ?? []),
+    ];
+    for (const roleId of inPlayRoleIds) {
+      if (seen.has(roleId)) continue;
+      const role = rolesDb[roleId];
+      if (role && role.reminders.length > 0) {
+        seen.add(roleId);
+        for (const label of role.reminders) items.push({ role, label });
       }
     }
     return [...items, ...globalItems];
-  }, [game.players, rolesDb, globalItems]);
+  }, [game.players, game.storytellerRoleIds, game.loricIds, game.fabledIds, rolesDb, globalItems]);
 
   const scriptItems = useMemo(() => {
     const items: ReminderItem[] = [];

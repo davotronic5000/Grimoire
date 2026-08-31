@@ -59,6 +59,7 @@ export default function SetupPage() {
       scriptRoleIds: selectedScript.roleIds,
       playerNames: playerNames.map(n => n.trim() || 'Player'),
       homebrewRoles: selectedScript.homebrewRoles,
+      nightOrderOverride: selectedScript.meta.nightOrder,
     });
     router.push(`/game?id=${id}`);
   }

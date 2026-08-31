@@ -10,6 +10,7 @@ import type {
   RoleDefinition,
   CreateGameParams,
   SavantInfoEntry,
+  NightOrderOverride,
 } from './types';
 
 import { buildRolesIndex, buildAliasMap } from './roles';
@@ -54,13 +55,13 @@ interface AppState {
   addPlayer: (gameId: string, name: string) => void;
   removePlayer: (gameId: string, playerId: string) => void;
   setBluff: (gameId: string, index: 0 | 1 | 2, roleId: string | null) => void;
-  toggleStoryTool: (gameId: string, field: 'loricIds' | 'fabledIds', roleId: string) => void;
+  toggleStoryTool: (gameId: string, field: 'loricIds' | 'fabledIds' | 'storytellerRoleIds', roleId: string) => void;
   togglePhase: (gameId: string) => void;
   togglePhaseBack: (gameId: string) => void;
   reorderPlayer: (gameId: string, fromIndex: number, toIndex: number) => void;
   swapPlayers: (gameId: string, indexA: number, indexB: number) => void;
   resetGame: (gameId: string) => void;
-  changeScript: (gameId: string, scriptId: string, scriptName: string, scriptRoleIds: string[], homebrewRoles?: Record<string, RoleDefinition>, scriptAuthor?: string) => void;
+  changeScript: (gameId: string, scriptId: string, scriptName: string, scriptRoleIds: string[], homebrewRoles?: Record<string, RoleDefinition>, scriptAuthor?: string, nightOrderOverride?: NightOrderOverride) => void;
   addRoleToScript: (gameId: string, roleId: string) => void;
   removeRoleFromScript: (gameId: string, roleId: string) => void;
   loadJinxes: () => Promise<void>;
@@ -169,11 +170,15 @@ export const useStore = create<AppState>()(
           scriptRoleIds: params.scriptRoleIds,
           baseScriptRoleIds: params.scriptRoleIds,
           homebrewRoles: params.homebrewRoles,
+          nightOrderOverride: params.nightOrderOverride,
           players,
           phase: 'night',
           dayNumber: 0,
           nightNumber: 1,
           bluffRoleIds: [null, null, null],
+          loricIds: [],
+          fabledIds: [],
+          storytellerRoleIds: [],
         };
         set(state => ({
           games: { ...state.games, [id]: game },
@@ -406,6 +411,7 @@ export const useStore = create<AppState>()(
                 bluffRoleIds: [null, null, null],
                 loricIds: [],
                 fabledIds: [],
+                storytellerRoleIds: [],
                 players: game.players.map(p => ({
                   ...p,
                   roleId: null,
@@ -421,7 +427,7 @@ export const useStore = create<AppState>()(
         });
       },
 
-      changeScript: (gameId, scriptId, scriptName, scriptRoleIds, homebrewRoles, scriptAuthor) => {
+      changeScript: (gameId, scriptId, scriptName, scriptRoleIds, homebrewRoles, scriptAuthor, nightOrderOverride) => {
         set(state => {
           const game = state.games[gameId];
           if (!game) return state;
@@ -436,6 +442,7 @@ export const useStore = create<AppState>()(
                 scriptRoleIds,
                 baseScriptRoleIds: scriptRoleIds,
                 homebrewRoles: homebrewRoles ?? {},
+                nightOrderOverride,
                 // Reset game state when script changes
                 phase: 'night',
                 dayNumber: 0,
@@ -443,6 +450,7 @@ export const useStore = create<AppState>()(
                 bluffRoleIds: [null, null, null],
                 loricIds: [],
                 fabledIds: [],
+                storytellerRoleIds: [],
                 players: game.players.map(p => ({
                   ...p,
                   roleId: null,

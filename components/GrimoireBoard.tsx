@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import type { Game, Player, RoleDefinition } from '@/lib/types';
 import { useStore } from '@/lib/store';
-import { getRoleDistribution } from '@/lib/roles';
+import { getRoleDistribution, getNightOrder } from '@/lib/roles';
 import ClearableInput from './ClearableInput';
 import PlayerToken from './PlayerToken';
 import NightOrderPanel from './NightOrderPanel';
@@ -270,29 +270,33 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
 
   const bluffIds   = game.bluffRoleIds ?? [null, null, null];
   const bluffCount = bluffIds.filter(Boolean).length;
-  const toolsCount = (game.loricIds?.length ?? 0) + (game.fabledIds?.length ?? 0);
+  const toolsCount = (game.loricIds?.length ?? 0) + (game.fabledIds?.length ?? 0) + (game.storytellerRoleIds?.length ?? 0);
+
+  // Role IDs actually held by an alive player, used to rank badges shown on
+  // player tokens. Ranking goes through getNightOrder so a script-specific
+  // nightOrderOverride (e.g. Hunt for the Ring) produces the same order here
+  // as in the Night Order drawer.
+  const alivePlayerRoleIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const p of players) if (p.isAlive && p.roleId) ids.add(p.roleId);
+    return ids;
+  }, [players]);
 
   const firstNightRanks = useMemo(() => {
     const ranks = new Map<string, number>();
-    const entries = players
-      .filter(p => p.isAlive && p.roleId && (rolesDb[p.roleId]?.firstNight ?? 0) > 0)
-      .map(p => ({ roleId: p.roleId!, order: rolesDb[p.roleId!].firstNight }));
-    const seen = new Set<string>();
-    const unique = entries.filter(e => { if (seen.has(e.roleId)) return false; seen.add(e.roleId); return true; });
-    unique.sort((a, b) => a.order - b.order).forEach((e, i) => ranks.set(e.roleId, i + 1));
+    getNightOrder(game.scriptRoleIds, rolesDb, allRoles, 'first', alivePlayerRoleIds, game.nightOrderOverride)
+      .filter(e => !e.isSpecial)
+      .forEach((e, i) => ranks.set(e.roleId, i + 1));
     return ranks;
-  }, [players, rolesDb]);
+  }, [game.scriptRoleIds, rolesDb, allRoles, alivePlayerRoleIds, game.nightOrderOverride]);
 
   const otherNightRanks = useMemo(() => {
     const ranks = new Map<string, number>();
-    const entries = players
-      .filter(p => p.isAlive && p.roleId && (rolesDb[p.roleId]?.otherNight ?? 0) > 0)
-      .map(p => ({ roleId: p.roleId!, order: rolesDb[p.roleId!].otherNight }));
-    const seen = new Set<string>();
-    const unique = entries.filter(e => { if (seen.has(e.roleId)) return false; seen.add(e.roleId); return true; });
-    unique.sort((a, b) => a.order - b.order).forEach((e, i) => ranks.set(e.roleId, i + 1));
+    getNightOrder(game.scriptRoleIds, rolesDb, allRoles, 'other', alivePlayerRoleIds, game.nightOrderOverride)
+      .filter(e => !e.isSpecial)
+      .forEach((e, i) => ranks.set(e.roleId, i + 1));
     return ranks;
-  }, [players, rolesDb]);
+  }, [game.scriptRoleIds, rolesDb, allRoles, alivePlayerRoleIds, game.nightOrderOverride]);
 
   // Pool remaining = original counts minus what's currently assigned to any player
   const assignRemaining = useMemo(() => {

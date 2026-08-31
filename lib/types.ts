@@ -26,12 +26,21 @@ export type RoleTeam =
   | 'loric'
   | 'fabled';
 
+/** Explicit per-script night order — role IDs (plus 'dusk'/'dawn'/'minioninfo'/'demoninfo')
+ *  in wake order, overriding each role's default firstNight/otherNight number. */
+export interface NightOrderOverride {
+  firstNight?: string[];
+  otherNight?: string[];
+}
+
 export interface ParsedScript {
   meta: {
     id: string; // 'tb' | 'bmr' | 'snv' | 'custom'
     name: string;
     author?: string;
     colour?: string;
+    /** Script-specific night order, when the script JSON's _meta defines one. */
+    nightOrder?: NightOrderOverride;
   };
   roleIds: string[]; // normalized role IDs in this script
   /** Full definitions for homebrew roles not in the official roles DB */
@@ -94,8 +103,12 @@ export interface Game {
   loricIds?: string[];
   /** Active Fabled character IDs for this game. */
   fabledIds?: string[];
+  /** Normal script role IDs the Storyteller is holding themselves (not assigned to a player). */
+  storytellerRoleIds?: string[];
   /** Homebrew role definitions from a custom script upload, persisted with the game. */
   homebrewRoles?: Record<string, RoleDefinition>;
+  /** Script-specific night order, when the script defines one — overrides per-role firstNight/otherNight numbers. */
+  nightOrderOverride?: NightOrderOverride;
 }
 
 export interface CreateGameParams {
@@ -106,6 +119,7 @@ export interface CreateGameParams {
   scriptRoleIds: string[];
   playerNames: string[];
   homebrewRoles?: Record<string, RoleDefinition>;
+  nightOrderOverride?: NightOrderOverride;
 }
 
 // Night order entry (used by NightOrderPanel)
