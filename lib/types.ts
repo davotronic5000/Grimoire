@@ -14,6 +14,8 @@ export interface RoleDefinition {
   ability: string;
   /** Custom image URL for homebrew roles (from script JSON "image" field) */
   image?: string;
+  /** Homebrew flag — this role's ability still triggers/wakes even if the player holding it is dead. */
+  evenWhenDead?: boolean;
 }
 
 // NOTE: Roles.json uses 'traveler' (American single-L) — do NOT use 'traveller'

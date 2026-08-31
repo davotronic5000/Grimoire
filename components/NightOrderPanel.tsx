@@ -43,27 +43,29 @@ export default function NightOrderPanel({
     [game.storytellerRoleIds, game.loricIds, game.fabledIds]
   );
 
-  // Set of role IDs that have at least one alive assigned player, or are Storyteller-held
+  // Set of role IDs that have at least one assigned player (alive, or dead
+  // holding a role whose ability still triggers even when dead), or are
+  // Storyteller-held
   const assignedRoleIds = useMemo(() => {
     const ids = new Set<string>(storytellerHeldIds);
     for (const p of game.players) {
-      if (p.roleId && p.isAlive) ids.add(p.roleId);
+      if (p.roleId && (p.isAlive || rolesDb[p.roleId]?.evenWhenDead)) ids.add(p.roleId);
     }
     return ids;
-  }, [game.players, storytellerHeldIds]);
+  }, [game.players, storytellerHeldIds, rolesDb]);
 
-  // Map roleId → alive player names for the in-play tab
+  // Map roleId → player names (alive, or dead holding an evenWhenDead role) for the in-play tab
   const roleToPlayers = useMemo(() => {
     const map = new Map<string, string[]>();
     for (const p of game.players) {
-      if (p.roleId && p.isAlive) {
+      if (p.roleId && (p.isAlive || rolesDb[p.roleId]?.evenWhenDead)) {
         const names = map.get(p.roleId) ?? [];
-        names.push(p.name);
+        names.push(p.isAlive ? p.name : `${p.name} (dead)`);
         map.set(p.roleId, names);
       }
     }
     return map;
-  }, [game.players]);
+  }, [game.players, rolesDb]);
 
   // All script roles treated as "assigned" for the full-script tab
   const allScriptRoleSet = useMemo(

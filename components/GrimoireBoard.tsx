@@ -260,15 +260,18 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
   const bluffCount = bluffIds.filter(Boolean).length;
   const toolsCount = (game.loricIds?.length ?? 0) + (game.fabledIds?.length ?? 0) + (game.storytellerRoleIds?.length ?? 0);
 
-  // Role IDs actually held by an alive player, used to rank badges shown on
-  // player tokens. Ranking goes through getNightOrder so a script-specific
-  // nightOrderOverride (e.g. Hunt for the Ring) produces the same order here
-  // as in the Night Order drawer.
+  // Role IDs actually held by a player who wakes this game — alive, or dead
+  // holding a role whose ability still triggers even when dead (evenWhenDead)
+  // — used to rank badges shown on player tokens. Ranking goes through
+  // getNightOrder so a script-specific nightOrderOverride (e.g. Hunt for the
+  // Ring) produces the same order here as in the Night Order drawer.
   const alivePlayerRoleIds = useMemo(() => {
     const ids = new Set<string>();
-    for (const p of players) if (p.isAlive && p.roleId) ids.add(p.roleId);
+    for (const p of players) {
+      if (p.roleId && (p.isAlive || rolesDb[p.roleId]?.evenWhenDead)) ids.add(p.roleId);
+    }
     return ids;
-  }, [players]);
+  }, [players, rolesDb]);
 
   const firstNightRanks = useMemo(() => {
     const ranks = new Map<string, number>();
@@ -637,8 +640,8 @@ export default function GrimoireBoard({ game, rolesDb, allRoles }: Props) {
                   inwardAngle={angle + Math.PI}
                   onClick={() => handleTokenClick(player)}
                   onRemoveReminder={tokenId => handleRemoveReminder(player.id, tokenId)}
-                  firstNightOrder={player.isAlive && player.roleId ? (firstNightRanks.get(player.roleId) ?? null) : null}
-                  otherNightOrder={player.isAlive && player.roleId ? (otherNightRanks.get(player.roleId) ?? null) : null}
+                  firstNightOrder={player.roleId && (player.isAlive || rolesDb[player.roleId]?.evenWhenDead) ? (firstNightRanks.get(player.roleId) ?? null) : null}
+                  otherNightOrder={player.roleId && (player.isAlive || rolesDb[player.roleId]?.evenWhenDead) ? (otherNightRanks.get(player.roleId) ?? null) : null}
                 />
               </div>
             );

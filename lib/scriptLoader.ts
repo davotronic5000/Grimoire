@@ -92,6 +92,7 @@ export function parseScript(
           : Array.isArray(e.image) && typeof e.image[0] === 'string'
             ? e.image[0]
             : undefined,
+        evenWhenDead: typeof e.evenWhenDead === 'boolean' ? e.evenWhenDead : undefined,
       };
 
       if (!seen.has(rawId)) {
