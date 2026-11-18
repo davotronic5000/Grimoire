@@ -2,7 +2,6 @@ import withPWA from '@ducanh2912/next-pwa';
 
 const pwaConfig = withPWA({
   dest: 'public',
-  reloadOnOnline: true,
   disable: process.env.NODE_ENV === 'development',
   workboxOptions: {
     // InjectManifest: our custom sw.js defines all caching strategies,
